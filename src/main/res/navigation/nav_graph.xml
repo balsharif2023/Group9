@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_registrationPage"
+            app:destination="@id/registrationPage" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
@@ -36,5 +39,14 @@
         <action
             android:id="@+id/action_thirdFragment_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registrationPage"
+        android:name="com.example.secureonlinesharing.RegistrationPage"
+        android:label="registration_page"
+        tools:layout="@layout/registration_page" >
+        <action
+            android:id="@+id/action_registrationPage_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
     </fragment>
 </navigation>

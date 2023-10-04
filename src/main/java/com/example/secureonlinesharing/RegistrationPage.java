@@ -1,28 +1,36 @@
 package com.example.secureonlinesharing;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.secureonlinesharing.databinding.FragmentSecondBinding;
 
-public class SecondFragment extends Fragment {
+import com.example.secureonlinesharing.databinding.RegistrationPageBinding;
 
-    private FragmentSecondBinding binding;
+public class RegistrationPage extends Fragment {
+
+    private RegistrationPageBinding binding;
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
-    ) {
 
-        binding = FragmentSecondBinding.inflate(inflater, container, false);
+    )
+
+    {
+
+        binding = RegistrationPageBinding.inflate(inflater, container, false);
+
         return binding.getRoot();
 
     }
@@ -40,18 +48,17 @@ public class SecondFragment extends Fragment {
                 @Override
                 public void onClick(View view)
                 {
-                    NavHostFragment.findNavController(SecondFragment.this)
-                            .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                    NavHostFragment.findNavController(RegistrationPage.this)
+                            .navigate(R.id.action_registrationPage_to_FirstFragment);
                 }
             });
         }
 
-
-       binding.mediaRecord1.setOnClickListener(new View.OnClickListener() {
+       binding.registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_thirdFragment);
+                NavHostFragment.findNavController(RegistrationPage.this)
+                        .navigate(R.id.action_registrationPage_to_FirstFragment);
             }
         });
     }

@@ -6,14 +6,89 @@
     android:layout_height="match_parent"
     tools:context=".ThirdFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <VideoView
-            android:id="@+id/videoView"
+        <TextView
+            android:id="@+id/mediaTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Snow  Monkeys"
+            android:textSize="45sp" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:background="@drawable/media_border" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <VideoView
+                android:id="@+id/videoView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:background="@drawable/media_border" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/mediaDescriptionLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/media_description_label"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/mediaDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Snow monkeys bathing."
+                android:textSize="24sp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="?android:attr/listDivider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/mediaOwnerLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/media_owner_label"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/mediaOwner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clark Kent"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>
