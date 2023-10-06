@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_SecondFragment_to_thirdFragment"
             app:destination="@id/thirdFragment" />
+        <action
+            android:id="@+id/action_SecondFragment_to_documentViewer"
+            app:destination="@id/documentViewer" />
     </fragment>
     <fragment
         android:id="@+id/thirdFragment"
@@ -48,5 +51,14 @@
         <action
             android:id="@+id/action_registrationPage_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/documentViewer"
+        android:name="com.example.secureonlinesharing.DocumentViewer"
+        android:label="document_viewer"
+        tools:layout="@layout/document_viewer" >
+        <action
+            android:id="@+id/action_documentViewer_to_SecondFragment"
+            app:destination="@id/SecondFragment" />
     </fragment>
 </navigation>
