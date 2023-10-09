@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".DocumentViewer">
 
+    <com.example.secureonlinesharing.ZoomLinearLayout
+
+        android:id="@+id/zoom_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,6 +27,7 @@
             android:textSize="45sp" />
 
         <LinearLayout
+            android:id="@+id/pdfWrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -28,8 +35,33 @@
             <ImageView
                 android:id="@+id/pdfView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                             />
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/pdfForwardButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/leftarrow" />
+
+                <ImageButton
+                    android:id="@+id/pdfBackButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:scaleX="-1"
+                    android:src="@drawable/leftarrow" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -88,4 +120,5 @@
         </LinearLayout>
 
     </LinearLayout>
+    </com.example.secureonlinesharing.ZoomLinearLayout>
 </androidx.core.widget.NestedScrollView>

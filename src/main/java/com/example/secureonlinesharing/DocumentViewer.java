@@ -6,14 +6,18 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.graphics.pdf.PdfRenderer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RawRes;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -21,12 +25,17 @@ import com.example.secureonlinesharing.databinding.DocumentViewerBinding;
 import com.example.secureonlinesharing.databinding.FragmentThirdBinding;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 public class DocumentViewer extends Fragment {
 
     private DocumentViewerBinding binding;
+    private int pdfPageNum;
+
+    private PdfRenderer renderer;
 
     @Override
     public View onCreateView(
@@ -39,61 +48,75 @@ public class DocumentViewer extends Fragment {
 
         binding = DocumentViewerBinding.inflate(inflater, container, false);
         // create a new renderer
-        Resources resources= getResources();
-        AssetFileDescriptor fd = resources.openRawResourceFd(R.raw.loremipsum);
-//        URI pdfUri = URI.create("android.resource://" + getActivity().getPackageName() + "/" + R.raw.loremipsum);
-//       File pdfFile= new File(pdfUri);
-        try {
-            openPDF(fd);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+     
 
         return binding.getRoot();
 
     }
-    public void openPDF(AssetFileDescriptor fd) throws IOException {
-        PdfRenderer renderer = null;
+    void openPdfFromRaw() throws IOException {
+        if(renderer!=null && pdfPageNum== renderer.getPageCount())
+        {
+            pdfPageNum--;
+            return;
+        }
 
-            ParcelFileDescriptor fileDescriptor = fd.getParcelFileDescriptor();
-//                    ParcelFileDescriptor.open (file,
-//                    ParcelFileDescriptor.MODE_READ_ONLY);
-            renderer = new PdfRenderer(fileDescriptor);
+        if(renderer!=null && pdfPageNum== -1)
+        {
+            pdfPageNum++;
+            return;
+        }
+        // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
+        File fileCopy = new File(getActivity().getCacheDir(), "temp.pdf");
+        copyToCache(fileCopy, R.raw.loremipsum);
+        // We get a page from the PDF doc by calling 'open'
+        ParcelFileDescriptor fileDescriptor =
+                ParcelFileDescriptor.open(fileCopy,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+         if (renderer!=null)
+         {
 
-        // let us just render all pages
-        final int pageCount = renderer.getPageCount();
-//        for (int i = 0; i < pageCount; i++) {
-//            PdfRenderer.Page page = renderer.openPage(i);
-//
-//            // say we render for showing on the screen
-//            page.render(mBitmap, null, null, Page.RENDER_MODE_FOR_DISPLAY);
-//
-//            // do stuff with the bitmap
-//
-//            // close the page
-//            page.close();
-//        }
+         }
+        renderer = new PdfRenderer(fileDescriptor);
 
 
-        //Display page 0
-        PdfRenderer.Page rendererPage = renderer.openPage(0);
-        int rendererPageWidth = rendererPage.getWidth();
-        int rendererPageHeight = rendererPage.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(
-                rendererPageWidth,
-                rendererPageHeight,
+        PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
+        // Create a new bitmap and render the page contents into it
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+       getActivity().getWindowManager()
+               .getDefaultDisplay()
+               .getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        int pageWidth = mPdfPage.getWidth();
+        int pageHeight= mPdfPage.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight*width/pageWidth,
                 Bitmap.Config.ARGB_8888);
-        rendererPage.render(bitmap, null, null,
-                PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
+        mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        // Set the bitmap in the ImageView
         binding.pdfView.setImageBitmap(bitmap);
-        rendererPage.close();
-
-
-        fileDescriptor.close();
-        // close the renderer
-        renderer.close();
     }
+    void copyToCache(File file, @RawRes int pdfResource) throws IOException {
+
+
+//Get input stream object to read the pdf
+            InputStream input = getResources().openRawResource(pdfResource);
+            FileOutputStream output = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int size;
+            // Copy the entire contents of the file
+            while ((size = input.read(buffer)) != -1) {
+                output.write(buffer, 0, size);
+            }
+//Close the buffer
+            input.close();
+            output.close();
+
+    }
+
+
+
+
+
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -112,15 +135,61 @@ public class DocumentViewer extends Fragment {
                             .navigate(R.id.action_documentViewer_to_SecondFragment);
                 }
             });
+
+
         }
 
-      /*  binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
+        pdfPageNum =0;
+
+        try {
+            openPdfFromRaw();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+
+
+                try {
+                    pdfPageNum++;
+                    openPdfFromRaw();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+
             }
-        });*/
+        });
+
+        binding.pdfBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                try {
+                    pdfPageNum--;
+                    openPdfFromRaw();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
+        });
+
+
+        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
+        zoomLinearLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                zoomLinearLayout.init(getContext());
+                return false;
+            }
+        });
+
+
     }
 
     @Override
