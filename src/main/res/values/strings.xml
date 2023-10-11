@@ -57,4 +57,7 @@
     <string name="last_name_label">Last Name</string>
     <string name="password_confirm_label">Confirm Password</string>
     <string name="create_account">Create Account</string>
+    <string name="media_title_label">Title</string>
+    <string name="media_upload_button_label">Upload</string>
+    <string name="media_picker_label">Tap to choose file</string>
 </resources>

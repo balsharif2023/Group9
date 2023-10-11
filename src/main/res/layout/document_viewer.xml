@@ -44,7 +44,7 @@
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/pdfForwardButton"
+                    android:id="@+id/pdfBackButton"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:adjustViewBounds="true"
@@ -52,7 +52,7 @@
                     android:src="@drawable/leftarrow" />
 
                 <ImageButton
-                    android:id="@+id/pdfBackButton"
+                    android:id="@+id/pdfForwardButton"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:adjustViewBounds="true"

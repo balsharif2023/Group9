@@ -1,5 +1,6 @@
 package com.example.secureonlinesharing;
 
+import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -53,36 +54,23 @@ public class DocumentViewer extends Fragment {
         return binding.getRoot();
 
     }
-    void openPdfFromRaw() throws IOException {
-        if(renderer!=null && pdfPageNum== renderer.getPageCount())
-        {
-            pdfPageNum--;
-            return;
-        }
+    public static PdfRenderer openPdfFromRaw(Activity activity, ImageView img, InputStream input, int pdfPageNum) throws IOException {
 
-        if(renderer!=null && pdfPageNum== -1)
-        {
-            pdfPageNum++;
-            return;
-        }
         // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
-        File fileCopy = new File(getActivity().getCacheDir(), "temp.pdf");
-        copyToCache(fileCopy, R.raw.loremipsum);
+        File fileCopy = new File(activity.getCacheDir(), "temp.pdf");
+        copyToCache(fileCopy, input);
         // We get a page from the PDF doc by calling 'open'
         ParcelFileDescriptor fileDescriptor =
                 ParcelFileDescriptor.open(fileCopy,
                         ParcelFileDescriptor.MODE_READ_ONLY);
-         if (renderer!=null)
-         {
 
-         }
-        renderer = new PdfRenderer(fileDescriptor);
+        PdfRenderer renderer = new PdfRenderer(fileDescriptor);
 
 
         PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
         // Create a new bitmap and render the page contents into it
         DisplayMetrics displayMetrics = new DisplayMetrics();
-       getActivity().getWindowManager()
+       activity.getWindowManager()
                .getDefaultDisplay()
                .getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
@@ -93,13 +81,15 @@ public class DocumentViewer extends Fragment {
                 Bitmap.Config.ARGB_8888);
         mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         // Set the bitmap in the ImageView
-        binding.pdfView.setImageBitmap(bitmap);
+        img.setImageBitmap(bitmap);
+
+        return renderer;
     }
-    void copyToCache(File file, @RawRes int pdfResource) throws IOException {
+    public static void copyToCache(File file, InputStream input) throws IOException {
 
 
 //Get input stream object to read the pdf
-            InputStream input = getResources().openRawResource(pdfResource);
+
             FileOutputStream output = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
             int size;
@@ -140,9 +130,13 @@ public class DocumentViewer extends Fragment {
         }
 
         pdfPageNum =0;
+        int pdfResource = R.raw.sample;
+
 
         try {
-            openPdfFromRaw();
+            renderer = openPdfFromRaw(getActivity(),binding.pdfView,
+                    getResources().openRawResource(pdfResource),
+                    pdfPageNum);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -153,9 +147,14 @@ public class DocumentViewer extends Fragment {
 
 
                 try {
-                    pdfPageNum++;
-                    openPdfFromRaw();
-                } catch (IOException e) {
+                    if (renderer.getPageCount() - 1 > pdfPageNum) {
+                        pdfPageNum++;
+                        renderer = openPdfFromRaw(getActivity(),binding.pdfView,
+                                getResources().openRawResource(pdfResource),
+                                pdfPageNum);
+                    }
+                }
+                catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
@@ -169,9 +168,15 @@ public class DocumentViewer extends Fragment {
 
 
                 try {
+                    if(pdfPageNum >0)
+                    {
                     pdfPageNum--;
-                    openPdfFromRaw();
-                } catch (IOException e) {
+                        renderer = openPdfFromRaw(getActivity(),binding.pdfView,
+                                getResources().openRawResource(pdfResource),
+                                pdfPageNum);
+                    }
+                }
+                    catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
