@@ -2,16 +2,21 @@ package com.example.secureonlinesharing;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 import com.example.secureonlinesharing.databinding.RegistrationPageBinding;
@@ -25,9 +30,7 @@ public class RegistrationPage extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
 
-    )
-
-    {
+    ) {
 
         binding = RegistrationPageBinding.inflate(inflater, container, false);
 
@@ -38,29 +41,50 @@ public class RegistrationPage extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-       // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
+        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
+        if (backButton != null) {
             backButton.setVisibility(View.VISIBLE);
 
             backButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view)
-                {
+                public void onClick(View view) {
                     NavHostFragment.findNavController(RegistrationPage.this)
                             .navigate(R.id.action_registrationPage_to_FirstFragment);
                 }
             });
         }
 
-       binding.registerButton.setOnClickListener(new View.OnClickListener() {
+        binding.registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(RegistrationPage.this)
-                        .navigate(R.id.action_registrationPage_to_FirstFragment);
+//                Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", Pattern.CASE_INSENSITIVE);
+//                Matcher matcher = pattern.matcher("Visit W3Schools!");
+//                boolean matchFound = matcher.find();
+
+                validateForm();
+
+
+//                    NavHostFragment.findNavController(RegistrationPage.this)
+//                        .navigate(R.id.action_registrationPage_to_FirstFragment);
             }
         });
+    }
+
+    public void validateForm() {
+        // extract the entered data from the EditText
+        String emailToText = binding.emailInput.getText().toString();
+
+        // Android offers the inbuilt patterns which the entered
+        // data from the EditText field needs to be compared with
+        // In this case the entered data needs to compared with
+        // the EMAIL_ADDRESS, which is implemented same below
+        if (emailToText.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
+           binding.emailInvalidMessage.setVisibility(View.VISIBLE);
+        }
+
+
+
     }
 
     @Override

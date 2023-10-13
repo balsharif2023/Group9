@@ -60,4 +60,7 @@
     <string name="media_title_label">Title</string>
     <string name="media_upload_button_label">Upload</string>
     <string name="media_picker_label">Tap to choose file</string>
+    <string name="email_label">Email</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="email_invalid_message">Please enter a valid email address</string>
 </resources>
