@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
@@ -17,6 +18,9 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.graphics.pdf.PdfRenderer;
 
+
+
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 import androidx.fragment.app.Fragment;
@@ -25,11 +29,16 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.secureonlinesharing.databinding.DocumentViewerBinding;
 import com.example.secureonlinesharing.databinding.FragmentThirdBinding;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class DocumentViewer extends Fragment {
 
@@ -37,6 +46,14 @@ public class DocumentViewer extends Fragment {
     private int pdfPageNum;
 
     private PdfRenderer renderer;
+
+    // creating a variable
+    // for PDF view.
+   // PDFView pdfView;
+
+    // url of our PDF file.
+    String pdfurl = "https://innshomebase.com/securefilesharing/develop/public/loremipsum.pdf";
+
 
     @Override
     public View onCreateView(
@@ -112,6 +129,9 @@ public class DocumentViewer extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
+
+
+        new RetrievePDFfromUrl().execute(pdfurl);
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
         if (backButton!= null)
         {
@@ -133,13 +153,13 @@ public class DocumentViewer extends Fragment {
         int pdfResource = R.raw.sample;
 
 
-        try {
-            renderer = openPdfFromRaw(getActivity(),binding.pdfView,
-                    getResources().openRawResource(pdfResource),
-                    pdfPageNum);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+////          //  renderer = openPdfFromRaw(getActivity(),binding.pdfView,
+////                    getResources().openRawResource(pdfResource),
+////                    pdfPageNum);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -196,6 +216,47 @@ public class DocumentViewer extends Fragment {
 
 
     }
+
+    // create an async task class for loading pdf file from URL.
+    class RetrievePDFfromUrl extends AsyncTask<String, Void, InputStream> {
+        @Override
+        protected InputStream doInBackground(String... strings) {
+            // we are using inputstream
+            // for getting out PDF.
+            InputStream inputStream = null;
+            try {
+                URL url = new URL(strings[0]);
+                // below is the step where we are
+                // creating our connection.
+                HttpURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                if (urlConnection.getResponseCode() == 200) {
+                    // response is success.
+                    // we are getting input stream from url
+                    // and storing it in our variable.
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                }
+
+            } catch (IOException e) {
+                // this is the method
+                // to handle errors.
+                e.printStackTrace();
+                return null;
+            }
+            return inputStream;
+        }
+
+        @Override
+        protected void onPostExecute(InputStream inputStream) {
+            // after the execution of our async
+            // task we are loading our pdf in our pdf view.
+            try {
+                openPdfFromRaw(getActivity(),binding.pdfView,inputStream,0);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     @Override
     public void onDestroyView() {

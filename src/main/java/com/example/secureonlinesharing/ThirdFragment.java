@@ -33,7 +33,7 @@ public class ThirdFragment extends Fragment {
         VideoView videoView = (VideoView) binding.videoView;  //casting to VideoView is not Strictly required above API level 26
         videoView.setZOrderOnTop(true);
         videoView.setVisibility(View.VISIBLE);
-        videoView.setVideoURI(Uri.parse("android.resource://" + getActivity().getPackageName() + "/" + R.raw.monkey)); //set the path of the video that we need to use in our VideoView
+  //      videoView.setVideoURI(Uri.parse("android.resource://" + getActivity().getPackageName() + "/" + R.raw.monkey)); //set the path of the video that we need to use in our VideoView
 
         MediaController mediaController = new MediaController(getActivity());
         mediaController.setAnchorView(videoView);

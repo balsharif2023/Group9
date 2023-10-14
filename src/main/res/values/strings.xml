@@ -63,4 +63,7 @@
     <string name="email_label">Email</string>
     <string name="phone_number_label">Phone Number</string>
     <string name="email_invalid_message">Please enter a valid email address</string>
+    <string name="phone_num_invalid">Enter a 10 digit number</string>
+    <string name="pass_confirm_invalid">Two passwords do not match</string>
+    <string name="name_invalid">name should only contain letters, spaces,hyphens</string>
 </resources>

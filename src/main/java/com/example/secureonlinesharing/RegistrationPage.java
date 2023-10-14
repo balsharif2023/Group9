@@ -58,9 +58,7 @@ public class RegistrationPage extends Fragment {
         binding.registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", Pattern.CASE_INSENSITIVE);
-//                Matcher matcher = pattern.matcher("Visit W3Schools!");
-//                boolean matchFound = matcher.find();
+
 
                 validateForm();
 
@@ -74,14 +72,38 @@ public class RegistrationPage extends Fragment {
     public void validateForm() {
         // extract the entered data from the EditText
         String emailToText = binding.emailInput.getText().toString();
+        String phoneToText = binding.phoneNumberInput.getText().toString();
+
+        String firstToText = binding.firstNameInput.getText().toString();
+        String lastToText = binding.lastNameInput.getText().toString();
 
         // Android offers the inbuilt patterns which the entered
         // data from the EditText field needs to be compared with
         // In this case the entered data needs to compared with
         // the EMAIL_ADDRESS, which is implemented same below
-        if (emailToText.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
-           binding.emailInvalidMessage.setVisibility(View.VISIBLE);
-        }
+        boolean invalid = (emailToText.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(emailToText).matches());
+            binding.emailInvalidMessage.setVisibility(invalid ? View.VISIBLE : View.GONE);
+
+
+        invalid = phoneToText.isEmpty() || !Patterns.PHONE.matcher(phoneToText).matches();
+            binding.phoneNumInvalidMessage.setVisibility(invalid ? View.VISIBLE : View.GONE);
+
+
+        Pattern pattern = Pattern.compile("^[A-Za-z-]+$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(firstToText);
+        boolean matchFound = matcher.find();
+
+        binding.firstNameInvalidMessage.setVisibility(matchFound ? View.GONE : View.VISIBLE);
+
+
+
+        matcher = pattern.matcher(lastToText);
+
+        matchFound = matcher.find();
+
+
+        binding.lastNameInvalidMessage.setVisibility(matchFound ? View.GONE : View.VISIBLE);
+
 
 
 
