@@ -38,7 +38,8 @@ public class MediaUploader extends Fragment {
                     try {
                         InputStream inputStream =
                                 getActivity().getContentResolver().openInputStream(uri);
-                        DocumentViewer.openPdfFromRaw(getActivity(),binding.mediaUploadPreview,inputStream,0);
+                        DocumentViewer.copyToCache(getActivity(),inputStream);
+                        DocumentViewer.openPdf(getActivity(),binding.mediaUploadPreview,0);
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
