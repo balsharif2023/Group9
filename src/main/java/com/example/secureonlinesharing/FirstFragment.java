@@ -68,12 +68,17 @@ public class FirstFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
-                NavHostFragment.findNavController(FirstFragment.this)
-                  .navigate(R.id.action_FirstFragment_to_SecondFragment);
                 // getting a new volley request queue for making new requests
-               /* RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+                String userNameToText = binding.userNameInput.getText().toString();
+                String passwordToText = binding.passwordInput.getText().toString();
+                RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
                 // url of the api through which we get random dog images
-                String url = "https://innshomebase.com/securefilesharing/develop/battus/v1/controller/registerLogin/registerLogin.php?userId=1";
+                String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/userLogin.php";
+                url+= "?username="+ userNameToText;
+
+                url+= "&password="+ passwordToText;
+
+
 
                 // since the response we get from the api is in JSON, we
                 // need to use `JsonObjectRequest` for parsing the
@@ -98,6 +103,9 @@ public class FirstFragment extends Fragment {
                                 String message;
                                 try {
                                     message = response.getString("message");
+
+                                    NavHostFragment.findNavController(FirstFragment.this)
+                                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
                                     // load the image into the ImageView using Glide.
                                      //binding.textviewFirst.setText(message);
                                 } catch (JSONException e) {
