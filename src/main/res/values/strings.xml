@@ -66,4 +66,7 @@
     <string name="phone_num_invalid">Enter a 10 digit number</string>
     <string name="pass_confirm_invalid">Two passwords do not match</string>
     <string name="name_invalid">name should only contain letters, spaces,hyphens</string>
+    <string name="login_error_message">Login Unsuccessful</string>
+    <string name="user_name_empty_message">User Name cannot be empty</string>
+    <string name="password_empty_message">Password field must be filled out</string>
 </resources>

@@ -1,7 +1,10 @@
 package com.example.secureonlinesharing;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.ImageDecoder;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +26,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FirstFragment extends Fragment {
 
@@ -68,6 +74,11 @@ public class FirstFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
+                binding.loginErrorMessage.setVisibility(View.GONE);
+                if(!validateForm())
+                    return;
+
+
                 // getting a new volley request queue for making new requests
                 String userNameToText = binding.userNameInput.getText().toString();
                 String passwordToText = binding.passwordInput.getText().toString();
@@ -101,21 +112,43 @@ public class FirstFragment extends Fragment {
                             (Response.Listener<JSONObject>) response -> {
                                 // get the image url from the JSON object
                                 String message;
-                                try {
-                                    message = response.getString("message");
 
+                                   // message = response.getString("message");
+
+
+                               // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
+
+                                SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+                                SharedPreferences.Editor editor = data.edit();
+
+                                // below two lines will put values for
+                                // email and password in shared preferences.
+                                try {
+                                    editor.putString("id", response.getString("user_id"));
+                                    editor.putString("firstName", response.getString("user_first_name"));
+                                    editor.putString("lastName", response.getString("user_last_name"));
+                                    editor.putString("userName", response.getString("user_username"));
+                                    editor.putString("email", response.getString("user_email"));
+
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+
+                                // to save our data with key and value.
+                                editor.apply();
                                     NavHostFragment.findNavController(FirstFragment.this)
                                             .navigate(R.id.action_FirstFragment_to_SecondFragment);
                                     // load the image into the ImageView using Glide.
                                      //binding.textviewFirst.setText(message);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+
                             },
 
                             // lambda function for handling the case
                             // when the HTTP request fails
                             (Response.ErrorListener) error -> {
+                                binding.loginErrorMessage.setVisibility(View.VISIBLE);
                                 // make a Toast telling the user
                                 // that something went wrong
                                 //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
@@ -132,6 +165,27 @@ public class FirstFragment extends Fragment {
 
         });
     }
+
+    public boolean validateForm() {
+        // extract the entered data from the EditText
+
+        String passwordToText = binding.passwordInput.getText().toString();
+        String userNameToText = binding.userNameInput.getText().toString();
+
+        // Android offers the inbuilt patterns which the entered
+        // data from the EditText field needs to be compared with
+        // In this case the entered data needs to compared with
+        // the EMAIL_ADDRESS, which is implemented same below
+        boolean passwordValid = !passwordToText.isEmpty();
+        binding.passwordEmptyMessage.setVisibility(passwordValid? View.GONE : View.VISIBLE);
+
+        boolean userNameValid = !userNameToText.isEmpty();
+        binding.userNameEmptyMessage.setVisibility(userNameValid? View.GONE : View.VISIBLE);
+
+        return userNameValid && passwordValid;
+
+    }
+
 
     @Override
     public void onDestroyView() {
