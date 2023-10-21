@@ -152,6 +152,12 @@ public class DocumentViewer extends Fragment {
 
         }
 
+        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
+        if (userMenuButton!= null) {
+            userMenuButton.setVisibility(View.VISIBLE);
+
+
+        }
         pdfPageNum =0;
 
 

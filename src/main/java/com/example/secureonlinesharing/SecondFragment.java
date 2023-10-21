@@ -46,6 +46,12 @@ public class SecondFragment extends Fragment {
             });
         }
 
+        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
+        if (userMenuButton!= null) {
+            userMenuButton.setVisibility(View.VISIBLE);
+
+
+        }
 
        binding.mediaRecord1.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -80,6 +80,13 @@ public class MediaUploader extends Fragment {
             });
         }
 
+        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
+        if (userMenuButton!= null) {
+            userMenuButton.setVisibility(View.VISIBLE);
+
+
+        }
+
         binding.filePicker.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {

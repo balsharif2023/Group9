@@ -10,6 +10,9 @@
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
 
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
+
 
 
     <string name="previous">Previous</string>

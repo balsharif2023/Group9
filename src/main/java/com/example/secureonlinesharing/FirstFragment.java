@@ -59,6 +59,15 @@ public class FirstFragment extends Fragment {
 
                 }
             });
+
+
+        }
+
+        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
+        if (userMenuButton!= null) {
+            userMenuButton.setVisibility(View.GONE);
+
+
         }
 
         binding.createAccountLink.setOnClickListener(new View.OnClickListener() {
@@ -126,10 +135,9 @@ public class FirstFragment extends Fragment {
                                 // email and password in shared preferences.
                                 try {
                                     editor.putString("id", response.getString("user_id"));
-                                    editor.putString("firstName", response.getString("user_first_name"));
-                                    editor.putString("lastName", response.getString("user_last_name"));
+
                                     editor.putString("userName", response.getString("user_username"));
-                                    editor.putString("email", response.getString("user_email"));
+
 
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);

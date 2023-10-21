@@ -63,6 +63,13 @@ public class RegistrationPage extends Fragment {
             });
         }
 
+        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
+        if (userMenuButton!= null) {
+            userMenuButton.setVisibility(View.GONE);
+
+
+        }
+
         binding.registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
