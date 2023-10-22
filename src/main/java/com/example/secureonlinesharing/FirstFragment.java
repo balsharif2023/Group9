@@ -138,6 +138,9 @@ public class FirstFragment extends Fragment {
 
                                     editor.putString("userName", response.getString("user_username"));
 
+                                    editor.putString("token", response.getString("token"));
+
+
 
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);

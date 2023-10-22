@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        System.out.println("option selected" +id);
+
 
         drawerLayout.close();
 
@@ -114,17 +114,20 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (id==R.id.action_profile)
         {
-            return true;
+            NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
+            navController.navigateUp();
+            navController.navigate(R.id.userProfilePage);
+
 
         }
         else if (id==R.id.action_media)
 
         {
-            System.out.println("navigating");
+
             NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
             navController.navigateUp();
             navController.navigate(R.id.SecondFragment);
-            System.out.println("Done navigating");
+
         }
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;

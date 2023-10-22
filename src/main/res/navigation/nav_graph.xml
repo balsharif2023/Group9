@@ -73,4 +73,8 @@
             android:id="@+id/action_mediaUploader_to_SecondFragment"
             app:destination="@id/SecondFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/userProfilePage"
+        android:name="com.example.secureonlinesharing.UserProfilePage"
+        android:label="UserProfilePage" />
 </navigation>
