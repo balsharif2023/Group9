@@ -1,9 +1,12 @@
 package com.example.secureonlinesharing;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +19,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
 import com.example.secureonlinesharing.databinding.MediaUploaderBinding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MediaUploader extends Fragment {
 
@@ -99,58 +113,99 @@ public class MediaUploader extends Fragment {
             @Override
             public void onClick(View view)
             {
+                String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/createMedia.php";
+                SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+                String id = data.getString("id","");
 
-                // getting a new volley request queue for making new requests
-               /* RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
-                // url of the api through which we get random dog images
-                String url = "https://innshomebase.com/securefilesharing/develop/battus/v1/controller/registerLogin/registerLogin.php?userId=1";
+                String token = data.getString("jwt","");
+                VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
+                        token,
+                        new Response.Listener<NetworkResponse>() {
+                    @Override
+                    public void onResponse(NetworkResponse response) {
+                        String resultResponse = new String(response.data);
+                        try {
+                            JSONObject result = new JSONObject(resultResponse);
 
-                // since the response we get from the api is in JSON, we
-                // need to use `JsonObjectRequest` for parsing the
-                // request response
-              //  try {
+                            String message = result.getString("message");
 
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                            // we are using GET HTTP request method
-                            Request.Method.GET,
-                            // url we want to send the HTTP request to
-                            url,
-                            // this parameter is used to send a JSON object to the
-                            // server, since this is not required in our case,
-                            // we are keeping it `null`
-                          //  new JSONObject("{userId:1}"),
-                            null,
 
-                            // lambda function for handling the case
-                            // when the HTTP request succeeds
-                            (Response.Listener<JSONObject>) response -> {
-                                // get the image url from the JSON object
-                                String message;
-                                try {
-                                    message = response.getString("message");
-                                    // load the image into the ImageView using Glide.
-                                     //binding.textviewFirst.setText(message);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            },
+                                Log.i("Message", message);
 
-                            // lambda function for handling the case
-                            // when the HTTP request fails
-                            (Response.ErrorListener) error -> {
-                                // make a Toast telling the user
-                                // that something went wrong
-                                //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                                // log the error message in the error stream
-                                //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        String errorMessage = "Unknown error";
+                        if (networkResponse == null) {
+                            if (error.getClass().equals(TimeoutError.class)) {
+                                errorMessage = "Request timeout";
+                            } else if (error.getClass().equals(NoConnectionError.class)) {
+                                errorMessage = "Failed to connect server";
                             }
-                    );
-                    // add the json request object created above
-                    // to the Volley request queue
-                    volleyQueue.add(jsonObjectRequest);
-                //} // catch(JSONException e){} */
+                        } else {
+                            String result = new String(networkResponse.data);
+                            try {
+                                JSONObject response = new JSONObject(result);
 
+                                String message = response.getString("message");
+
+
+                                Log.e("Error Message", message);
+
+                                if (networkResponse.statusCode == 404) {
+                                    errorMessage = "Resource not found";
+                                } else if (networkResponse.statusCode == 401) {
+                                    errorMessage = message+" Please login again";
+                                } else if (networkResponse.statusCode == 400) {
+                                    errorMessage = message+ " Check your inputs";
+                                } else if (networkResponse.statusCode == 500) {
+                                    errorMessage = message+" Something is getting wrong";
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        Log.i("Error", errorMessage);
+                        error.printStackTrace();
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<>();
+
+                        params.put("ownerId", id);
+                        params.put("fileTitle", "preview");
+                        params.put("fileName","preview.jpg");
+                        params.put("accessRules", "concurrent_only");
+                        params.put("concurrentAccess", "1");
+                        params.put("mediaDescription", "Cool Picture");
+                        params.put("mediaType", "word");
+
+                        return params;
+                    }
+
+                    @Override
+                    protected Map<String, DataPart> getByteData() {
+                        Map<String, DataPart> params = new HashMap<>();
+                        // file name could found file base or direct access from real path
+                        // for now just get bitmap data from ImageView
+                        params.put("file", new DataPart("preview.jpg", AppHelper.getFileDataFromDrawable(getContext(), binding.mediaUploadPreview.getDrawable()), "image/jpeg"));
+
+                        return params;
+                    }
+                };
+
+                VolleySingleton.getInstance(getContext()).addToRequestQueue(multipartRequest);
             }
+
+
+
+
 
         });
     }

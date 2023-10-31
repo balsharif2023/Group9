@@ -208,7 +208,7 @@ public class UserProfilePage extends Fragment {
         SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
        String id = data.getString("id","");
 
-        String token = data.getString("token","");
+        String token = data.getString("jwt","");
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
@@ -216,19 +216,11 @@ public class UserProfilePage extends Fragment {
         url+= "?userid="+ id;
 
 
-        JSONObject json = null;
-        try {
-            json = new JSONObject(token);
-            String jwt = json.getString("jwt");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                url+= "&token="+ URLEncoder.encode(jwt, Charset.defaultCharset());
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            url+= "&token="+ URLEncoder.encode(token, Charset.defaultCharset());
         }
-
-
-
 
         System.out.println(url);
 
