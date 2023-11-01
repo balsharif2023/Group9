@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -71,12 +72,29 @@ public class DocumentViewer extends Fragment {
         return binding.getRoot();
 
     }
+
+    public static void openImage(Activity activity,ImageView img)
+    {
+        File imgFile = new File(activity.getCacheDir(), "temp");
+
+
+
+        // on below line we are checking if the image file exist or not.
+        if (imgFile.exists()) {
+            // on below line we are creating an image bitmap variable
+            // and adding a bitmap to it from image file.
+            Bitmap imgBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+            // on below line we are setting bitmap to our image view.
+            img.setImageBitmap(imgBitmap);
+        }
+    }
     public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
 
         // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
 
      //   File fileCopy = copyToCache(activity,input);
-        File fileCopy = new File(activity.getCacheDir(), "temp.pdf");
+        File fileCopy = new File(activity.getCacheDir(), "temp");
         // We get a page from the PDF doc by calling 'open'
         ParcelFileDescriptor fileDescriptor =
                 ParcelFileDescriptor.open(fileCopy,
@@ -107,7 +125,7 @@ public class DocumentViewer extends Fragment {
 
 
 //Get input stream object to read the pdf
-            File file = new File(activity.getCacheDir(), "temp.pdf");
+            File file = new File(activity.getCacheDir(), "temp");
             FileOutputStream output = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
             int size;

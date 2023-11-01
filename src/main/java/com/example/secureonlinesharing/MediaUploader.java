@@ -1,9 +1,11 @@
 package com.example.secureonlinesharing;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -30,16 +33,17 @@ import com.example.secureonlinesharing.databinding.MediaUploaderBinding;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MediaUploader extends Fragment {
 
     private MediaUploaderBinding binding;
-
 
 
     // GetContent creates an ActivityResultLauncher<String> to let you pass
@@ -52,8 +56,15 @@ public class MediaUploader extends Fragment {
                     try {
                         InputStream inputStream =
                                 getActivity().getContentResolver().openInputStream(uri);
-                        DocumentViewer.copyToCache(getActivity(),inputStream);
-                        DocumentViewer.openPdf(getActivity(),binding.mediaUploadPreview,0);
+                        DocumentViewer.copyToCache(getActivity(), inputStream);
+                        ContentResolver cR = getContext().getContentResolver();
+                        String type = cR.getType(uri);
+                        if (type.equals("application/pdf"))
+                            DocumentViewer.openPdf(getActivity(), binding.mediaUploadPreview, 0);
+                        else if (type.startsWith("image")) {
+                            DocumentViewer.openImage(getActivity(), binding.mediaUploadPreview);
+
+                        }
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
@@ -62,7 +73,6 @@ public class MediaUploader extends Fragment {
 
                 }
             });
-
 
 
     @Override
@@ -80,9 +90,8 @@ public class MediaUploader extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //((MainActivity) getActivity()).backButton.setVisibility(View.INVISIBLE);
-       ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
+        ImageButton backButton = getActivity().findViewById(R.id.backButton);
+        if (backButton != null) {
             backButton.setVisibility(View.VISIBLE);
             backButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -95,50 +104,53 @@ public class MediaUploader extends Fragment {
         }
 
         ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
+        if (userMenuButton != null) {
             userMenuButton.setVisibility(View.VISIBLE);
 
 
         }
 
         binding.filePicker.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 mGetContent.launch("application/pdf");
+            @Override
+            public void onClick(View view) {
+                mGetContent.launch("*/*");
 
-             }
+            }
 
-         });
+        });
         binding.mediaUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
+                binding.loadingWrapper.setVisibility(View.VISIBLE);
                 String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/createMedia.php";
-                SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-                String id = data.getString("id","");
+                SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+                String id = data.getString("id", "");
 
-                String token = data.getString("jwt","");
+                String token = data.getString("jwt", "");
                 VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
                         token,
                         new Response.Listener<NetworkResponse>() {
-                    @Override
-                    public void onResponse(NetworkResponse response) {
-                        String resultResponse = new String(response.data);
-                        try {
-                            JSONObject result = new JSONObject(resultResponse);
+                            @Override
+                            public void onResponse(NetworkResponse response) {
+                                binding.loadingWrapper.setVisibility(View.INVISIBLE);
+                                String resultResponse = new String(response.data);
+                                try {
+                                    JSONObject result = new JSONObject(resultResponse);
 
-                            String message = result.getString("message");
+                                    String message = result.getString("message");
 
 
-                                Log.i("Message", message);
+                                    Log.i("Message", message);
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        binding.loadingWrapper.setVisibility(View.INVISIBLE);
+
                         NetworkResponse networkResponse = error.networkResponse;
                         String errorMessage = "Unknown error";
                         if (networkResponse == null) {
@@ -156,15 +168,17 @@ public class MediaUploader extends Fragment {
 
 
                                 Log.e("Error Message", message);
+                                Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                                toast.show();
 
                                 if (networkResponse.statusCode == 404) {
                                     errorMessage = "Resource not found";
                                 } else if (networkResponse.statusCode == 401) {
-                                    errorMessage = message+" Please login again";
+                                    errorMessage = message + " Please login again";
                                 } else if (networkResponse.statusCode == 400) {
-                                    errorMessage = message+ " Check your inputs";
+                                    errorMessage = message + " Check your inputs";
                                 } else if (networkResponse.statusCode == 500) {
-                                    errorMessage = message+" Something is getting wrong";
+                                    errorMessage = message + " Something is getting wrong";
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -180,7 +194,7 @@ public class MediaUploader extends Fragment {
 
                         params.put("ownerId", id);
                         params.put("fileTitle", "preview");
-                        params.put("fileName","preview.jpg");
+                        params.put("fileName", "preview.jpg");
                         params.put("accessRules", "concurrent_only");
                         params.put("concurrentAccess", "1");
                         params.put("mediaDescription", "Cool Picture");
@@ -194,29 +208,46 @@ public class MediaUploader extends Fragment {
                         Map<String, DataPart> params = new HashMap<>();
                         // file name could found file base or direct access from real path
                         // for now just get bitmap data from ImageView
-                        params.put("file", new DataPart("preview.jpg", AppHelper.getFileDataFromDrawable(getContext(), binding.mediaUploadPreview.getDrawable()), "image/jpeg"));
+                        File fileCopy = new File(getActivity().getCacheDir(), "temp");
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            try {
+                                params.put("file",
+                                        new DataPart("file",
+                                                //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
+                                                Files.readAllBytes(fileCopy.toPath()),
+
+                                                "image/jpeg"));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+
+                        }
+
 
                         return params;
+
                     }
-                };
 
-                VolleySingleton.getInstance(getContext()).addToRequestQueue(multipartRequest);
-            }
+                } ;
+
+                VolleySingleton.getInstance(
+
+                    getContext()).
+
+                    addToRequestQueue(multipartRequest);
+                }
 
 
+            });
+        }
 
 
+        @Override
+        public void onDestroyView () {
+            super.onDestroyView();
+            binding = null;
+        }
 
-        });
     }
-
-
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
-}
