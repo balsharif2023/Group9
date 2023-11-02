@@ -1,6 +1,8 @@
 package com.example.secureonlinesharing;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -10,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,8 +21,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.graphics.pdf.PdfRenderer;
-
-
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
@@ -27,8 +29,19 @@ import androidx.annotation.RawRes;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.TimeoutError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.secureonlinesharing.databinding.DocumentViewerBinding;
 import com.example.secureonlinesharing.databinding.FragmentThirdBinding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -148,10 +161,10 @@ public class DocumentViewer extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-       // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
+        getMedia();
 
 
-        new Thread(new RetrievePDFfromUrl(pdfurl)).start();
+       // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
         //new RetrievePDFfromUrl(pdfurl).run();
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
         if (backButton!= null)
@@ -227,6 +240,114 @@ public class DocumentViewer extends Fragment {
                 return false;
             }
         });
+
+
+    }
+
+    public void getMedia()  {
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        JSONObject json ;
+        try {
+
+
+            json= new JSONObject();
+            json.put("media_Id", "16");
+            json.put("user_id", data.getString("id",""));
+            json.put("user_first_name", data.getString("firstName",""));
+            json.put("user_last_name", data.getString("lastName",""));
+            json.put("user_username", data.getString("userName",""));
+            json.put("token", data.getString("jwt",""));
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+            return;
+        }
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia2.php";
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.POST,
+
+                url,
+
+                json,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+                    try {
+                       // message = response.getString("token");
+                        //System.out.println(message);
+
+                        System.out.println(response.getString("mediaAccessPath"));
+                        binding.mediaTitle.setText(response.getString("mediaTitle"));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    // make a Toast telling the user
+                    // that something went wrong
+                     //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    // log the error message in the error stream
+                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    NetworkResponse networkResponse = error.networkResponse;
+                    //System.out.println("status code: "+ networkResponse.statusCode );
+                    String errorMessage = "Unknown error";
+                    if (networkResponse == null) {
+                        if (error.getClass().equals(TimeoutError.class)) {
+                            errorMessage = "Request timeout";
+                        } else if (error.getClass().equals(NoConnectionError.class)) {
+                            errorMessage = "Failed to connect server";
+                        }
+                        Toast toast = Toast.makeText(getContext(),errorMessage,Toast.LENGTH_SHORT);
+                        toast.show();
+
+                    } else {
+                        String result = new String(networkResponse.data);
+                        try {
+                            JSONObject response = new JSONObject(result);
+
+                            String message = response.getString("message");
+
+
+                            Log.e("Error Message", message);
+                            Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                            toast.show();
+
+                            if (networkResponse.statusCode == 404) {
+                                errorMessage = "Resource not found";
+                            } else if (networkResponse.statusCode == 401) {
+                                errorMessage = message + " Please login again";
+                            } else if (networkResponse.statusCode == 400) {
+                                errorMessage = message + " Check your inputs";
+                            } else if (networkResponse.statusCode == 500) {
+                                errorMessage = message + " Something is getting wrong";
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Log.i("Error", errorMessage);
+                    error.printStackTrace();
+                }
+        );
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
 
 
     }

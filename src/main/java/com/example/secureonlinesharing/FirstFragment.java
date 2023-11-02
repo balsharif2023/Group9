@@ -137,6 +137,13 @@ public class FirstFragment extends Fragment {
                                     editor.putString("id", response.getString("user_id"));
 
                                     editor.putString("userName", response.getString("user_username"));
+
+                                    editor.putString("firstName", response.getString("user_first_name"));
+
+                                    editor.putString("lastName", response.getString("user_last_name"));
+
+
+
                                     String token = response.getString("token");
                                     editor.putString("token",token );
 
@@ -145,6 +152,8 @@ public class FirstFragment extends Fragment {
                                         json = new JSONObject(token);
                                         String jwt = json.getString("jwt");
                                         editor.putString("jwt",jwt );
+
+                                        System.out.println(jwt);
 
 
 
