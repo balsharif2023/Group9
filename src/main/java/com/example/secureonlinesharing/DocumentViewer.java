@@ -57,6 +57,8 @@ import javax.net.ssl.HttpsURLConnection;
 public class DocumentViewer extends Fragment {
 
     private DocumentViewerBinding binding;
+
+    private  String mediaId = "";
     private int pdfPageNum;
 
     private PdfRenderer renderer;
@@ -161,6 +163,8 @@ public class DocumentViewer extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mediaId = getArguments().getString("mediaId");
+
         getMedia();
 
 
@@ -190,6 +194,22 @@ public class DocumentViewer extends Fragment {
 
         }
         pdfPageNum =0;
+
+        binding.mediaEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Bundle bundle = new Bundle();
+
+                bundle.putString("mediaId","16");
+                NavHostFragment.findNavController(DocumentViewer.this)
+                        .navigate(R.id.action_documentViewer_to_mediaUploader,bundle);
+
+
+            }
+        });
+
+
 
 
 
@@ -252,7 +272,7 @@ public class DocumentViewer extends Fragment {
 
 
             json= new JSONObject();
-            json.put("media_Id", "16");
+            json.put("media_Id", mediaId);
             json.put("user_id", data.getString("id",""));
             json.put("user_first_name", data.getString("firstName",""));
             json.put("user_last_name", data.getString("lastName",""));
@@ -267,7 +287,7 @@ public class DocumentViewer extends Fragment {
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia2.php";
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
 

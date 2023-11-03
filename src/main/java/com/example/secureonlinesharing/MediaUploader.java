@@ -25,9 +25,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.secureonlinesharing.databinding.MediaUploaderBinding;
 
 import org.json.JSONException;
@@ -44,7 +47,9 @@ import java.util.Map;
 public class MediaUploader extends Fragment {
 
     private MediaUploaderBinding binding;
+     private  boolean edit = false ;
 
+     private String mediaId ="";
 
     // GetContent creates an ActivityResultLauncher<String> to let you pass
 // in the mime type you want to let the user select
@@ -110,6 +115,18 @@ public class MediaUploader extends Fragment {
 
         }
 
+         mediaId= getArguments().getString("mediaId");
+        edit = !mediaId.equals("");
+        if (edit)
+        {
+            getMedia(mediaId);
+            binding.mediaUploadButton.setText(R.string.media_edit_button_label);
+        }
+        else
+        {
+            binding.mediaUploadButton.setText(R.string.media_upload_button_label);
+        }
+
         binding.filePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,127 +138,267 @@ public class MediaUploader extends Fragment {
         binding.mediaUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                binding.loadingWrapper.setVisibility(View.VISIBLE);
-                String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/createMedia.php";
-                SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-                String id = data.getString("id", "");
+                saveMedia();
+            }
 
-                String token = data.getString("jwt", "");
-                VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
-                        token,
-                        new Response.Listener<NetworkResponse>() {
-                            @Override
-                            public void onResponse(NetworkResponse response) {
-                                binding.loadingWrapper.setVisibility(View.INVISIBLE);
-                                String resultResponse = new String(response.data);
-                                try {
-                                    JSONObject result = new JSONObject(resultResponse);
-
-                                    String message = result.getString("message");
-
-
-                                    Log.i("Message", message);
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        binding.loadingWrapper.setVisibility(View.INVISIBLE);
-
-                        NetworkResponse networkResponse = error.networkResponse;
-                        String errorMessage = "Unknown error";
-                        if (networkResponse == null) {
-                            if (error.getClass().equals(TimeoutError.class)) {
-                                errorMessage = "Request timeout";
-                            } else if (error.getClass().equals(NoConnectionError.class)) {
-                                errorMessage = "Failed to connect server";
-                            }
-                        } else {
-                            String result = new String(networkResponse.data);
-                            try {
-                                JSONObject response = new JSONObject(result);
-
-                                String message = response.getString("message");
-
-
-                                Log.e("Error Message", message);
-                                Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
-                                toast.show();
-
-                                if (networkResponse.statusCode == 404) {
-                                    errorMessage = "Resource not found";
-                                } else if (networkResponse.statusCode == 401) {
-                                    errorMessage = message + " Please login again";
-                                } else if (networkResponse.statusCode == 400) {
-                                    errorMessage = message + " Check your inputs";
-                                } else if (networkResponse.statusCode == 500) {
-                                    errorMessage = message + " Something is getting wrong";
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        Log.i("Error", errorMessage);
-                        error.printStackTrace();
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() {
-                        Map<String, String> params = new HashMap<>();
-
-                        params.put("ownerId", id);
-                        params.put("fileTitle", "preview");
-                        params.put("fileName", "preview.jpg");
-                        params.put("accessRules", "concurrent_only");
-                        params.put("concurrentAccess", "1");
-                        params.put("mediaDescription", "Cool Picture");
-                        params.put("mediaType", "word");
-
-                        return params;
-                    }
-
-                    @Override
-                    protected Map<String, DataPart> getByteData() {
-                        Map<String, DataPart> params = new HashMap<>();
-                        // file name could found file base or direct access from real path
-                        // for now just get bitmap data from ImageView
-                        File fileCopy = new File(getActivity().getCacheDir(), "temp");
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            try {
-                                params.put("file",
-                                        new DataPart("file",
-                                                //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
-                                                Files.readAllBytes(fileCopy.toPath()),
-
-                                                "image/jpeg"));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
-
-                        }
-
-
-                        return params;
-
-                    }
-
-                } ;
-
-                VolleySingleton.getInstance(
-
-                    getContext()).
-
-                    addToRequestQueue(multipartRequest);
-                }
 
 
             });
         }
+    public void getMedia(String mediaId)  {
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        JSONObject json ;
+        try {
+
+
+            json= new JSONObject();
+            json.put("media_Id", mediaId);
+            json.put("user_id", data.getString("id",""));
+            json.put("user_first_name", data.getString("firstName",""));
+            json.put("user_last_name", data.getString("lastName",""));
+            json.put("user_username", data.getString("userName",""));
+            json.put("token", data.getString("jwt",""));
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+            return;
+        }
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.POST,
+
+                url,
+
+                json,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+                    try {
+                        // message = response.getString("token");
+                        //System.out.println(message);
+
+                        System.out.println(response.getString("mediaAccessPath"));
+                        binding.mediaTitleInput.setText(response.getString("mediaTitle"));
+                        binding.mediaDescriptionInput.setText(response.getString("mediaDescription"));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    // make a Toast telling the user
+                    // that something went wrong
+                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    // log the error message in the error stream
+                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    NetworkResponse networkResponse = error.networkResponse;
+                    //System.out.println("status code: "+ networkResponse.statusCode );
+                    String errorMessage = "Unknown error";
+                    if (networkResponse == null) {
+                        if (error.getClass().equals(TimeoutError.class)) {
+                            errorMessage = "Request timeout";
+                        } else if (error.getClass().equals(NoConnectionError.class)) {
+                            errorMessage = "Failed to connect server";
+                        }
+                        Toast toast = Toast.makeText(getContext(),errorMessage,Toast.LENGTH_SHORT);
+                        toast.show();
+
+                    } else {
+                        String result = new String(networkResponse.data);
+                        try {
+                            JSONObject response = new JSONObject(result);
+
+                            String message = response.getString("message");
+
+
+                            Log.e("Error Message", message);
+                            Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                            toast.show();
+
+                            if (networkResponse.statusCode == 404) {
+                                errorMessage = "Resource not found";
+                            } else if (networkResponse.statusCode == 401) {
+                                errorMessage = message + " Please login again";
+                            } else if (networkResponse.statusCode == 400) {
+                                errorMessage = message + " Check your inputs";
+                            } else if (networkResponse.statusCode == 500) {
+                                errorMessage = message + " Something is getting wrong";
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Log.i("Error", errorMessage);
+                    error.printStackTrace();
+                }
+        );
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
+    }
+
+
+
+    public void saveMedia ()
+    {
+        binding.loadingWrapper.setVisibility(View.VISIBLE);
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/";
+        if(edit)
+        {
+             url+= "editMedia.php";
+
+        }
+        else
+        {
+            url += "createMedia.php";
+        }
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        String id = data.getString("id", "");
+
+        String token = data.getString("jwt", "");
+        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
+                token,
+                new Response.Listener<NetworkResponse>() {
+                    @Override
+                    public void onResponse(NetworkResponse response) {
+                        binding.loadingWrapper.setVisibility(View.INVISIBLE);
+                        String resultResponse = new String(response.data);
+                        try {
+                            JSONObject result = new JSONObject(resultResponse);
+
+                            String message = result.getString("message");
+                            if(result.has("mediaId"))
+                                 mediaId = result.getString("mediaId");
+
+                            Bundle bundle = new Bundle();
+
+                            bundle.putString("mediaId", mediaId);
+                            NavHostFragment.findNavController(MediaUploader.this)
+                                    .navigate(R.id.action_mediaUploader_to_documentViewer,bundle);
+
+
+                            Log.i("Message", message);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                binding.loadingWrapper.setVisibility(View.INVISIBLE);
+
+                NetworkResponse networkResponse = error.networkResponse;
+                String errorMessage = "Unknown error";
+                if (networkResponse == null) {
+                    if (error.getClass().equals(TimeoutError.class)) {
+                        errorMessage = "Request timeout";
+                    } else if (error.getClass().equals(NoConnectionError.class)) {
+                        errorMessage = "Failed to connect server";
+                    }
+                } else {
+                    String result = new String(networkResponse.data);
+                    try {
+                        JSONObject response = new JSONObject(result);
+
+                        String message = response.getString("message");
+
+
+                        Log.e("Error Message", message);
+                        Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                        toast.show();
+
+                        if (networkResponse.statusCode == 404) {
+                            errorMessage = "Resource not found";
+                        } else if (networkResponse.statusCode == 401) {
+                            errorMessage = message + " Please login again";
+                        } else if (networkResponse.statusCode == 400) {
+                            errorMessage = message + " Check your inputs";
+                        } else if (networkResponse.statusCode == 500) {
+                            errorMessage = message + " Something is getting wrong";
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Log.i("Error", errorMessage);
+                error.printStackTrace();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                if(edit)
+                {
+                    params.put("mediaId", mediaId);
+                }
+
+                params.put("ownerId", id);
+                params.put("fileTitle", binding.mediaTitleInput.getText().toString());
+                params.put("fileName", "preview.jpg");
+                params.put("accessRules", "concurrent_only");
+                params.put("concurrentAccess", "1");
+                params.put("mediaDescription", binding.mediaDescriptionInput.getText().toString());
+                params.put("mediaType", "word");
+
+                return params;
+            }
+
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+                // file name could found file base or direct access from real path
+                // for now just get bitmap data from ImageView
+                File fileCopy = new File(getActivity().getCacheDir(), "temp");
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        params.put("file",
+                                new DataPart("file",
+                                        //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
+                                        Files.readAllBytes(fileCopy.toPath()),
+
+                                        "image/jpeg"));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                }
+
+
+                return params;
+
+            }
+
+        } ;
+
+        VolleySingleton.getInstance(
+
+                        getContext()).
+
+                addToRequestQueue(multipartRequest);
+
+
+    }
+
 
 
         @Override

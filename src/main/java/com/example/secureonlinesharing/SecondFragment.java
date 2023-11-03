@@ -64,8 +64,10 @@ public class SecondFragment extends Fragment {
         binding.mediaRecord2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putString("mediaId","16");
                 NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_documentViewer);
+                        .navigate(R.id.action_SecondFragment_to_documentViewer,bundle);
             }
         });
 
@@ -73,8 +75,11 @@ public class SecondFragment extends Fragment {
         binding.addMediaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putString("mediaId","");
                 NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_mediaUploader);
+                        .navigate(R.id.action_SecondFragment_to_mediaUploader,bundle);
+
             }
         });
     }

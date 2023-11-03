@@ -63,6 +63,9 @@
         <action
             android:id="@+id/action_documentViewer_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+        <action
+            android:id="@+id/action_documentViewer_to_mediaUploader"
+            app:destination="@id/mediaUploader" />
     </fragment>
     <fragment
         android:id="@+id/mediaUploader"
@@ -72,6 +75,9 @@
         <action
             android:id="@+id/action_mediaUploader_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+        <action
+            android:id="@+id/action_mediaUploader_to_documentViewer"
+            app:destination="@id/documentViewer" />
     </fragment>
     <fragment
         android:id="@+id/userProfilePage"
