@@ -13,7 +13,7 @@
 
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
+            android:id="@+id/mediaForm"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
@@ -66,8 +66,14 @@
                     android:ellipsize="end"
                     android:ems="10"
                     android:inputType="text" />
+
             </LinearLayout>
 
+
+            <Spinner
+                android:id="@+id/mediaAccessRuleDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -99,7 +105,9 @@
                     android:paddingLeft="80dp"
                     android:paddingRight="80dp"
                     android:text="@string/media_edit_button_label" />
+
             </LinearLayout>
+
         </LinearLayout>
 
         <!--  <ImageView

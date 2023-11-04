@@ -29,6 +29,7 @@ import androidx.annotation.RawRes;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
@@ -51,6 +52,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -201,7 +204,7 @@ public class DocumentViewer extends Fragment {
 
                 Bundle bundle = new Bundle();
 
-                bundle.putString("mediaId","16");
+                bundle.putString("mediaId",mediaId);
                 NavHostFragment.findNavController(DocumentViewer.this)
                         .navigate(R.id.action_documentViewer_to_mediaUploader,bundle);
 
@@ -265,37 +268,29 @@ public class DocumentViewer extends Fragment {
     }
 
     public void getMedia()  {
+
         SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
+        String token = data.getString("jwt","");
+
+        String userId = data.getString("id","");
+
         JSONObject json ;
-        try {
 
-
-            json= new JSONObject();
-            json.put("media_Id", mediaId);
-            json.put("user_id", data.getString("id",""));
-            json.put("user_first_name", data.getString("firstName",""));
-            json.put("user_last_name", data.getString("lastName",""));
-            json.put("user_username", data.getString("userName",""));
-            json.put("token", data.getString("jwt",""));
-
-        } catch (JSONException e) {
-
-            e.printStackTrace();
-            return;
-        }
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
+        url += "?mediaId="+ mediaId;
+
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
 
-                Request.Method.POST,
+                Request.Method.GET,
 
                 url,
 
-                json,
+                null,
 
 
                 // lambda function for handling the case
@@ -309,6 +304,28 @@ public class DocumentViewer extends Fragment {
 
                         System.out.println(response.getString("mediaAccessPath"));
                         binding.mediaTitle.setText(response.getString("mediaTitle"));
+                        binding.mediaDescription.setText(response.getString("mediaDescription"));
+
+                        String owner = response.getString("mediaOwnerId");
+
+                        System.out.println("owner: "+ owner + " user: "+ userId);
+                        String accessPath = response.getString("mediaAccessPath");
+
+                        System.out.println(accessPath);
+
+                        new Thread(new RetrieveFileFromUrl(accessPath)).start();
+
+                        if( owner.equals(userId))
+                        {
+                            String firstName = data.getString("firstName","");
+                            String lastName = data.getString("lastName","");
+
+                            binding.mediaOwner.setText(firstName+ " "+ lastName);
+
+                        }
+                        else
+                            binding.mediaOwner.setText("");
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -363,7 +380,19 @@ public class DocumentViewer extends Fragment {
                     Log.i("Error", errorMessage);
                     error.printStackTrace();
                 }
-        );
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers =  super.getHeaders();
+                HashMap<String, String> headers2 =new HashMap<String,String>();
+                for(String s: headers.keySet())
+                {
+                    headers2.put(s,headers.get(s));
+                }
+                headers2.put("Authorization","Bearer " + token);
+                return headers2;
+            }
+        };
         // add the json request object created above
         // to the Volley request queue
         volleyQueue.add(jsonObjectRequest);
@@ -373,9 +402,11 @@ public class DocumentViewer extends Fragment {
     }
 
     // create an async task class for loading pdf file from URL.
-    class RetrievePDFfromUrl implements Runnable{
+    class RetrieveFileFromUrl implements Runnable{
         private String urlStr;
-        public RetrievePDFfromUrl(String url)
+
+        private String contentType;
+        public RetrieveFileFromUrl (String url)
         {
             this.urlStr = url;
         }
@@ -397,6 +428,8 @@ public class DocumentViewer extends Fragment {
                     // response is success.
                     // we are getting input stream from url
                     // and storing it in our variable.
+                   contentType = urlConnection.getContentType();
+                   System.out.println(contentType);
                     inputStream = new BufferedInputStream(urlConnection.getInputStream());
                     copyToCache(getActivity(),inputStream);
                 }
@@ -413,7 +446,18 @@ public class DocumentViewer extends Fragment {
             getActivity().runOnUiThread(new Runnable(){
                 public void run(){
                     try {
-                       renderer= openPdf(getActivity(),binding.pdfView,0);
+                        if (contentType.equals("application/pdf"))
+                        {
+                            renderer = openPdf(getActivity(), binding.pdfView, 0);
+                            binding.pdfControls.setVisibility(View.VISIBLE);
+                        }
+                        else if (contentType.startsWith("image")) {
+                            openImage(getActivity(), binding.pdfView);
+                            binding.pdfControls.setVisibility(View.GONE);
+
+
+                        }
+
 
                     } catch (IOException e) {
                         throw new RuntimeException(e);

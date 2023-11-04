@@ -12,7 +12,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -22,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
@@ -41,15 +44,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MediaUploader extends Fragment {
 
     private MediaUploaderBinding binding;
-     private  boolean edit = false ;
+    private boolean edit = false;
 
-     private String mediaId ="";
+    private String mediaId = "";
+
+    private String extension = "";
+
+    private  String mediaType="";
 
     // GetContent creates an ActivityResultLauncher<String> to let you pass
 // in the mime type you want to let the user select
@@ -58,17 +66,35 @@ public class MediaUploader extends Fragment {
                 @Override
                 public void onActivityResult(Uri uri) {
                     // Handle the returned Uri
+                    System.out.println(uri.getPath());
+                    System.out.println(uri.getPathSegments());
+
                     try {
                         InputStream inputStream =
                                 getActivity().getContentResolver().openInputStream(uri);
                         DocumentViewer.copyToCache(getActivity(), inputStream);
                         ContentResolver cR = getContext().getContentResolver();
                         String type = cR.getType(uri);
-                        if (type.equals("application/pdf"))
+                        System.out.println(type);
+                        if (type.equals("application/pdf")) {
                             DocumentViewer.openPdf(getActivity(), binding.mediaUploadPreview, 0);
-                        else if (type.startsWith("image")) {
+                            extension = ".pdf";
+                            mediaType = "pdf";
+                        } else if (type.startsWith("image")) {
                             DocumentViewer.openImage(getActivity(), binding.mediaUploadPreview);
+                            if (type.equals("image/png")) {
+                                extension = ".png";
+                                mediaType = "png";
+                            }
+                            else if (type.equals("image/jpeg")) {
+                                extension = ".jpeg";
+                                mediaType = "jpg";
 
+                            }
+
+                        } else if (type.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+                            extension = ".docx";
+                            mediaType = "docx";
                         }
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
@@ -115,15 +141,12 @@ public class MediaUploader extends Fragment {
 
         }
 
-         mediaId= getArguments().getString("mediaId");
+        mediaId = getArguments().getString("mediaId");
         edit = !mediaId.equals("");
-        if (edit)
-        {
+        if (edit) {
             getMedia(mediaId);
             binding.mediaUploadButton.setText(R.string.media_edit_button_label);
-        }
-        else
-        {
+        } else {
             binding.mediaUploadButton.setText(R.string.media_upload_button_label);
         }
 
@@ -142,41 +165,32 @@ public class MediaUploader extends Fragment {
             }
 
 
+        });
+        Spinner dropdown = binding.mediaAccessRuleDropdown;
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.access_rules, R.layout.dropdown_item);
+        adapter.setDropDownViewResource(R.layout.dropdown_item);
+        dropdown.setAdapter(adapter);
+    }
 
-            });
-        }
-    public void getMedia(String mediaId)  {
-        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+    public void getMedia(String mediaId) {
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
-        JSONObject json ;
-        try {
+        String token = data.getString("jwt", "");
 
-
-            json= new JSONObject();
-            json.put("media_Id", mediaId);
-            json.put("user_id", data.getString("id",""));
-            json.put("user_first_name", data.getString("firstName",""));
-            json.put("user_last_name", data.getString("lastName",""));
-            json.put("user_username", data.getString("userName",""));
-            json.put("token", data.getString("jwt",""));
-
-        } catch (JSONException e) {
-
-            e.printStackTrace();
-            return;
-        }
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
 
+        url += "?mediaId=" + mediaId;
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
 
-                Request.Method.POST,
+                Request.Method.GET,
 
                 url,
 
-                json,
+                null,
 
 
                 // lambda function for handling the case
@@ -214,7 +228,7 @@ public class MediaUploader extends Fragment {
                         } else if (error.getClass().equals(NoConnectionError.class)) {
                             errorMessage = "Failed to connect server";
                         }
-                        Toast toast = Toast.makeText(getContext(),errorMessage,Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
                         toast.show();
 
                     } else {
@@ -226,7 +240,7 @@ public class MediaUploader extends Fragment {
 
 
                             Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
                             toast.show();
 
                             if (networkResponse.statusCode == 404) {
@@ -245,7 +259,18 @@ public class MediaUploader extends Fragment {
                     Log.i("Error", errorMessage);
                     error.printStackTrace();
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
         // add the json request object created above
         // to the Volley request queue
         volleyQueue.add(jsonObjectRequest);
@@ -255,18 +280,13 @@ public class MediaUploader extends Fragment {
     }
 
 
-
-    public void saveMedia ()
-    {
+    public void saveMedia() {
         binding.loadingWrapper.setVisibility(View.VISIBLE);
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/";
-        if(edit)
-        {
-             url+= "editMedia.php";
+        if (edit) {
+            url += "editMedia.php";
 
-        }
-        else
-        {
+        } else {
             url += "createMedia.php";
         }
         SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
@@ -284,14 +304,14 @@ public class MediaUploader extends Fragment {
                             JSONObject result = new JSONObject(resultResponse);
 
                             String message = result.getString("message");
-                            if(result.has("mediaId"))
-                                 mediaId = result.getString("mediaId");
+                            if (result.has("mediaId"))
+                                mediaId = result.getString("mediaId");
 
                             Bundle bundle = new Bundle();
 
                             bundle.putString("mediaId", mediaId);
                             NavHostFragment.findNavController(MediaUploader.this)
-                                    .navigate(R.id.action_mediaUploader_to_documentViewer,bundle);
+                                    .navigate(R.id.action_mediaUploader_to_documentViewer, bundle);
 
 
                             Log.i("Message", message);
@@ -322,7 +342,7 @@ public class MediaUploader extends Fragment {
 
 
                         Log.e("Error Message", message);
-                        Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
                         toast.show();
 
                         if (networkResponse.statusCode == 404) {
@@ -345,18 +365,17 @@ public class MediaUploader extends Fragment {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                if(edit)
-                {
+                if (edit) {
                     params.put("mediaId", mediaId);
                 }
-
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 params.put("ownerId", id);
                 params.put("fileTitle", binding.mediaTitleInput.getText().toString());
-                params.put("fileName", "preview.jpg");
-                params.put("accessRules", "concurrent_only");
+                params.put("fileName", "file_" + timestamp.getTime() + extension);
+                params.put("accessRules", binding.mediaAccessRuleDropdown.getSelectedItem().toString());
                 params.put("concurrentAccess", "1");
                 params.put("mediaDescription", binding.mediaDescriptionInput.getText().toString());
-                params.put("mediaType", "word");
+                params.put("mediaType", mediaType);
 
                 return params;
             }
@@ -388,7 +407,7 @@ public class MediaUploader extends Fragment {
 
             }
 
-        } ;
+        };
 
         VolleySingleton.getInstance(
 
@@ -400,11 +419,10 @@ public class MediaUploader extends Fragment {
     }
 
 
-
-        @Override
-        public void onDestroyView () {
-            super.onDestroyView();
-            binding = null;
-        }
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
+
+}
