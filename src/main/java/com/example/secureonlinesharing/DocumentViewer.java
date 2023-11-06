@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -40,6 +41,13 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.secureonlinesharing.databinding.DocumentViewerBinding;
 import com.example.secureonlinesharing.databinding.FragmentThirdBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,6 +61,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -65,6 +74,16 @@ public class DocumentViewer extends Fragment {
     private int pdfPageNum;
 
     private PdfRenderer renderer;
+
+
+    private Bitmap mSelectedImage;
+    private GraphicOverlay mGraphicOverlay;
+    // Max width (portrait mode)
+    private Integer mImageMaxWidth;
+    // Max height (portrait mode)
+    private Integer mImageMaxHeight;
+
+
 
     // creating a variable
     // for PDF view.
@@ -91,7 +110,7 @@ public class DocumentViewer extends Fragment {
 
     }
 
-    public static void openImage(Activity activity,ImageView img)
+    public static Bitmap openImage(Activity activity,ImageView img)
     {
         File imgFile = new File(activity.getCacheDir(), "temp");
 
@@ -105,7 +124,9 @@ public class DocumentViewer extends Fragment {
 
             // on below line we are setting bitmap to our image view.
             img.setImageBitmap(imgBitmap);
+            return imgBitmap;
         }
+        return null;
     }
     public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
 
@@ -165,6 +186,7 @@ public class DocumentViewer extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mGraphicOverlay = binding.graphicOverlay;
 
         mediaId = getArguments().getString("mediaId");
 
@@ -215,7 +237,12 @@ public class DocumentViewer extends Fragment {
 
 
 
-
+        binding.detectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                runFaceContourDetection();
+            }
+        });
 
 
         binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
@@ -226,7 +253,7 @@ public class DocumentViewer extends Fragment {
                 try {
                     if (renderer.getPageCount() - 1 > pdfPageNum) {
                         pdfPageNum++;
-                        renderer = openPdf(getActivity(),binding.pdfView, pdfPageNum);
+                        renderer = openPdf(getActivity(),binding.mediaView, pdfPageNum);
                     }
                 }
                 catch (IOException e) {
@@ -244,7 +271,7 @@ public class DocumentViewer extends Fragment {
                 if(pdfPageNum >0)
                 {
                 pdfPageNum--;
-                    renderer = openPdf(getActivity(),binding.pdfView, pdfPageNum);
+                    renderer = openPdf(getActivity(),binding.mediaView, pdfPageNum);
                 }
             }
                 catch (IOException e) {
@@ -255,14 +282,14 @@ public class DocumentViewer extends Fragment {
         });
 
 
-        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
-        zoomLinearLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                zoomLinearLayout.init(getContext());
-                return false;
-            }
-        });
+//        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
+//        zoomLinearLayout.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                zoomLinearLayout.init(getContext());
+//                return false;
+//            }
+//        });
 
 
     }
@@ -448,11 +475,11 @@ public class DocumentViewer extends Fragment {
                     try {
                         if (contentType.equals("application/pdf"))
                         {
-                            renderer = openPdf(getActivity(), binding.pdfView, 0);
+                            renderer = openPdf(getActivity(), binding.mediaView, 0);
                             binding.pdfControls.setVisibility(View.VISIBLE);
                         }
                         else if (contentType.startsWith("image")) {
-                            openImage(getActivity(), binding.pdfView);
+                          mSelectedImage =  openImage(getActivity(), binding.mediaView);
                             binding.pdfControls.setVisibility(View.GONE);
 
 
@@ -477,4 +504,66 @@ public class DocumentViewer extends Fragment {
         binding = null;
     }
 
+
+    private void runFaceContourDetection() {
+        InputImage image = InputImage.fromBitmap(mSelectedImage, 0);
+        FaceDetectorOptions options =
+                new FaceDetectorOptions.Builder()
+                        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                        .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+                        .build();
+
+        binding.detectButton.setEnabled(false);
+        FaceDetector detector = FaceDetection.getClient(options);
+        detector.process(image)
+                .addOnSuccessListener(
+                        new OnSuccessListener<List<Face>>() {
+                            @Override
+                            public void onSuccess(List<Face> faces) {
+                                binding.detectButton.setEnabled(true);
+                                processFaceContourDetectionResult(faces);
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Task failed with an exception
+                                binding.detectButton.setEnabled(true);
+                                e.printStackTrace();
+                            }
+                        });
+
+    }
+
+    private void processFaceContourDetectionResult(List<Face> faces) {
+        // Task completed successfully
+        if (faces.size() == 0) {
+            showToast("No face found");
+            return;
+        }
+        else
+        {
+            showToast("face found");
+        }
+        mGraphicOverlay.clear();
+        for (int i = 0; i < faces.size(); ++i) {
+            Face face = faces.get(i);
+            FaceContourGraphic faceGraphic = new FaceContourGraphic(mGraphicOverlay);
+            mGraphicOverlay.add(faceGraphic);
+            faceGraphic.updateFace(face);
+        }
+    }
+
+
+
+
+    private void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+
+
 }
+
+

@@ -5,145 +5,169 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".DocumentViewer">
 
-    <com.example.secureonlinesharing.ZoomLinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <!--  <com.example.secureonlinesharing.ZoomLinearLayout
 
         android:id="@+id/zoom_linear_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"> -->
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/mediaEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:src="@android:drawable/ic_menu_edit"
+            android:visibility="visible"
+            app:backgroundTint="@color/design_default_color_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            tools:layout_editor_absoluteX="178dp">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/mediaEditButton"
+            <TextView
+                android:id="@+id/mediaTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:src="@android:drawable/ic_menu_edit"
-                android:visibility="visible"
-                app:backgroundTint="@color/design_default_color_secondary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:layout_gravity="center"
+                android:text="File Not Loaded"
+                android:textSize="45sp" />
 
             <LinearLayout
+                android:id="@+id/pdfWrapper"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="10dp"
-                tools:layout_editor_absoluteX="178dp">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/mediaTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="File Not Loaded"
-                    android:textSize="45sp" />
-
-                <LinearLayout
-                    android:id="@+id/pdfWrapper"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/pdfView"
+                        android:id="@+id/mediaView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 
-                    <LinearLayout
-                        android:id="@+id/pdfControls"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageButton
-                            android:id="@+id/pdfBackButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="50dp"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitXY"
-                            android:src="@drawable/leftarrow" />
-
-                        <ImageButton
-                            android:id="@+id/pdfForwardButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="50dp"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitXY"
-                            android:scaleX="-1"
-                            android:src="@drawable/leftarrow" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
+                    <com.example.secureonlinesharing.GraphicOverlay
+                        android:id="@+id/graphic_overlay"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_alignParentStart="true"
+                        app:layout_constraintBottom_toBottomOf="@id/mediaView"
+                        app:layout_constraintLeft_toLeftOf="@id/mediaView"
+                        app:layout_constraintRight_toRightOf="@id/mediaView"
+                        app:layout_constraintTop_toTopOf="@id/mediaView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
+                    android:id="@+id/pdfControls"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="10dp"
-                    android:orientation="vertical">
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/mediaDescriptionLabel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/media_description_label"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
+                    <ImageButton
+                        android:id="@+id/pdfBackButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/leftarrow" />
 
-                    <TextView
-                        android:id="@+id/mediaDescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="File Not Loaded."
-                        android:textSize="24sp" />
+                    <ImageButton
+                        android:id="@+id/pdfForwardButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitXY"
+                        android:scaleX="-1"
+                        android:src="@drawable/leftarrow" />
 
-                </LinearLayout>
-
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="3dp"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/mediaOwnerLabel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/media_owner_label"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/mediaOwner"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="File Not Loaded"
-                        android:textSize="24sp" />
                 </LinearLayout>
 
             </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </com.example.secureonlinesharing.ZoomLinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/mediaDescriptionLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/media_description_label"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/mediaDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="File Not Loaded."
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/mediaOwnerLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/media_owner_label"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/mediaOwner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="File Not Loaded"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/detectButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Button" />
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
