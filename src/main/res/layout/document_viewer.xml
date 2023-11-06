@@ -107,7 +107,7 @@
                         android:id="@+id/mediaDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Snow monkeys bathing."
+                        android:text="File Not Loaded."
                         android:textSize="24sp" />
 
                 </LinearLayout>
