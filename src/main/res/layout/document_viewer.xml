@@ -138,7 +138,7 @@
                         android:id="@+id/mediaOwner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Clark Kent"
+                        android:text="File Not Loaded"
                         android:textSize="24sp" />
                 </LinearLayout>
 
