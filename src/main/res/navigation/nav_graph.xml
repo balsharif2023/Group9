@@ -36,6 +36,9 @@
         <action
             android:id="@+id/action_SecondFragment_to_mediaUploader"
             app:destination="@id/mediaUploader" />
+        <action
+            android:id="@+id/action_SecondFragment_to_faceAuth"
+            app:destination="@id/faceAuth" />
     </fragment>
     <fragment
         android:id="@+id/thirdFragment"
@@ -83,4 +86,16 @@
         android:id="@+id/userProfilePage"
         android:name="com.example.secureonlinesharing.UserProfilePage"
         android:label="UserProfilePage" />
+    <fragment
+        android:id="@+id/faceAuth"
+        android:name="com.example.secureonlinesharing.FaceAuth"
+        android:label="face_auth"
+        tools:layout="@layout/face_auth" >
+        <action
+            android:id="@+id/action_faceAuth_to_documentViewer"
+            app:destination="@id/documentViewer" />
+        <action
+            android:id="@+id/action_faceAuth_to_SecondFragment"
+            app:destination="@id/SecondFragment" />
+    </fragment>
 </navigation>

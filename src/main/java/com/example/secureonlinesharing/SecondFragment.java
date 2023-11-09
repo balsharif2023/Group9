@@ -141,8 +141,11 @@ public class SecondFragment extends Fragment {
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
+//                                    NavHostFragment.findNavController(SecondFragment.this)
+//                                            .navigate(R.id.action_SecondFragment_to_documentViewer,bundle);
+
                                     NavHostFragment.findNavController(SecondFragment.this)
-                                            .navigate(R.id.action_SecondFragment_to_documentViewer,bundle);
+                                            .navigate(R.id.action_SecondFragment_to_faceAuth,bundle);
                                 }
                             });
 
