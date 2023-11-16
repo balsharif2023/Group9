@@ -98,6 +98,13 @@
                 android:layout_height="wrap_content"
                 android:text="@string/camera_capture_button_label" />
 
+            <Button
+                android:id="@+id/retakeButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/camera_retake_button_label"
+                android:visibility="gone" />
+
         </LinearLayout>
 
 

@@ -9,7 +9,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
@@ -59,12 +62,22 @@ import com.google.mlkit.vision.face.FaceDetectorOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.Tensor;
+import org.tensorflow.lite.support.common.FileUtil;
+import org.tensorflow.lite.support.common.ops.CastOp;
+import org.tensorflow.lite.support.image.ImageProcessor;
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.support.image.ops.ResizeOp;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -75,7 +88,6 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 
-
 public class FaceAuth extends Fragment {
     private FaceAuthBinding binding;
 
@@ -83,7 +95,7 @@ public class FaceAuth extends Fragment {
     private ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
-                                startCamera();
+                    startCamera();
 
                 } else {
                     // Explain to the user that the feature is unavailable because the
@@ -95,8 +107,7 @@ public class FaceAuth extends Fragment {
             });
 
 
-
-    private  String mediaId = "";
+    private String mediaId = "";
     private int pdfPageNum;
 
     private PdfRenderer renderer;
@@ -112,13 +123,58 @@ public class FaceAuth extends Fragment {
     private LifecycleCameraController cameraController;
 
 
-
     // creating a variable
     // for PDF view.
-   // PDFView pdfView;
+    // PDFView pdfView;
 
     // url of our PDF file.
     String pdfurl = "https://innshomebase.com/securefilesharing/develop/public/loremipsum.pdf";
+
+    private int imgSize = 112;
+// Set this image size according to our choice of DNN Model (160 for FaceNet, 112 for MobileFaceNet)
+
+    private ImageProcessor imageTensorProcessor = new ImageProcessor.Builder()
+            .add( new ResizeOp(imgSize, imgSize, ResizeOp.ResizeMethod.BILINEAR))
+            .add( new CastOp( DataType.FLOAT32 ))
+            .build();
+
+    private ByteBuffer convertBitmapToBuffer( Bitmap image)  {
+        return imageTensorProcessor.process(TensorImage.fromBitmap(image)).getBuffer();
+    }
+
+    Interpreter.Options interpreterOptions;
+
+
+
+    Interpreter interpreter;
+
+    private float[] runFaceNet(Bitmap ref, Bitmap capture) {
+        Map<Integer, Object> faceNetModelOutputs =  new HashMap<>();
+      //  faceNetModelOutputs[0] = Array(1) { FloatArray(embeddingDim) }
+
+        // The shape of *1* output's tensor
+        int[] OutputShape;
+// The type of the *1* output's tensor
+        DataType OutputDataType;
+// The multi-tensor ready storage
+     
+
+        ByteBuffer x;
+// For each model's tensors (there are getOutputTensorCount() of them for this tflite model)
+        for (int i = 0; i < interpreter.getOutputTensorCount(); i++) {
+            OutputShape = interpreter.getOutputTensor(i).shape();
+            OutputDataType = interpreter.getOutputTensor(i).dataType();
+            x = TensorBuffer.createFixedSize(OutputShape, OutputDataType).getBuffer();
+            faceNetModelOutputs.put(i, x);
+            System.out.println("Created a buffer of " + x.limit()+ " bytes for tensor "+ i);
+        }
+
+        System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
+        Object[]inputs = {convertBitmapToBuffer(ref), convertBitmapToBuffer(capture)};
+        interpreter.runForMultipleInputsOutputs(inputs, faceNetModelOutputs);
+
+        return ((TensorBuffer)faceNetModelOutputs.get(0)).getFloatArray();
+    }
 
 
     @Override
@@ -126,22 +182,18 @@ public class FaceAuth extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
 
-    )
-
-    {
+    ) {
 
         binding = FaceAuthBinding.inflate(inflater, container, false);
         // create a new renderer
-     
+
 
         return binding.getRoot();
 
     }
 
-    public static Bitmap openImage(Activity activity,ImageView img)
-    {
+    public static Bitmap openImage(Activity activity, ImageView img) {
         File imgFile = new File(activity.getCacheDir(), "temp");
-
 
 
         // on below line we are checking if the image file exist or not.
@@ -156,11 +208,12 @@ public class FaceAuth extends Fragment {
         }
         return null;
     }
+
     public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
 
         // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
 
-     //   File fileCopy = copyToCache(activity,input);
+        //   File fileCopy = copyToCache(activity,input);
         File fileCopy = new File(activity.getCacheDir(), "temp");
         // We get a page from the PDF doc by calling 'open'
         ParcelFileDescriptor fileDescriptor =
@@ -173,14 +226,14 @@ public class FaceAuth extends Fragment {
         PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
         // Create a new bitmap and render the page contents into it
         DisplayMetrics displayMetrics = new DisplayMetrics();
-       activity.getWindowManager()
-               .getDefaultDisplay()
-               .getMetrics(displayMetrics);
+        activity.getWindowManager()
+                .getDefaultDisplay()
+                .getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
         int pageWidth = mPdfPage.getWidth();
-        int pageHeight= mPdfPage.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight*width/pageWidth,
+        int pageHeight = mPdfPage.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight * width / pageWidth,
                 Bitmap.Config.ARGB_8888);
         mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         // Set the bitmap in the ImageView
@@ -188,39 +241,38 @@ public class FaceAuth extends Fragment {
 
         return renderer;
     }
+
     public static File copyToCache(Activity activity, InputStream input) throws IOException {
 
 
 //Get input stream object to read the pdf
-            File file = new File(activity.getCacheDir(), "temp");
-            FileOutputStream output = new FileOutputStream(file);
-            byte[] buffer = new byte[1024];
-            int size;
-            // Copy the entire contents of the file
-            while ((size = input.read(buffer)) != -1) {
-                output.write(buffer, 0, size);
-            }
+        File file = new File(activity.getCacheDir(), "temp");
+        FileOutputStream output = new FileOutputStream(file);
+        byte[] buffer = new byte[1024];
+        int size;
+        // Copy the entire contents of the file
+        while ((size = input.read(buffer)) != -1) {
+            output.write(buffer, 0, size);
+        }
 //Close the buffer
-            input.close();
-            output.close();
-            return file;
+        input.close();
+        output.close();
+        return file;
 
     }
 
 
-  public void startCamera()
-  {
+    public void startCamera() {
 
 
-      PreviewView previewView = binding.faceView;
-      cameraController = new LifecycleCameraController(getContext());
-      cameraController.bindToLifecycle(this);
-      cameraController.setCameraSelector(CameraSelector.DEFAULT_FRONT_CAMERA);
-      cameraController.setEnabledUseCases(IMAGE_CAPTURE);
-      previewView.setController(cameraController);
+        PreviewView previewView = binding.faceView;
+        cameraController = new LifecycleCameraController(getContext());
+        cameraController.bindToLifecycle(this);
+        cameraController.setCameraSelector(CameraSelector.DEFAULT_FRONT_CAMERA);
+        cameraController.setEnabledUseCases(IMAGE_CAPTURE);
+        previewView.setController(cameraController);
 
-  }
-
+    }
 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -231,13 +283,22 @@ public class FaceAuth extends Fragment {
 //
 //        getMedia();
 
+     interpreterOptions =new Interpreter.Options().setNumThreads(4);
+
+
+        try {
+            interpreter = new Interpreter(FileUtil.loadMappedFile(getContext(), "MobileFaceNet.tflite"), interpreterOptions);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         if (ContextCompat.checkSelfPermission(
-                getContext(), "android.permission.CAMERA")==
+                getContext(), "android.permission.CAMERA") ==
                 PackageManager.PERMISSION_GRANTED) {
             // You can use the API that requires the permission.
             startCamera();
-        }  else {
+        } else {
             // You can directly ask for the permission.
             // The registered ActivityResultCallback gets the result of this request.
             requestPermissionLauncher.launch(
@@ -246,39 +307,41 @@ public class FaceAuth extends Fragment {
 
         binding.detectButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-
-            {
-                   System.out.println("capture button click");
-                  cameraController.takePicture(ContextCompat.getMainExecutor(getContext()),
-                          new ImageCapture.OnImageCapturedCallback() {
-                              @Override
-                              public void onCaptureSuccess(@NonNull ImageProxy image) {
-                                  super.onCaptureSuccess(image);
-                                 mSelectedImage =  image.toBitmap();
+            public void onClick(View view) {
+                System.out.println("capture button click");
+                cameraController.takePicture(ContextCompat.getMainExecutor(getContext()),
+                        new ImageCapture.OnImageCapturedCallback() {
+                            @Override
+                            public void onCaptureSuccess(@NonNull ImageProxy image) {
+                                super.onCaptureSuccess(image);
+                                mSelectedImage = rotateImage(image.toBitmap(), image.getImageInfo().getRotationDegrees());
 //
 //
 //
 //
 //
-                             binding.captureView.setRotation(image.getImageInfo().getRotationDegrees());
-                                 binding.captureView.setImageBitmap(mSelectedImage);
+                                // binding.captureView.setRotation(image.getImageInfo().getRotationDegrees());
+                                binding.captureView.setImageBitmap(mSelectedImage);
 //                                  binding.captureView.setVisibility(View.VISIBLE;isVisible = true;
 
 
-                                  binding.faceView.setVisibility(View.GONE);
-                                  binding.captureView.setVisibility(View.VISIBLE);
-                                  runFaceContourDetection();
+                                binding.faceView.setVisibility(View.GONE);
+                                binding.captureView.setVisibility(View.VISIBLE);
+                                binding.detectButton.setVisibility(View.GONE);
+                                binding.retakeButton.setVisibility(View.VISIBLE);
 
-                              }
+                                //runFaceContourDetection();
+                                runFaceNet(mSelectedImage,mSelectedImage);
 
-                              @Override
-                              public void onError(@NonNull ImageCaptureException exception) {
-                                  super.onError(exception);
-                                  System.out.println("capture error");
-                                  exception.printStackTrace();
-                              }
-                          });
+                            }
+
+                            @Override
+                            public void onError(@NonNull ImageCaptureException exception) {
+                                super.onError(exception);
+                                System.out.println("capture error");
+                                exception.printStackTrace();
+                            }
+                        });
 
 //                NavHostFragment.findNavController(FaceAuth.this)
 //                        .navigate(R.id.action_faceAuth_to_SecondFragment);
@@ -286,21 +349,30 @@ public class FaceAuth extends Fragment {
         });
 
 
+        binding.retakeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
 
+                binding.faceView.setVisibility(View.VISIBLE);
+                binding.captureView.setVisibility(View.GONE);
+                binding.detectButton.setVisibility(View.VISIBLE);
+                binding.retakeButton.setVisibility(View.GONE);
+
+
+            }
+        });
 
 
         // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
         //new RetrievePDFfromUrl(pdfurl).run();
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
+        if (backButton != null) {
             backButton.setVisibility(View.VISIBLE);
 
             backButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view)
-                {
+                public void onClick(View view) {
                     NavHostFragment.findNavController(FaceAuth.this)
                             .navigate(R.id.action_faceAuth_to_SecondFragment);
                 }
@@ -310,14 +382,12 @@ public class FaceAuth extends Fragment {
         }
 
         ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
+        if (userMenuButton != null) {
             userMenuButton.setVisibility(View.VISIBLE);
 
 
         }
-        pdfPageNum =0;
-
-
+        pdfPageNum = 0;
 
 
         binding.mediaEditButton.setOnClickListener(new View.OnClickListener() {
@@ -326,18 +396,13 @@ public class FaceAuth extends Fragment {
 
                 Bundle bundle = new Bundle();
 
-                bundle.putString("mediaId",mediaId);
+                bundle.putString("mediaId", mediaId);
                 NavHostFragment.findNavController(FaceAuth.this)
-                        .navigate(R.id.action_documentViewer_to_mediaUploader,bundle);
+                        .navigate(R.id.action_documentViewer_to_mediaUploader, bundle);
 
 
             }
         });
-
-
-
-
-
 
 
 //        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
@@ -352,21 +417,21 @@ public class FaceAuth extends Fragment {
 
     }
 
-    public void getMedia()  {
+    public void getMedia() {
 
-        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
-        String token = data.getString("jwt","");
+        String token = data.getString("jwt", "");
 
-        String userId = data.getString("id","");
+        String userId = data.getString("id", "");
 
-        JSONObject json ;
+        JSONObject json;
 
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
-        url += "?mediaId="+ mediaId;
+        url += "?mediaId=" + mediaId;
 
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -384,7 +449,7 @@ public class FaceAuth extends Fragment {
                     // get the image url from the JSON object
                     String message;
                     try {
-                       // message = response.getString("token");
+                        // message = response.getString("token");
                         //System.out.println(message);
 
                         System.out.println(response.getString("mediaAccessPath"));
@@ -392,21 +457,19 @@ public class FaceAuth extends Fragment {
 
                         String owner = response.getString("mediaOwnerId");
 
-                        System.out.println("owner: "+ owner + " user: "+ userId);
+                        System.out.println("owner: " + owner + " user: " + userId);
                         String accessPath = response.getString("mediaAccessPath");
 
                         System.out.println(accessPath);
 
                         new Thread(new RetrieveFileFromUrl(accessPath)).start();
 
-                        if( owner.equals(userId))
-                        {
-                            String firstName = data.getString("firstName","");
-                            String lastName = data.getString("lastName","");
+                        if (owner.equals(userId)) {
+                            String firstName = data.getString("firstName", "");
+                            String lastName = data.getString("lastName", "");
 
 
                         }
-
 
 
                     } catch (JSONException e) {
@@ -419,7 +482,7 @@ public class FaceAuth extends Fragment {
                 (Response.ErrorListener) error -> {
                     // make a Toast telling the user
                     // that something went wrong
-                     //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
                     // log the error message in the error stream
                     //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
                     NetworkResponse networkResponse = error.networkResponse;
@@ -431,7 +494,7 @@ public class FaceAuth extends Fragment {
                         } else if (error.getClass().equals(NoConnectionError.class)) {
                             errorMessage = "Failed to connect server";
                         }
-                        Toast toast = Toast.makeText(getContext(),errorMessage,Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
                         toast.show();
 
                     } else {
@@ -443,7 +506,7 @@ public class FaceAuth extends Fragment {
 
 
                             Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
                             toast.show();
 
                             if (networkResponse.statusCode == 404) {
@@ -462,16 +525,15 @@ public class FaceAuth extends Fragment {
                     Log.i("Error", errorMessage);
                     error.printStackTrace();
                 }
-        ){
+        ) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers =  super.getHeaders();
-                HashMap<String, String> headers2 =new HashMap<String,String>();
-                for(String s: headers.keySet())
-                {
-                    headers2.put(s,headers.get(s));
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
                 }
-                headers2.put("Authorization","Bearer " + token);
+                headers2.put("Authorization", "Bearer " + token);
                 return headers2;
             }
         };
@@ -484,16 +546,17 @@ public class FaceAuth extends Fragment {
     }
 
     // create an async task class for loading pdf file from URL.
-    class RetrieveFileFromUrl implements Runnable{
+    class RetrieveFileFromUrl implements Runnable {
         private String urlStr;
 
         private String contentType;
-        public RetrieveFileFromUrl (String url)
-        {
+
+        public RetrieveFileFromUrl(String url) {
             this.urlStr = url;
         }
+
         @Override
-        public void run (){
+        public void run() {
             // we are using inputstream
             // for getting out PDF.
             InputStream inputStream = null;
@@ -510,10 +573,10 @@ public class FaceAuth extends Fragment {
                     // response is success.
                     // we are getting input stream from url
                     // and storing it in our variable.
-                   contentType = urlConnection.getContentType();
-                   System.out.println(contentType);
+                    contentType = urlConnection.getContentType();
+                    System.out.println(contentType);
                     inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                    copyToCache(getActivity(),inputStream);
+                    copyToCache(getActivity(), inputStream);
                 }
                 urlConnection.disconnect();
 
@@ -525,8 +588,8 @@ public class FaceAuth extends Fragment {
             }
 
 
-            getActivity().runOnUiThread(new Runnable(){
-                public void run(){
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
 //                    try {
 //                        if (contentType.equals("application/pdf"))
 //                        {
@@ -547,7 +610,6 @@ public class FaceAuth extends Fragment {
                 }
             });
         }
-
 
 
     }
@@ -596,9 +658,7 @@ public class FaceAuth extends Fragment {
         if (faces.size() == 0) {
             showToast("No face found");
             return;
-        }
-        else
-        {
+        } else {
             showToast("face found");
         }
         mGraphicOverlay.clear();
@@ -611,14 +671,46 @@ public class FaceAuth extends Fragment {
     }
 
 
-
-
     private void showToast(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
+    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
+        ExifInterface ei = new ExifInterface(selectedImage.getPath());
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
+    }
+
+
+    public static Bitmap flip(Bitmap src, int type) {
+        // create new matrix for transformation
+        Matrix matrix = new Matrix();
+        matrix.preScale(-1.0f, 1.0f);
+
+        // return transformed image
+        return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
+    }
 
 }
+
+
 
 

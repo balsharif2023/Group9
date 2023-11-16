@@ -47,6 +47,11 @@ dependencies {
     // Face features
     implementation ("com.google.mlkit:face-detection:16.0.0")
 
+    implementation ("org.tensorflow:tensorflow-lite:+")//2.4.0
+    implementation ("org.tensorflow:tensorflow-lite-gpu:+")
+
+    implementation ("org.tensorflow:tensorflow-lite-support:+")//0.1.0
+
 
 
     val camerax_version = "1.3.0"

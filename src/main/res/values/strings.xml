@@ -78,4 +78,5 @@
     <string name="password_empty_message">Password field must be filled out</string>
     <string name="media_edit_button_label">Save Changes</string>
     <string name="camera_capture_button_label">Capture</string>
+    <string name="camera_retake_button_label">Retake</string>
 </resources>
