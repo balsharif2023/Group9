@@ -81,6 +81,8 @@ import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,33 +150,67 @@ public class FaceAuth extends Fragment {
 
     Interpreter interpreter;
 
-    private float[] runFaceNet(Bitmap ref, Bitmap capture) {
+    private FloatBuffer runFaceNet(Bitmap ref, Bitmap capture) {
         Map<Integer, Object> faceNetModelOutputs =  new HashMap<>();
       //  faceNetModelOutputs[0] = Array(1) { FloatArray(embeddingDim) }
 
         // The shape of *1* output's tensor
-        int[] OutputShape;
+        int[] OutputShape= {};
 // The type of the *1* output's tensor
         DataType OutputDataType;
 // The multi-tensor ready storage
      
 
-        ByteBuffer x;
+
 // For each model's tensors (there are getOutputTensorCount() of them for this tflite model)
-        for (int i = 0; i < interpreter.getOutputTensorCount(); i++) {
-            OutputShape = interpreter.getOutputTensor(i).shape();
-            OutputDataType = interpreter.getOutputTensor(i).dataType();
-            x = TensorBuffer.createFixedSize(OutputShape, OutputDataType).getBuffer();
-            faceNetModelOutputs.put(i, x);
-            System.out.println("Created a buffer of " + x.limit()+ " bytes for tensor "+ i);
-        }
 
+            OutputShape = interpreter.getOutputTensor(0).shape();
+            OutputDataType = interpreter.getOutputTensor(0).dataType();
+           TensorBuffer outputTensor = TensorBuffer.createFixedSize(OutputShape, OutputDataType);
+            ByteBuffer outputBuffer =outputTensor.getBuffer();
+
+            System.out.println("Created a buffer of " + outputBuffer.limit()+ " bytes for tensor "+ 0);
+
+        int[] InputShape = interpreter.getInputTensor(0).shape();
+        DataType InputDataType = interpreter.getInputTensor(0).dataType();
+
+        ByteBuffer b1 = convertBitmapToBuffer(ref), b2 = convertBitmapToBuffer(capture);
+        ByteBuffer inputBuffer = //ByteBuffer.allocate(b1.capacity()+b2.capacity())
+                TensorBuffer.createFixedSize(InputShape, InputDataType).getBuffer().put(b1).put(b2);
+
+
+
+        TensorBuffer inputTensor = TensorBuffer.createFixedSize(InputShape, InputDataType);
+        inputTensor.loadBuffer(inputBuffer);
         System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
-        Object[]inputs = {convertBitmapToBuffer(ref), convertBitmapToBuffer(capture)};
-        interpreter.runForMultipleInputsOutputs(inputs, faceNetModelOutputs);
+        Object[]inputs = {inputTensor.getBuffer()};
+        interpreter.run(inputTensor.getBuffer(), outputBuffer);
 
-        return ((TensorBuffer)faceNetModelOutputs.get(0)).getFloatArray();
+        System.out.println(Arrays.toString(OutputShape));
+        System.out.println(Arrays.toString(outputTensor.getFloatArray()));
+       // return ((TensorBuffer)faceNetModelOutputs.get(0)).getFloatArray();
+        return outputBuffer.asFloatBuffer();
     }
+
+//    private float l2Norm(float[] x1 , float[]x2 )  {
+//        float sum = 0.0;
+//         for( int i =0; i<x1.length; i++)
+//        {
+//
+//        }
+//        float mag1 = sqrt(x1.map { xi -> xi.pow(2) }.sum())
+//        float mag2 = sqrt(x2.map { xi -> xi.pow(2) }.sum())
+//        for (i in x1.indices) {
+//            sum += ((x1[i] / mag1) - (x2[i] / mag2)).pow(2)
+//        }
+//        return sqrt(sum)
+//    }
+//
+
+
+
+
+
 
 
     @Override
