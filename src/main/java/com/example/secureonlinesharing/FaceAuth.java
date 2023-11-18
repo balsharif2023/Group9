@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -81,6 +82,7 @@ import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -150,7 +152,7 @@ public class FaceAuth extends Fragment {
 
     Interpreter interpreter;
 
-    private FloatBuffer runFaceNet(Bitmap ref, Bitmap capture) {
+    private float[][] runFaceNet(Bitmap ref, Bitmap capture) {
         Map<Integer, Object> faceNetModelOutputs =  new HashMap<>();
       //  faceNetModelOutputs[0] = Array(1) { FloatArray(embeddingDim) }
 
@@ -169,43 +171,79 @@ public class FaceAuth extends Fragment {
            TensorBuffer outputTensor = TensorBuffer.createFixedSize(OutputShape, OutputDataType);
             ByteBuffer outputBuffer =outputTensor.getBuffer();
 
-            System.out.println("Created a buffer of " + outputBuffer.limit()+ " bytes for tensor "+ 0);
+          //  System.out.println("Created a buffer of " + outputBuffer.limit()+ " bytes for tensor "+ 0);
 
         int[] InputShape = interpreter.getInputTensor(0).shape();
         DataType InputDataType = interpreter.getInputTensor(0).dataType();
 
         ByteBuffer b1 = convertBitmapToBuffer(ref), b2 = convertBitmapToBuffer(capture);
         ByteBuffer inputBuffer = //ByteBuffer.allocate(b1.capacity()+b2.capacity())
-                TensorBuffer.createFixedSize(InputShape, InputDataType).getBuffer().put(b1).put(b2);
+                TensorBuffer.createFixedSize(InputShape, InputDataType).getBuffer()
+                        .put(b1).put(b2)
+                        .order(ByteOrder.nativeOrder());
 
 
 
         TensorBuffer inputTensor = TensorBuffer.createFixedSize(InputShape, InputDataType);
         inputTensor.loadBuffer(inputBuffer);
-        System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
+      //  System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
         Object[]inputs = {inputTensor.getBuffer()};
         interpreter.run(inputTensor.getBuffer(), outputBuffer);
 
-        System.out.println(Arrays.toString(OutputShape));
-        System.out.println(Arrays.toString(outputTensor.getFloatArray()));
-       // return ((TensorBuffer)faceNetModelOutputs.get(0)).getFloatArray();
-        return outputBuffer.asFloatBuffer();
+        float[] arr = outputTensor.getFloatArray();
+
+        float[][] matrix = new float[2][arr.length/2];
+
+        for (int i =0;i< arr.length/2;i++)
+        {
+            matrix[0][i] =arr[i];
+            matrix[1][i]=arr[arr.length/2+i];
+        }
+
+//      //  System.out.println(Arrays.toString(OutputShape));
+//        System.out.println(Arrays.toString(matrix[0]));
+//
+//        System.out.println(Arrays.toString(matrix[1]));
+
+        // return ((TensorBuffer)faceNetModelOutputs.get(0)).getFloatArray();
+        return matrix;
     }
 
-//    private float l2Norm(float[] x1 , float[]x2 )  {
-//        float sum = 0.0;
-//         for( int i =0; i<x1.length; i++)
-//        {
-//
-//        }
-//        float mag1 = sqrt(x1.map { xi -> xi.pow(2) }.sum())
-//        float mag2 = sqrt(x2.map { xi -> xi.pow(2) }.sum())
-//        for (i in x1.indices) {
-//            sum += ((x1[i] / mag1) - (x2[i] / mag2)).pow(2)
-//        }
-//        return sqrt(sum)
-//    }
-//
+    private float l2Norm(float[] x1 , float[]x2 )  {
+        float sum = 0.0f, mag1 =0.0f, mag2 =0.0f;
+
+         for( int i =0; i<x1.length; i++)
+        {
+            mag1+= x1[i]* x1[i];
+
+            mag2+= x2[i] * x2[i];
+        }
+         mag1= (float) Math.sqrt(mag1);
+         mag2 = (float) Math.sqrt(mag2);
+
+        for( int i =0; i<x1.length; i++)
+        {
+
+            sum += Math.pow((x1[i] / mag1) - (x2[i] / mag2),2);
+        }
+        return (float) Math.sqrt(sum);
+    }
+
+    private float cosineSim(float[] x1 , float[]x2 )
+    {
+        float dotProduct = 0.0f;
+        float normA = 0.0f;
+        float normB = 0.0f;
+
+        for (int i =0; i<x1.length; i++)
+        {
+            dotProduct += x1[i] * x2[i];
+            normA += Math.pow(x1[i],2);
+            normB += Math.pow(x2[i],2);
+        }
+        return (float) (dotProduct / (Math.sqrt(normA) *Math.sqrt(normB)));
+    }
+
 
 
 
@@ -367,7 +405,83 @@ public class FaceAuth extends Fragment {
                                 binding.retakeButton.setVisibility(View.VISIBLE);
 
                                 //runFaceContourDetection();
-                                runFaceNet(mSelectedImage,mSelectedImage);
+                                Bitmap tom1 = BitmapFactory.decodeResource(getContext().getResources(),
+                                        R.drawable.tom5);
+
+                                Bitmap tom2 = BitmapFactory.decodeResource(getContext().getResources(),
+                                        R.drawable.shaq);
+
+                                float[][] output = runFaceNet(tom1,tom2);
+
+                                float score = cosineSim(output[0], output[1]);
+                                System.out.println("matching score: "+ score);
+
+                               showToast("matching score: "+ score);
+
+                                int[] img = {
+                                        R.drawable.jay1,
+
+                                        R.drawable.jay2,
+                                        R.drawable.jay3,
+                                        R.drawable.jay4,
+
+                                        R.drawable.jay5,
+
+                                        R.drawable.tom1,
+                                        R.drawable.tom2,
+                                        R.drawable.tom3,
+                                        R.drawable.tom4,
+                                        R.drawable.tom5,
+                                        R.drawable.tom6,
+                                        R.drawable.shaq,
+                                        R.drawable.owl,
+                                        R.drawable.green,
+                                        R.drawable.boston
+
+                                };
+
+                                String[] names =   {
+                                        "jay1",
+                                        "jay2",
+                                        "jay3",
+                                        "jay4",
+                                        "jay5",
+                                        "tom1",
+                                        "tom2",
+                                        "tom3",
+                                         "tom4",
+                                        "tom5",
+                                       "tom6",
+                                       "shaq",
+                                        "owl",
+                                        "green",
+                                       "boston"
+
+                                };
+
+
+                               for(int i =0; i<img.length;i++)
+                               {
+                                   Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
+                                          img[i]);
+                                   System.out.println("comparing image "+ names[i]);
+
+                                   for(int j =0; j<img.length;j++)
+                                   {
+                                       Bitmap img2 = BitmapFactory.decodeResource(getContext().getResources(),
+                                              img[j]);
+
+
+
+                                        output = runFaceNet(img1,img2);
+
+                                        score = cosineSim(output[0], output[1]);
+                                       System.out.println("\t" +names[j]+  ": "+ score);
+
+                                   }
+
+
+                               }
 
                             }
 
