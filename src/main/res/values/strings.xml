@@ -79,4 +79,6 @@
     <string name="media_edit_button_label">Save Changes</string>
     <string name="camera_capture_button_label">Capture</string>
     <string name="camera_retake_button_label">Retake</string>
+    <string name="face_auth_title">Facial Scan</string>
+    <string name="head_shot_title">Headshot for Authentication</string>
 </resources>

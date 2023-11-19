@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
 import android.media.ExifInterface;
@@ -96,19 +97,6 @@ public class FaceAuth extends Fragment {
     private FaceAuthBinding binding;
 
 
-    private ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    startCamera();
-
-                } else {
-                    // Explain to the user that the feature is unavailable because the
-                    // feature requires a permission that the user has denied. At the
-                    // same time, respect the user's decision. Don't link to system
-                    // settings in an effort to convince the user to change their
-                    // decision.
-                }
-            });
 
 
     private String mediaId = "";
@@ -116,15 +104,10 @@ public class FaceAuth extends Fragment {
 
     private PdfRenderer renderer;
 
+    private CameraHandler camera;
 
-    private Bitmap mSelectedImage;
-    private GraphicOverlay mGraphicOverlay;
-    // Max width (portrait mode)
-    private Integer mImageMaxWidth;
-    // Max height (portrait mode)
-    private Integer mImageMaxHeight;
 
-    private LifecycleCameraController cameraController;
+
 
 
     // creating a variable
@@ -336,26 +319,13 @@ public class FaceAuth extends Fragment {
     }
 
 
-    public void startCamera() {
 
-
-        PreviewView previewView = binding.faceView;
-        cameraController = new LifecycleCameraController(getContext());
-        cameraController.bindToLifecycle(this);
-        cameraController.setCameraSelector(CameraSelector.DEFAULT_FRONT_CAMERA);
-        cameraController.setEnabledUseCases(IMAGE_CAPTURE);
-        previewView.setController(cameraController);
-
-    }
 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mGraphicOverlay = binding.graphicOverlay;
 
-//        mediaId = getArguments().getString("mediaId");
-//
-//        getMedia();
+    camera = new CameraHandler(this,binding.camera.detectButton,binding.camera.retakeButton, binding.camera.captureView,binding.camera.faceView);
 
      interpreterOptions =new Interpreter.Options().setNumThreads(4);
 
@@ -367,151 +337,11 @@ public class FaceAuth extends Fragment {
         }
 
 
-        if (ContextCompat.checkSelfPermission(
-                getContext(), "android.permission.CAMERA") ==
-                PackageManager.PERMISSION_GRANTED) {
-            // You can use the API that requires the permission.
-            startCamera();
-        } else {
-            // You can directly ask for the permission.
-            // The registered ActivityResultCallback gets the result of this request.
-            requestPermissionLauncher.launch(
-                    "android.permission.CAMERA");
-        }
-
-        binding.detectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                System.out.println("capture button click");
-                cameraController.takePicture(ContextCompat.getMainExecutor(getContext()),
-                        new ImageCapture.OnImageCapturedCallback() {
-                            @Override
-                            public void onCaptureSuccess(@NonNull ImageProxy image) {
-                                super.onCaptureSuccess(image);
-                                mSelectedImage = rotateImage(image.toBitmap(), image.getImageInfo().getRotationDegrees());
-//
-//
-//
-//
-//
-                                // binding.captureView.setRotation(image.getImageInfo().getRotationDegrees());
-                                binding.captureView.setImageBitmap(mSelectedImage);
-//                                  binding.captureView.setVisibility(View.VISIBLE;isVisible = true;
-
-
-                                binding.faceView.setVisibility(View.GONE);
-                                binding.captureView.setVisibility(View.VISIBLE);
-                                binding.detectButton.setVisibility(View.GONE);
-                                binding.retakeButton.setVisibility(View.VISIBLE);
-
-                                //runFaceContourDetection();
-                                Bitmap tom1 = BitmapFactory.decodeResource(getContext().getResources(),
-                                        R.drawable.tom5);
-
-                                Bitmap tom2 = BitmapFactory.decodeResource(getContext().getResources(),
-                                        R.drawable.shaq);
-
-                                float[][] output = runFaceNet(tom1,tom2);
-
-                                float score = cosineSim(output[0], output[1]);
-                                System.out.println("matching score: "+ score);
-
-                               showToast("matching score: "+ score);
-
-                                int[] img = {
-                                        R.drawable.jay1,
-
-                                        R.drawable.jay2,
-                                        R.drawable.jay3,
-                                        R.drawable.jay4,
-
-                                        R.drawable.jay5,
-
-                                        R.drawable.tom1,
-                                        R.drawable.tom2,
-                                        R.drawable.tom3,
-                                        R.drawable.tom4,
-                                        R.drawable.tom5,
-                                        R.drawable.tom6,
-                                        R.drawable.shaq,
-                                        R.drawable.owl,
-                                        R.drawable.green,
-                                        R.drawable.boston
-
-                                };
-
-                                String[] names =   {
-                                        "jay1",
-                                        "jay2",
-                                        "jay3",
-                                        "jay4",
-                                        "jay5",
-                                        "tom1",
-                                        "tom2",
-                                        "tom3",
-                                         "tom4",
-                                        "tom5",
-                                       "tom6",
-                                       "shaq",
-                                        "owl",
-                                        "green",
-                                       "boston"
-
-                                };
-
-
-                               for(int i =0; i<img.length;i++)
-                               {
-                                   Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
-                                          img[i]);
-                                   System.out.println("comparing image "+ names[i]);
-
-                                   for(int j =0; j<img.length;j++)
-                                   {
-                                       Bitmap img2 = BitmapFactory.decodeResource(getContext().getResources(),
-                                              img[j]);
 
 
 
-                                        output = runFaceNet(img1,img2);
-
-                                        score = cosineSim(output[0], output[1]);
-                                       System.out.println("\t" +names[j]+  ": "+ score);
-
-                                   }
 
 
-                               }
-
-                            }
-
-                            @Override
-                            public void onError(@NonNull ImageCaptureException exception) {
-                                super.onError(exception);
-                                System.out.println("capture error");
-                                exception.printStackTrace();
-                            }
-                        });
-
-//                NavHostFragment.findNavController(FaceAuth.this)
-//                        .navigate(R.id.action_faceAuth_to_SecondFragment);
-            }
-        });
-
-
-        binding.retakeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                binding.faceView.setVisibility(View.VISIBLE);
-                binding.captureView.setVisibility(View.GONE);
-                binding.detectButton.setVisibility(View.VISIBLE);
-                binding.retakeButton.setVisibility(View.GONE);
-
-
-            }
-        });
 
 
         // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
@@ -772,93 +602,94 @@ public class FaceAuth extends Fragment {
     }
 
 
-    private void runFaceContourDetection() {
-        InputImage image = InputImage.fromBitmap(mSelectedImage, 0);
-        FaceDetectorOptions options =
-                new FaceDetectorOptions.Builder()
-                        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-                        .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
-                        .build();
-
-        binding.detectButton.setEnabled(false);
-        FaceDetector detector = FaceDetection.getClient(options);
-        detector.process(image)
-                .addOnSuccessListener(
-                        new OnSuccessListener<List<Face>>() {
-                            @Override
-                            public void onSuccess(List<Face> faces) {
-                                binding.detectButton.setEnabled(true);
-                                processFaceContourDetectionResult(faces);
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Task failed with an exception
-                                binding.detectButton.setEnabled(true);
-                                e.printStackTrace();
-                            }
-                        });
-
-    }
-
-    private void processFaceContourDetectionResult(List<Face> faces) {
-        // Task completed successfully
-        if (faces.size() == 0) {
-            showToast("No face found");
-            return;
-        } else {
-            showToast("face found");
-        }
-        mGraphicOverlay.clear();
-        for (int i = 0; i < faces.size(); ++i) {
-            Face face = faces.get(i);
-            FaceContourGraphic faceGraphic = new FaceContourGraphic(mGraphicOverlay);
-            mGraphicOverlay.add(faceGraphic);
-            faceGraphic.updateFace(face);
-        }
-    }
 
 
-    private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
-        ExifInterface ei = new ExifInterface(selectedImage.getPath());
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
-    private static Bitmap rotateImage(Bitmap img, int degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        img.recycle();
-        return rotatedImg;
-    }
+public  void faceMatch() {
 
 
-    public static Bitmap flip(Bitmap src, int type) {
-        // create new matrix for transformation
-        Matrix matrix = new Matrix();
-        matrix.preScale(-1.0f, 1.0f);
+    Bitmap tom1 = BitmapFactory.decodeResource(getContext().getResources(),
+            R.drawable.tom5);
 
-        // return transformed image
-        return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
-    }
+    Bitmap tom2 = BitmapFactory.decodeResource(getContext().getResources(),
+            R.drawable.shaq);
 
+
+
+
+
+                           /*     float[][] output = runFaceNet(tom1,tom2);
+
+                                float score = cosineSim(output[0], output[1]);
+                                System.out.println("matching score: "+ score);
+
+                               showToast("matching score: "+ score);
+
+                                int[] img = {
+                                        R.drawable.jay1,
+
+                                        R.drawable.jay2,
+                                        R.drawable.jay3,
+                                        R.drawable.jay4,
+
+                                        R.drawable.jay5,
+
+                                        R.drawable.tom1,
+                                        R.drawable.tom2,
+                                        R.drawable.tom3,
+                                        R.drawable.tom4,
+                                        R.drawable.tom5,
+                                        R.drawable.tom6,
+                                        R.drawable.shaq,
+                                        R.drawable.owl,
+                                        R.drawable.green,
+                                        R.drawable.boston
+
+                                };
+
+                                String[] names =   {
+                                        "jay1",
+                                        "jay2",
+                                        "jay3",
+                                        "jay4",
+                                        "jay5",
+                                        "tom1",
+                                        "tom2",
+                                        "tom3",
+                                         "tom4",
+                                        "tom5",
+                                       "tom6",
+                                       "shaq",
+                                        "owl",
+                                        "green",
+                                       "boston"
+
+                                };
+
+
+                               for(int i =0; i<img.length;i++)
+                               {
+                                   Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
+                                          img[i]);
+                                   System.out.println("comparing image "+ names[i]);
+
+                                   for(int j =0; j<img.length;j++)
+                                   {
+                                       Bitmap img2 = BitmapFactory.decodeResource(getContext().getResources(),
+                                              img[j]);
+
+
+
+                                        output = runFaceNet(img1,img2);
+
+                                        score = cosineSim(output[0], output[1]);
+                                       System.out.println("\t" +names[j]+  ": "+ score);
+
+                                   }
+
+
+                               } //*/
+
+}
 }
 
 
