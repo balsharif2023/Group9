@@ -325,7 +325,10 @@ public class FaceAuth extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-    camera = new CameraHandler(this,binding.camera.detectButton,binding.camera.retakeButton, binding.camera.captureView,binding.camera.faceView);
+    camera = new CameraHandler(this,binding.camera.detectButton
+            ,binding.camera.retakeButton, binding.camera.captureView,
+            binding.camera.faceView,
+            binding.camera.graphicOverlay);
 
      interpreterOptions =new Interpreter.Options().setNumThreads(4);
 
@@ -370,19 +373,7 @@ public class FaceAuth extends Fragment {
         pdfPageNum = 0;
 
 
-        binding.mediaEditButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                Bundle bundle = new Bundle();
-
-                bundle.putString("mediaId", mediaId);
-                NavHostFragment.findNavController(FaceAuth.this)
-                        .navigate(R.id.action_documentViewer_to_mediaUploader, bundle);
-
-
-            }
-        });
 
 
 //        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
@@ -397,202 +388,6 @@ public class FaceAuth extends Fragment {
 
     }
 
-    public void getMedia() {
-
-        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-
-        String token = data.getString("jwt", "");
-
-        String userId = data.getString("id", "");
-
-        JSONObject json;
-
-
-        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
-        // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
-        url += "?mediaId=" + mediaId;
-
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-
-                Request.Method.GET,
-
-                url,
-
-                null,
-
-
-                // lambda function for handling the case
-                // when the HTTP request succeeds
-                (Response.Listener<JSONObject>) response -> {
-                    // get the image url from the JSON object
-                    String message;
-                    try {
-                        // message = response.getString("token");
-                        //System.out.println(message);
-
-                        System.out.println(response.getString("mediaAccessPath"));
-                        binding.mediaTitle.setText(response.getString("mediaTitle"));
-
-                        String owner = response.getString("mediaOwnerId");
-
-                        System.out.println("owner: " + owner + " user: " + userId);
-                        String accessPath = response.getString("mediaAccessPath");
-
-                        System.out.println(accessPath);
-
-                        new Thread(new RetrieveFileFromUrl(accessPath)).start();
-
-                        if (owner.equals(userId)) {
-                            String firstName = data.getString("firstName", "");
-                            String lastName = data.getString("lastName", "");
-
-
-                        }
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                },
-
-                // lambda function for handling the case
-                // when the HTTP request fails
-                (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
-                    NetworkResponse networkResponse = error.networkResponse;
-                    //System.out.println("status code: "+ networkResponse.statusCode );
-                    String errorMessage = "Unknown error";
-                    if (networkResponse == null) {
-                        if (error.getClass().equals(TimeoutError.class)) {
-                            errorMessage = "Request timeout";
-                        } else if (error.getClass().equals(NoConnectionError.class)) {
-                            errorMessage = "Failed to connect server";
-                        }
-                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
-                        toast.show();
-
-                    } else {
-                        String result = new String(networkResponse.data);
-                        try {
-                            JSONObject response = new JSONObject(result);
-
-                            String message = response.getString("message");
-
-
-                            Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                            toast.show();
-
-                            if (networkResponse.statusCode == 404) {
-                                errorMessage = "Resource not found";
-                            } else if (networkResponse.statusCode == 401) {
-                                errorMessage = message + " Please login again";
-                            } else if (networkResponse.statusCode == 400) {
-                                errorMessage = message + " Check your inputs";
-                            } else if (networkResponse.statusCode == 500) {
-                                errorMessage = message + " Something is getting wrong";
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Log.i("Error", errorMessage);
-                    error.printStackTrace();
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = super.getHeaders();
-                HashMap<String, String> headers2 = new HashMap<String, String>();
-                for (String s : headers.keySet()) {
-                    headers2.put(s, headers.get(s));
-                }
-                headers2.put("Authorization", "Bearer " + token);
-                return headers2;
-            }
-        };
-        // add the json request object created above
-        // to the Volley request queue
-        volleyQueue.add(jsonObjectRequest);
-        //} // catch(JSONException e){} */
-
-
-    }
-
-    // create an async task class for loading pdf file from URL.
-    class RetrieveFileFromUrl implements Runnable {
-        private String urlStr;
-
-        private String contentType;
-
-        public RetrieveFileFromUrl(String url) {
-            this.urlStr = url;
-        }
-
-        @Override
-        public void run() {
-            // we are using inputstream
-            // for getting out PDF.
-            InputStream inputStream = null;
-            HttpURLConnection urlConnection = null;
-            try {
-                URL url = new URL(urlStr);
-                // below is the step where we are
-                // creating our connection.
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                System.out.println(urlConnection);
-                System.out.println(urlConnection.getResponseCode());
-
-                if (urlConnection.getResponseCode() == 200) {
-                    // response is success.
-                    // we are getting input stream from url
-                    // and storing it in our variable.
-                    contentType = urlConnection.getContentType();
-                    System.out.println(contentType);
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                    copyToCache(getActivity(), inputStream);
-                }
-                urlConnection.disconnect();
-
-            } catch (IOException e) {
-                // this is the method
-                // to handle errors.
-                e.printStackTrace();
-
-            }
-
-
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-//                    try {
-//                        if (contentType.equals("application/pdf"))
-//                        {
-//                            renderer = openPdf(getActivity(), binding.mediaView, 0);
-//                            binding.pdfControls.setVisibility(View.VISIBLE);
-//                        }
-//                        else if (contentType.startsWith("image")) {
-//                          mSelectedImage =  openImage(getActivity(), binding.mediaView);
-//                            binding.pdfControls.setVisibility(View.GONE);
-//
-//
-//                        }
-//
-//
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-                }
-            });
-        }
-
-
-    }
 
 
     @Override

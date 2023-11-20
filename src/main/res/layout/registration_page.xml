@@ -269,14 +269,14 @@
             android:orientation="vertical">
 
             <Button
-                android:id="@+id/registerButton"
+                android:id="@+id/nextButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/gold"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
-                android:text="@string/register_button_label" />
+                android:text="@string/next_button_label" />
         </LinearLayout>
     </LinearLayout>
 

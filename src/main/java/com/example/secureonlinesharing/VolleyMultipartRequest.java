@@ -80,7 +80,8 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
         {
             headers2.put(s,headers.get(s));
         }
-        headers2.put("Authorization","Bearer " + token);
+        if(token!= null)
+            headers2.put("Authorization","Bearer " + token);
        System.out.println(token);
         return headers2;
     }

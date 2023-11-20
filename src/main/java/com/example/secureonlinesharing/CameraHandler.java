@@ -50,7 +50,7 @@ public class CameraHandler {
 
 
 
-    private Bitmap mSelectedImage, cropImage;
+    public Bitmap mSelectedImage, cropImage;
     private GraphicOverlay mGraphicOverlay;
 
     private LifecycleCameraController cameraController;
@@ -59,7 +59,7 @@ public class CameraHandler {
 
 
     public CameraHandler(Fragment fragment,Button captureButton, Button retakeButton,
-                         ImageView captureView, PreviewView preview)
+                         ImageView captureView, PreviewView preview,GraphicOverlay overlay)
     {
         this.captureButton = captureButton;
 
@@ -68,6 +68,8 @@ public class CameraHandler {
 
         this.fragment = fragment;
         this.preview = preview;
+
+        this.mGraphicOverlay = overlay;
 
 
               requestPermissionLauncher =
@@ -125,6 +127,7 @@ public class CameraHandler {
                                 runFaceContourDetection();
 
                                  captureView.setImageBitmap(cropImage);
+                                 onCapture();
 
 
                             }
@@ -139,6 +142,24 @@ public class CameraHandler {
 
                 //                NavHostFragment.findNavController(FaceAuth.this)
 //                        .navigate(R.id.action_faceAuth_to_SecondFragment);
+            }
+        });
+
+
+
+        retakeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                preview.setVisibility(View.VISIBLE);
+                captureView.setVisibility(View.GONE);
+                captureButton.setVisibility(View.VISIBLE);
+                retakeButton.setVisibility(View.GONE);
+
+                onRetake();
+
+
             }
         });
 
@@ -192,19 +213,7 @@ public class CameraHandler {
                         });
 
 
-         retakeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-
-                preview.setVisibility(View.VISIBLE);
-                captureView.setVisibility(View.GONE);
-               captureButton.setVisibility(View.VISIBLE);
-                retakeButton.setVisibility(View.GONE);
-
-
-            }
-        });
 
     }
 
@@ -271,7 +280,11 @@ public class CameraHandler {
     }
 
 
+    public  void onCapture(){
 
+    }
+
+    public  void onRetake(){}
 
 
 

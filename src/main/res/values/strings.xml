@@ -81,4 +81,5 @@
     <string name="camera_retake_button_label">Retake</string>
     <string name="face_auth_title">Facial Scan</string>
     <string name="head_shot_title">Headshot for Authentication</string>
+    <string name="next_button_label">Next</string>
 </resources>

@@ -64,19 +64,18 @@ public class RegistrationPage extends Fragment {
         }
 
         ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
+        if (userMenuButton != null) {
             userMenuButton.setVisibility(View.GONE);
 
 
         }
 
-        binding.registerButton.setOnClickListener(new View.OnClickListener() {
+        binding.nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if (validateForm()) {
-                    submitForm();
-
+                    goToHeadShot();
                 }
 
             }
@@ -103,7 +102,7 @@ public class RegistrationPage extends Fragment {
         binding.emailInvalidMessage.setVisibility(emailValid ? View.GONE : View.VISIBLE);
 
 
-       boolean phoneValid = !phoneToText.isEmpty() && Patterns.PHONE.matcher(phoneToText).matches();
+        boolean phoneValid = !phoneToText.isEmpty() && Patterns.PHONE.matcher(phoneToText).matches();
         binding.phoneNumInvalidMessage.setVisibility(phoneValid ? View.GONE : View.VISIBLE);
 
 
@@ -111,7 +110,7 @@ public class RegistrationPage extends Fragment {
         Matcher matcher = pattern.matcher(firstToText);
         boolean firstNameValid = matcher.find();
 
-        binding.firstNameInvalidMessage.setVisibility(firstNameValid? View.GONE : View.VISIBLE);
+        binding.firstNameInvalidMessage.setVisibility(firstNameValid ? View.GONE : View.VISIBLE);
 
 
         matcher = pattern.matcher(lastToText);
@@ -119,80 +118,27 @@ public class RegistrationPage extends Fragment {
         boolean lastNameValid = matcher.find();
 
 
-        binding.lastNameInvalidMessage.setVisibility(lastNameValid? View.GONE : View.VISIBLE);
-        boolean passwordMatch= passwordToText.equals(passwordConfirmToText);
+        binding.lastNameInvalidMessage.setVisibility(lastNameValid ? View.GONE : View.VISIBLE);
+        boolean passwordMatch = passwordToText.equals(passwordConfirmToText);
         binding.passwordConfirmInvalidMessage.setVisibility(passwordMatch ? View.GONE : View.VISIBLE);
         return emailValid && phoneValid && lastNameValid && firstNameValid && passwordMatch;
     }
 
-    public void submitForm()  {
+    public void goToHeadShot() {
 
-        JSONObject data ;
-        try {
+        Bundle data = new Bundle();
+        data.putString("user_email", binding.emailInput.getText().toString());
+        data.putString("user_phone", binding.phoneNumberInput.getText().toString());
+        data.putString("user_first_name", binding.firstNameInput.getText().toString());
+        data.putString("user_last_name", binding.lastNameInput.getText().toString());
+        data.putString("user_username", binding.userNameInput.getText().toString());
+        data.putString("user_password", binding.passwordInput.getText().toString());
 
-
-            data= new JSONObject();
-            data.put("user_email", binding.emailInput.getText().toString());
-            data.put("user_phone", binding.phoneNumberInput.getText().toString());
-            data.put("user_first_name", binding.firstNameInput.getText().toString());
-            data.put("user_last_name", binding.lastNameInput.getText().toString());
-            data.put("user_username", binding.userNameInput.getText().toString());
-            data.put("user_password", binding.passwordInput.getText().toString());
-
-        } catch (JSONException e) {
-
-            e.printStackTrace();
-            return;
-        }
-
-        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
-        // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/addUser.php";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-
-                Request.Method.POST,
-
-                url,
-
-                data,
-
-
-                // lambda function for handling the case
-                // when the HTTP request succeeds
-                (Response.Listener<JSONObject>) response -> {
-                    // get the image url from the JSON object
-                    String message;
-                    try {
-                        message = response.getString("token");
-                        System.out.println(message);
-                        NavHostFragment.findNavController(RegistrationPage.this)
-                                .navigate(R.id.action_registrationPage_to_FirstFragment);
-                        // load the image into the ImageView using Glide.
-                        //binding.textviewFirst.setText(message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                },
-
-                // lambda function for handling the case
-                // when the HTTP request fails
-                (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
-                }
-        );
-        // add the json request object created above
-        // to the Volley request queue
-        volleyQueue.add(jsonObjectRequest);
-        //} // catch(JSONException e){} */
+        NavHostFragment.findNavController(RegistrationPage.this)
+                .navigate(R.id.action_registrationPage_to_registrationHeadShot, data);
 
 
     }
-
 
     @Override
     public void onDestroyView() {

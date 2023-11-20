@@ -6,15 +6,12 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".FaceAuth">
+    tools:context=".RegistrationHeadShot">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
-
-
-
 
 
         <LinearLayout
@@ -34,9 +31,39 @@
                 android:text="@string/head_shot_title"
                 android:textSize="30sp" />
 
-            <include layout="@layout/camera_with_capture" />
+            <include
+                android:id="@+id/camera"
+                layout="@layout/camera_with_capture" />
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/register_button_label" />
 
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/loadingWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="invisible">
+
+            <pl.droidsonroids.gif.GifImageView
+                android:id="@+id/loadingIcon"
+                android:layout_width="match_parent"
+
+                android:layout_height="match_parent"
+                android:background="@drawable/spining" />
         </LinearLayout>
 
 

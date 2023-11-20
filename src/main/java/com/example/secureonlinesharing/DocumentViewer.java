@@ -110,24 +110,7 @@ public class DocumentViewer extends Fragment {
 
     }
 
-    public static Bitmap openImage(Activity activity,ImageView img)
-    {
-        File imgFile = new File(activity.getCacheDir(), "temp");
 
-
-
-        // on below line we are checking if the image file exist or not.
-        if (imgFile.exists()) {
-            // on below line we are creating an image bitmap variable
-            // and adding a bitmap to it from image file.
-            Bitmap imgBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
-            // on below line we are setting bitmap to our image view.
-            img.setImageBitmap(imgBitmap);
-            return imgBitmap;
-        }
-        return null;
-    }
     public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
 
         // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
@@ -160,24 +143,7 @@ public class DocumentViewer extends Fragment {
 
         return renderer;
     }
-    public static File copyToCache(Activity activity, InputStream input) throws IOException {
 
-
-//Get input stream object to read the pdf
-            File file = new File(activity.getCacheDir(), "temp");
-            FileOutputStream output = new FileOutputStream(file);
-            byte[] buffer = new byte[1024];
-            int size;
-            // Copy the entire contents of the file
-            while ((size = input.read(buffer)) != -1) {
-                output.write(buffer, 0, size);
-            }
-//Close the buffer
-            input.close();
-            output.close();
-            return file;
-
-    }
 
 
 
@@ -340,7 +306,31 @@ public class DocumentViewer extends Fragment {
 
                         System.out.println(accessPath);
 
-                        new Thread(new RetrieveFileFromUrl(accessPath)).start();
+                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, "temp"){
+
+                            @Override
+                            public void onRetrieve()
+                            {
+                                try {
+                                    if (contentType.equals("application/pdf"))
+                                    {
+                                        renderer = openPdf(getActivity(), binding.mediaView, 0);
+                                        binding.pdfControls.setVisibility(View.VISIBLE);
+                                    }
+                                    else if (contentType.startsWith("image")) {
+                                        mSelectedImage =  RetrieveFileFromUrl.openImage(getActivity(), binding.mediaView, "temp");
+                                        binding.pdfControls.setVisibility(View.GONE);
+
+
+                                    }
+
+
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+
+                        }).start();
 
                         if( owner.equals(userId))
                         {
@@ -429,73 +419,7 @@ public class DocumentViewer extends Fragment {
     }
 
     // create an async task class for loading pdf file from URL.
-    class RetrieveFileFromUrl implements Runnable{
-        private String urlStr;
 
-        private String contentType;
-        public RetrieveFileFromUrl (String url)
-        {
-            this.urlStr = url;
-        }
-        @Override
-        public void run (){
-            // we are using inputstream
-            // for getting out PDF.
-            InputStream inputStream = null;
-            HttpURLConnection urlConnection = null;
-            try {
-                URL url = new URL(urlStr);
-                // below is the step where we are
-                // creating our connection.
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                System.out.println(urlConnection);
-                System.out.println(urlConnection.getResponseCode());
-
-                if (urlConnection.getResponseCode() == 200) {
-                    // response is success.
-                    // we are getting input stream from url
-                    // and storing it in our variable.
-                   contentType = urlConnection.getContentType();
-                   System.out.println(contentType);
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                    copyToCache(getActivity(),inputStream);
-                }
-                urlConnection.disconnect();
-
-            } catch (IOException e) {
-                // this is the method
-                // to handle errors.
-                e.printStackTrace();
-
-            }
-
-
-            getActivity().runOnUiThread(new Runnable(){
-                public void run(){
-                    try {
-                        if (contentType.equals("application/pdf"))
-                        {
-                            renderer = openPdf(getActivity(), binding.mediaView, 0);
-                            binding.pdfControls.setVisibility(View.VISIBLE);
-                        }
-                        else if (contentType.startsWith("image")) {
-                          mSelectedImage =  openImage(getActivity(), binding.mediaView);
-                            binding.pdfControls.setVisibility(View.GONE);
-
-
-                        }
-
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-        }
-
-
-
-    }
 
 
     @Override

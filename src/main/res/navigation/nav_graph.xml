@@ -57,6 +57,9 @@
         <action
             android:id="@+id/action_registrationPage_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+        <action
+            android:id="@+id/action_registrationPage_to_registrationHeadShot"
+            app:destination="@id/registrationHeadShot" />
     </fragment>
     <fragment
         android:id="@+id/documentViewer"
@@ -97,5 +100,14 @@
         <action
             android:id="@+id/action_faceAuth_to_SecondFragment"
             app:destination="@id/SecondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registrationHeadShot"
+        android:name="com.example.secureonlinesharing.RegistrationHeadShot"
+        android:label="registration_headshot"
+        tools:layout="@layout/registration_headshot" >
+        <action
+            android:id="@+id/action_registrationHeadShot_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
     </fragment>
 </navigation>

@@ -72,7 +72,7 @@ public class MediaUploader extends Fragment {
                     try {
                         InputStream inputStream =
                                 getActivity().getContentResolver().openInputStream(uri);
-                        DocumentViewer.copyToCache(getActivity(), inputStream);
+                        RetrieveFileFromUrl.copyToCache(getActivity(), inputStream,"temp ");
                         ContentResolver cR = getContext().getContentResolver();
                         String type = cR.getType(uri);
                         System.out.println(type);
@@ -81,7 +81,7 @@ public class MediaUploader extends Fragment {
                             extension = ".pdf";
                             mediaType = "pdf";
                         } else if (type.startsWith("image")) {
-                            DocumentViewer.openImage(getActivity(), binding.mediaUploadPreview);
+                            RetrieveFileFromUrl.openImage(getActivity(), binding.mediaUploadPreview, "temp");
                             if (type.equals("image/png")) {
                                 extension = ".png";
                                 mediaType = "png";

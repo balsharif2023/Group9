@@ -2,6 +2,8 @@ package com.example.secureonlinesharing;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -263,13 +265,15 @@ public class UserProfilePage extends Fragment {
                         binding.phoneNumberDisplay.setText(phone);
 
 
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
                     }
 
 
-
+                  RetrieveFileFromUrl.openImage(getActivity(),binding.profilePic,"profile_pic");
 
 
                 },

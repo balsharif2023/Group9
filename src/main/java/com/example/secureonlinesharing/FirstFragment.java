@@ -129,7 +129,9 @@ public class FirstFragment extends Fragment {
                                 // get the image url from the JSON object
                                 String message;
 
+
                                    // message = response.getString("message");
+
 
 
                                // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
@@ -141,6 +143,9 @@ public class FirstFragment extends Fragment {
                                 // below two lines will put values for
                                 // email and password in shared preferences.
                                 try {
+
+                                    System.out.println(response);
+
                                     editor.putString("id", response.getString("user_id"));
 
                                     editor.putString("userName", response.getString("user_username"));
@@ -162,12 +167,17 @@ public class FirstFragment extends Fragment {
 
                                         System.out.println(jwt);
 
+                                    new Thread(new RetrieveFileFromUrl(FirstFragment.this,
+                                            response.getString("facial_profile_file"), "profile_pic")).start();
 
 
 
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
+
+
+
 
 
                                 // to save our data with key and value.
