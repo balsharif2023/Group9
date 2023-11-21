@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
 import android.media.ExifInterface;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +78,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,8 +100,6 @@ public class FaceAuth extends Fragment {
     private FaceAuthBinding binding;
 
 
-
-
     private String mediaId = "";
     private int pdfPageNum;
 
@@ -106,8 +107,7 @@ public class FaceAuth extends Fragment {
 
     private CameraHandler camera;
 
-
-
+    private Bitmap headShot;
 
 
     // creating a variable
@@ -121,40 +121,38 @@ public class FaceAuth extends Fragment {
 // Set this image size according to our choice of DNN Model (160 for FaceNet, 112 for MobileFaceNet)
 
     private ImageProcessor imageTensorProcessor = new ImageProcessor.Builder()
-            .add( new ResizeOp(imgSize, imgSize, ResizeOp.ResizeMethod.BILINEAR))
-            .add( new CastOp( DataType.FLOAT32 ))
+            .add(new ResizeOp(imgSize, imgSize, ResizeOp.ResizeMethod.BILINEAR))
+            .add(new CastOp(DataType.FLOAT32))
             .build();
 
-    private ByteBuffer convertBitmapToBuffer( Bitmap image)  {
+    private ByteBuffer convertBitmapToBuffer(Bitmap image) {
         return imageTensorProcessor.process(TensorImage.fromBitmap(image)).getBuffer();
     }
 
     Interpreter.Options interpreterOptions;
 
 
-
     Interpreter interpreter;
 
     private float[][] runFaceNet(Bitmap ref, Bitmap capture) {
-        Map<Integer, Object> faceNetModelOutputs =  new HashMap<>();
-      //  faceNetModelOutputs[0] = Array(1) { FloatArray(embeddingDim) }
+        Map<Integer, Object> faceNetModelOutputs = new HashMap<>();
+        //  faceNetModelOutputs[0] = Array(1) { FloatArray(embeddingDim) }
 
         // The shape of *1* output's tensor
-        int[] OutputShape= {};
+        int[] OutputShape = {};
 // The type of the *1* output's tensor
         DataType OutputDataType;
 // The multi-tensor ready storage
-     
 
 
 // For each model's tensors (there are getOutputTensorCount() of them for this tflite model)
 
-            OutputShape = interpreter.getOutputTensor(0).shape();
-            OutputDataType = interpreter.getOutputTensor(0).dataType();
-           TensorBuffer outputTensor = TensorBuffer.createFixedSize(OutputShape, OutputDataType);
-            ByteBuffer outputBuffer =outputTensor.getBuffer();
+        OutputShape = interpreter.getOutputTensor(0).shape();
+        OutputDataType = interpreter.getOutputTensor(0).dataType();
+        TensorBuffer outputTensor = TensorBuffer.createFixedSize(OutputShape, OutputDataType);
+        ByteBuffer outputBuffer = outputTensor.getBuffer();
 
-          //  System.out.println("Created a buffer of " + outputBuffer.limit()+ " bytes for tensor "+ 0);
+        //  System.out.println("Created a buffer of " + outputBuffer.limit()+ " bytes for tensor "+ 0);
 
         int[] InputShape = interpreter.getInputTensor(0).shape();
         DataType InputDataType = interpreter.getInputTensor(0).dataType();
@@ -166,21 +164,19 @@ public class FaceAuth extends Fragment {
                         .order(ByteOrder.nativeOrder());
 
 
-
         TensorBuffer inputTensor = TensorBuffer.createFixedSize(InputShape, InputDataType);
         inputTensor.loadBuffer(inputBuffer);
-      //  System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
-        Object[]inputs = {inputTensor.getBuffer()};
+        //  System.out.println("Created a tflite output of %d output tensors."+ faceNetModelOutputs.size());
+        Object[] inputs = {inputTensor.getBuffer()};
         interpreter.run(inputTensor.getBuffer(), outputBuffer);
 
         float[] arr = outputTensor.getFloatArray();
 
-        float[][] matrix = new float[2][arr.length/2];
+        float[][] matrix = new float[2][arr.length / 2];
 
-        for (int i =0;i< arr.length/2;i++)
-        {
-            matrix[0][i] =arr[i];
-            matrix[1][i]=arr[arr.length/2+i];
+        for (int i = 0; i < arr.length / 2; i++) {
+            matrix[0][i] = arr[i];
+            matrix[1][i] = arr[arr.length / 2 + i];
         }
 
 //      //  System.out.println(Arrays.toString(OutputShape));
@@ -192,46 +188,36 @@ public class FaceAuth extends Fragment {
         return matrix;
     }
 
-    private float l2Norm(float[] x1 , float[]x2 )  {
-        float sum = 0.0f, mag1 =0.0f, mag2 =0.0f;
+    private float l2Norm(float[] x1, float[] x2) {
+        float sum = 0.0f, mag1 = 0.0f, mag2 = 0.0f;
 
-         for( int i =0; i<x1.length; i++)
-        {
-            mag1+= x1[i]* x1[i];
+        for (int i = 0; i < x1.length; i++) {
+            mag1 += x1[i] * x1[i];
 
-            mag2+= x2[i] * x2[i];
+            mag2 += x2[i] * x2[i];
         }
-         mag1= (float) Math.sqrt(mag1);
-         mag2 = (float) Math.sqrt(mag2);
+        mag1 = (float) Math.sqrt(mag1);
+        mag2 = (float) Math.sqrt(mag2);
 
-        for( int i =0; i<x1.length; i++)
-        {
+        for (int i = 0; i < x1.length; i++) {
 
-            sum += Math.pow((x1[i] / mag1) - (x2[i] / mag2),2);
+            sum += Math.pow((x1[i] / mag1) - (x2[i] / mag2), 2);
         }
         return (float) Math.sqrt(sum);
     }
 
-    private float cosineSim(float[] x1 , float[]x2 )
-    {
+    private float cosineSim(float[] x1, float[] x2) {
         float dotProduct = 0.0f;
         float normA = 0.0f;
         float normB = 0.0f;
 
-        for (int i =0; i<x1.length; i++)
-        {
+        for (int i = 0; i < x1.length; i++) {
             dotProduct += x1[i] * x2[i];
-            normA += Math.pow(x1[i],2);
-            normB += Math.pow(x2[i],2);
+            normA += Math.pow(x1[i], 2);
+            normB += Math.pow(x2[i], 2);
         }
-        return (float) (dotProduct / (Math.sqrt(normA) *Math.sqrt(normB)));
+        return (float) (dotProduct / (Math.sqrt(normA) * Math.sqrt(normB)));
     }
-
-
-
-
-
-
 
 
     @Override
@@ -319,18 +305,26 @@ public class FaceAuth extends Fragment {
     }
 
 
-
-
-
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-    camera = new CameraHandler(this,binding.camera.detectButton
-            ,binding.camera.retakeButton, binding.camera.captureView,
-            binding.camera.faceView,
-            binding.camera.graphicOverlay);
+//        camera = new CameraHandler(this, binding.camera.detectButton
+//                , binding.camera.retakeButton, binding.camera.captureView,
+//                binding.camera.faceView,
+//                binding.camera.graphicOverlay) {
+//
+//            @Override
+//            public void onCapture() {
+//
+//                //  headShot = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
+//
+//
+//                faceMatch();
+//            }
+//        };
+        cropAll();
 
-     interpreterOptions =new Interpreter.Options().setNumThreads(4);
+        interpreterOptions = new Interpreter.Options().setNumThreads(4);
 
 
         try {
@@ -338,13 +332,6 @@ public class FaceAuth extends Fragment {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
-
-
-
-
 
 
         // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
@@ -373,9 +360,6 @@ public class FaceAuth extends Fragment {
         pdfPageNum = 0;
 
 
-
-
-
 //        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
 //        zoomLinearLayout.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
@@ -389,7 +373,6 @@ public class FaceAuth extends Fragment {
     }
 
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -397,94 +380,139 @@ public class FaceAuth extends Fragment {
     }
 
 
+    public void faceMatch() {
 
 
-public  void faceMatch() {
+        int[] img = {
+                R.drawable.jay1,
+
+                R.drawable.jay2,
+                R.drawable.jay3,
+                R.drawable.jay4,
+
+                R.drawable.jay5,
+
+                R.drawable.tom1,
+                R.drawable.tom2,
+                R.drawable.tom3,
+                R.drawable.tom4,
+                R.drawable.tom5,
+                R.drawable.tom6,
+                R.drawable.shaq,
+                R.drawable.owl,
+                R.drawable.green,
+                R.drawable.boston
+
+        };
+
+        String[] names = {
+                "jay1",
+                "jay2",
+                "jay3",
+                "jay4",
+                "jay5",
+                "tom1",
+                "tom2",
+                "tom3",
+                "tom4",
+                "tom5",
+                "tom6",
+                "shaq",
+                "owl",
+                "green",
+                "boston"
+
+        };
+
+        float bestScore = 0;
+        int bestIndex = 0;
+        for (int i = 0; i < img.length; i++) {
+            Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
+                    img[i]);
+            System.out.println("comparing image " + names[i]);
 
 
-    Bitmap tom1 = BitmapFactory.decodeResource(getContext().getResources(),
-            R.drawable.tom5);
+            float[][] output = runFaceNet(img1, camera.getCropImage());
 
-    Bitmap tom2 = BitmapFactory.decodeResource(getContext().getResources(),
-            R.drawable.shaq);
+            float score = cosineSim(output[0], output[1]);
+            System.out.println("\t" + names[i] + ": " + score);
 
-
-
-
-
-                           /*     float[][] output = runFaceNet(tom1,tom2);
-
-                                float score = cosineSim(output[0], output[1]);
-                                System.out.println("matching score: "+ score);
-
-                               showToast("matching score: "+ score);
-
-                                int[] img = {
-                                        R.drawable.jay1,
-
-                                        R.drawable.jay2,
-                                        R.drawable.jay3,
-                                        R.drawable.jay4,
-
-                                        R.drawable.jay5,
-
-                                        R.drawable.tom1,
-                                        R.drawable.tom2,
-                                        R.drawable.tom3,
-                                        R.drawable.tom4,
-                                        R.drawable.tom5,
-                                        R.drawable.tom6,
-                                        R.drawable.shaq,
-                                        R.drawable.owl,
-                                        R.drawable.green,
-                                        R.drawable.boston
-
-                                };
-
-                                String[] names =   {
-                                        "jay1",
-                                        "jay2",
-                                        "jay3",
-                                        "jay4",
-                                        "jay5",
-                                        "tom1",
-                                        "tom2",
-                                        "tom3",
-                                         "tom4",
-                                        "tom5",
-                                       "tom6",
-                                       "shaq",
-                                        "owl",
-                                        "green",
-                                       "boston"
-
-                                };
+            if (score > bestScore) {
+                bestScore = score;
+                bestIndex = i;
+            }
 
 
-                               for(int i =0; i<img.length;i++)
-                               {
-                                   Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
-                                          img[i]);
-                                   System.out.println("comparing image "+ names[i]);
+        } //*/
 
-                                   for(int j =0; j<img.length;j++)
-                                   {
-                                       Bitmap img2 = BitmapFactory.decodeResource(getContext().getResources(),
-                                              img[j]);
+        System.out.println("best match is " + names[bestIndex] + " with score " + bestScore);
+
+    }
+
+    public  void cropAll(){
+
+        int[] img = {
+                R.drawable.tom1,
+
+                R.drawable.jay2,
+                R.drawable.jay3,
+                R.drawable.jay4,
+
+                R.drawable.jay5,
+
+                R.drawable.tom1,
+                R.drawable.tom2,
+                R.drawable.tom3,
+                R.drawable.tom4,
+                R.drawable.tom5,
+                R.drawable.tom6,
+                R.drawable.shaq,
+
+
+        };
+        String fileName ="";
+
+        String cropFile ="";
+
+
+        camera = new CameraHandler(this, binding.camera.detectButton
+                , binding.camera.retakeButton, binding.camera.captureView,
+                binding.camera.faceView,
+                binding.camera.graphicOverlay) {
+
+            @Override
+            public void onCapture() {
+                File file = new File(fileName);
+                FileOutputStream output = null ;
+                try {
+                    output = new FileOutputStream(file);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                getCropImage().compress(Bitmap.CompressFormat.JPEG,100,output);
+            }
+        };
+
+        for(int  i=0 ; i< 1;i++)
+        {
+            TypedValue value = new TypedValue();
+            getResources().getValue(img[i], value, true);
+            // check value.string if not null - it is not null for drawables...
+
+            fileName =value.string.toString();
+
+            camera.fileName = fileName.replace(".jpg","_crop.jpg")
+                    .replace(".jpeg","_crop.jpeg")
+                            .replace("res/drawable","sdcard");
+
+            camera.setSelectedImage(BitmapFactory.decodeResource(getContext().getResources(),
+                    img[i]));
+            camera.runFaceContourDetection();
+        }
+    }
 
 
 
-                                        output = runFaceNet(img1,img2);
-
-                                        score = cosineSim(output[0], output[1]);
-                                       System.out.println("\t" +names[j]+  ": "+ score);
-
-                                   }
-
-
-                               } //*/
-
-}
 }
 
 

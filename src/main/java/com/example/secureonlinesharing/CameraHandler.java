@@ -50,12 +50,14 @@ public class CameraHandler {
 
 
 
-    public Bitmap mSelectedImage, cropImage;
+    private Bitmap mSelectedImage, cropImage;
     private GraphicOverlay mGraphicOverlay;
 
     private LifecycleCameraController cameraController;
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
+
+    String fileName;
 
 
     public CameraHandler(Fragment fragment,Button captureButton, Button retakeButton,
@@ -125,9 +127,14 @@ public class CameraHandler {
                                 retakeButton.setVisibility(View.VISIBLE);
 
                                 runFaceContourDetection();
+//
+//                                System.out.println("headshot: "+ cropImage.getWidth()+"x" + cropImage.getHeight());
+//
+//                                captureView.setImageBitmap(cropImage);
 
-                                 captureView.setImageBitmap(cropImage);
-                                 onCapture();
+
+
+
 
 
                             }
@@ -167,6 +174,19 @@ public class CameraHandler {
 
             }
 
+   public Bitmap getCropImage(){
+
+        return cropImage;
+   }
+
+    public Bitmap getSelectedImage(){
+
+        return mSelectedImage;
+    }
+
+    public void setSelectedImage(Bitmap img){
+        mSelectedImage = img;
+    }
 
 
     public void startCamera() {
@@ -183,7 +203,7 @@ public class CameraHandler {
 
 
 
-    private void runFaceContourDetection() {
+    public void runFaceContourDetection() {
         InputImage image = InputImage.fromBitmap(mSelectedImage, 0);
         FaceDetectorOptions options =
                 new FaceDetectorOptions.Builder()
@@ -198,8 +218,10 @@ public class CameraHandler {
                         new OnSuccessListener<List<Face>>() {
                             @Override
                             public void onSuccess(List<Face> faces) {
+                                System.out.println("face found");
                                 captureButton.setEnabled(true);
                                 processFaceContourDetectionResult(faces);
+                                onCapture();
                             }
                         })
                 .addOnFailureListener(
@@ -207,6 +229,8 @@ public class CameraHandler {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 // Task failed with an exception
+
+                                System.out.println("No face found");
                                 captureButton.setEnabled(true);
                                 e.printStackTrace();
                             }
@@ -240,7 +264,8 @@ public class CameraHandler {
 
 
         cropImage = Bitmap.createBitmap(mSelectedImage,box.left,box.top,box.width(),box.height());
-       captureView.setImageBitmap(cropImage);
+        System.out.println(cropImage.getByteCount());
+        captureView.setImageBitmap(cropImage);
     }
 
 

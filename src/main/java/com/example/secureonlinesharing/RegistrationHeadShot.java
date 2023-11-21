@@ -3,6 +3,7 @@ package com.example.secureonlinesharing;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -144,24 +146,6 @@ public class RegistrationHeadShot extends Fragment {
         return renderer;
     }
 
-    public static File copyToCache(Activity activity, InputStream input) throws IOException {
-
-
-//Get input stream object to read the pdf
-        File file = new File(activity.getCacheDir(), "temp");
-        FileOutputStream output = new FileOutputStream(file);
-        byte[] buffer = new byte[1024];
-        int size;
-        // Copy the entire contents of the file
-        while ((size = input.read(buffer)) != -1) {
-            output.write(buffer, 0, size);
-        }
-//Close the buffer
-        input.close();
-        output.close();
-        return file;
-
-    }
 
 
 
@@ -180,11 +164,14 @@ public class RegistrationHeadShot extends Fragment {
         public void onCapture(){
 
             try {
+                Bitmap cropImage = getCropImage();
                 int quality = 100;
                 File file = new File(getActivity().getCacheDir(), "temp");
                 FileOutputStream output = new FileOutputStream(file);
+                System.out.println("headshot: "+ cropImage.getWidth()+"x" + cropImage.getHeight());
                 cropImage.compress(Bitmap.CompressFormat.JPEG, quality, output);
                 output.close();
+                System.out.println("file size: "+ file.length());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -335,7 +322,7 @@ public class RegistrationHeadShot extends Fragment {
                     try {
                         JSONObject response = new JSONObject(result);
 
-                        String message = response.getString("message");
+                        String message = response.getString("reason");
 
 
                         Log.e("Error Message", message);
@@ -385,16 +372,46 @@ public class RegistrationHeadShot extends Fragment {
                 File fileCopy = new File(getActivity().getCacheDir(), "temp");
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    try {
-                        params.put("face_profile",
-                                new DataPart("file",
-                                        //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
-                                        Files.readAllBytes(fileCopy.toPath()),
+//                    Bitmap bitmap = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
+//
+//
+//                    try {
+//
+//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+//                        byte[] bytes = baos.toByteArray();
+//
+//                        File file = new File(getActivity().getCacheDir(), "profile_pic");
+//                        FileOutputStream output = new FileOutputStream(file);
+//
+//                        output.write(bytes, 0, bytes.length);
+//
+//                        output.close();
+//
+//                        baos.close();
 
-                                        "image/jpeg"));
+
+                    byte[] bytes = new byte[0];
+                    try {
+                        bytes = Files.readAllBytes(fileCopy.toPath());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+                    System.out.println("headshot size:  "+ bytes.length);
+                        params.put("face_profile",
+                                new DataPart("file",
+                                        //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
+                                        bytes,
+
+                                        "image/jpeg"));
+
+
+
+//
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+
 
 
                 }
