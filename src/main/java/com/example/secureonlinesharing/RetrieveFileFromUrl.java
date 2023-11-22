@@ -19,19 +19,18 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 class RetrieveFileFromUrl implements Runnable{
-    private String urlStr, fileName;
+    private String urlStr, file_name;
 
     private Fragment fragment;
 
     public String contentType;
-    public RetrieveFileFromUrl (Fragment fragment, String url, String fileName)
+    public RetrieveFileFromUrl (Fragment fragment, String url,String file_name)
     {
         this.fragment= fragment;
 
         this.urlStr = url;
-
-        this.fileName = fileName;
-    }
+        this.file_name = file_name;
+           }
     @Override
     public void run (){
         // we are using inputstream
@@ -53,7 +52,7 @@ class RetrieveFileFromUrl implements Runnable{
                 contentType = urlConnection.getContentType();
                 System.out.println(contentType);
                 inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                copyToCache(fragment.getActivity(),inputStream,fileName);
+                copyToCache(fragment.getActivity(),inputStream,file_name);
             }
             urlConnection.disconnect();
 
@@ -81,14 +80,25 @@ class RetrieveFileFromUrl implements Runnable{
         File file = new File(activity.getCacheDir(), fileName);
         FileOutputStream output = new FileOutputStream(file);
         byte[] buffer = new byte[1024];
-        int size;
+        int size, bytes =0;
         // Copy the entire contents of the file
         while ((size = input.read(buffer)) != -1) {
             output.write(buffer, 0, size);
+
+            bytes+= size;
         }
 //Close the buffer
         input.close();
         output.close();
+        System.out.println("Wrote " + bytes + " bytes to "+ file.getAbsolutePath());
+        System.out.println("Written file size:  "+ file.length());
+        File file2 = new File(activity.getCacheDir(), fileName);
+
+        System.out.println("N  file size:  "+ file.length());
+
+
+
+
         return file;
 
     }
@@ -97,7 +107,8 @@ class RetrieveFileFromUrl implements Runnable{
     {
         File imgFile = new File(activity.getCacheDir(), fileName);
 
-        System.out.println(imgFile);
+        System.out.println("loading from cache "+ imgFile.getAbsolutePath());
+        System.out.println("file size:  "+ imgFile.length());
 
         // on below line we are checking if the image file exist or not.
         if (imgFile.exists()) {

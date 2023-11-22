@@ -32,6 +32,7 @@ import org.json.JSONObject;
 public class RegistrationPage extends Fragment {
 
     private RegistrationPageBinding binding;
+    private boolean editing= false;
 
     @Override
     public View onCreateView(
@@ -48,6 +49,17 @@ public class RegistrationPage extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Bundle args= getArguments();
+        editing =  args.containsKey("user_id");
+
+        if(editing)
+        {
+            binding.userNameInput.setText(args.getString("user_name"));
+            binding.firstNameInput.setText(args.getString("user_first"));
+            binding.lastNameInput.setText(args.getString("user_last"));
+            binding.phoneNumberInput.setText(args.getString("user_phone"));
+            binding.emailInput.setText(args.getString("user_email"));
+        }
 
         // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
@@ -127,6 +139,7 @@ public class RegistrationPage extends Fragment {
     public void goToHeadShot() {
 
         Bundle data = new Bundle();
+        if(editing) data.putString("user_id", getArguments().getString("user_id"));
         data.putString("user_email", binding.emailInput.getText().toString());
         data.putString("user_phone", binding.phoneNumberInput.getText().toString());
         data.putString("user_first_name", binding.firstNameInput.getText().toString());

@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 public class UserProfilePage extends Fragment {
 
     private UserProfilePageBinding binding;
+    String userName,email,firstName,lastName,phone,userId;
 
     @Override
     public View onCreateView(
@@ -62,7 +63,7 @@ public class UserProfilePage extends Fragment {
                 @Override
                 public void onClick(View view) {
                     NavHostFragment.findNavController(UserProfilePage.this)
-                            .navigate(R.id.action_registrationPage_to_FirstFragment);
+                            .navigate(R.id.action_userProfilePage_to_SecondFragment);
                 }
             });
         }
@@ -78,10 +79,18 @@ public class UserProfilePage extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if (validateForm()) {
-                    submitForm();
+                    Bundle bundle = new Bundle();
+                SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+                String id = data.getString("id","");
+                    bundle.putString("user_id",id);
+                    bundle.putString("user_name", userName);
+                 bundle.putString("user_first",firstName);
+                bundle.putString("user_last", lastName);
+                bundle.putString("user_phone", phone);
+                bundle.putString("user_email", email);
 
-                }
+                NavHostFragment.findNavController(UserProfilePage.this)
+                        .navigate(R.id.action_userProfilePage_to_registrationPage,bundle);
 
             }
 
@@ -208,14 +217,14 @@ public class UserProfilePage extends Fragment {
     public void getUserInfo()
     {
         SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-       String id = data.getString("id","");
+       userId = data.getString("id","");
 
         String token = data.getString("jwt","");
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/getData.php";
-        url+= "?userid="+ id;
+        url+= "?userid="+ userId;
 
 
 
@@ -243,16 +252,17 @@ public class UserProfilePage extends Fragment {
 
 
 
+
                     try {
 
+                        System.out.println(response);
+                          firstName = response.getString("user_first_name");
+                          lastName = response.getString("user_last_name");
 
-                        String  firstName = response.getString("user_first_name");
-                        String  lastName = response.getString("user_last_name");
+                          userName = response.getString("user_username");
+                          email = response.getString("user_email");
 
-                        String  userName = response.getString("user_username");
-                        String  email = response.getString("user_email");
-
-                        String  phone = response.getString("user_phone");
+                          phone = response.getString("user_phone");
 
                         binding.firstNameDisplay.setText(firstName);
 

@@ -257,12 +257,14 @@ public class RegistrationHeadShot extends Fragment {
 
 
     public void submitForm()  {
+        boolean editing= getArguments().containsKey("user_id");
 
         JSONObject data ;
         try {
 
             Bundle args = getArguments();
             data= new JSONObject();
+            if(editing) data.put("user_id", args.getString("user_id"));
             data.put("user_email", args.getString("user_email"));
             data.put("user_phone",  args.getString("user_phone"));
             data.put("user_first_name",  args.getString("user_first_name"));
@@ -278,7 +280,13 @@ public class RegistrationHeadShot extends Fragment {
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/addUser.php";
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/";
+        if(editing){
+            url+= "updateUserInfo.php";
+        }
+        else  {
+            url+= "addUser.php" ;
+        }
 
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
                 null,

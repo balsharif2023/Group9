@@ -308,21 +308,21 @@ public class FaceAuth extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        camera = new CameraHandler(this, binding.camera.detectButton
-//                , binding.camera.retakeButton, binding.camera.captureView,
-//                binding.camera.faceView,
-//                binding.camera.graphicOverlay) {
-//
-//            @Override
-//            public void onCapture() {
-//
-//                //  headShot = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
-//
-//
-//                faceMatch();
-//            }
-//        };
-        cropAll();
+        camera = new CameraHandler(this, binding.camera.detectButton
+                , binding.camera.retakeButton, binding.camera.captureView,
+                binding.camera.faceView,
+                binding.camera.graphicOverlay) {
+
+            @Override
+            public void onCapture() {
+
+                //  headShot = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
+
+
+                faceMatch();
+            }
+        };
+
 
         interpreterOptions = new Interpreter.Options().setNumThreads(4);
 
@@ -426,16 +426,29 @@ public class FaceAuth extends Fragment {
 
         float bestScore = 0;
         int bestIndex = 0;
-        for (int i = 0; i < img.length; i++) {
-            Bitmap img1 = BitmapFactory.decodeResource(getContext().getResources(),
-                    img[i]);
-            System.out.println("comparing image " + names[i]);
+        for (int i = -1; i < img.length; i++) {
+            Bitmap img1 = null;
+            if(i<0)
+            {
+                File imgFile = new File(getActivity().getCacheDir(), "profile_pic");
+
+
+                img1 = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+                System.out.println("comparing profile_pic " );
+
+            }
+            else {
+                img1 = BitmapFactory.decodeResource(getContext().getResources(),
+                        img[i]);
+                System.out.println("comparing image " + names[i]);
+            }
 
 
             float[][] output = runFaceNet(img1, camera.getCropImage());
 
             float score = cosineSim(output[0], output[1]);
-            System.out.println("\t" + names[i] + ": " + score);
+            System.out.println("\t" + ( i<0? "profile_pic":names[i]) + ": " + score);
 
             if (score > bestScore) {
                 bestScore = score;
@@ -445,7 +458,7 @@ public class FaceAuth extends Fragment {
 
         } //*/
 
-        System.out.println("best match is " + names[bestIndex] + " with score " + bestScore);
+        System.out.println("best match is " +  ( bestIndex<0? "profile_pic":names[bestIndex])  + " with score " + bestScore);
 
     }
 
