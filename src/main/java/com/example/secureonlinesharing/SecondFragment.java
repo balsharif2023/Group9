@@ -137,7 +137,7 @@ public class SecondFragment extends Fragment {
                                 public void onClick(View view) {
                                     Bundle bundle = new Bundle();
                                     try {
-                                        bundle.putString("mediaId",entry.getString("media_Id"));
+                                        bundle.putString("media_id",entry.getString("media_Id"));
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }

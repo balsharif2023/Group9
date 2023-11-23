@@ -72,8 +72,10 @@ public class MediaUploader extends Fragment {
                     try {
                         InputStream inputStream =
                                 getActivity().getContentResolver().openInputStream(uri);
-                        RetrieveFileFromUrl.copyToCache(getActivity(), inputStream,"temp2 ");
-                        File file = new File(getActivity().getCacheDir(),"profile_pic");
+                        RetrieveFileFromUrl.copyToCache(getActivity(), inputStream,
+                                MainActivity.MEDIA_UPLOAD_CACHE_FILE);
+                        File file = new File(getActivity().getCacheDir(),
+                                MainActivity.MEDIA_UPLOAD_CACHE_FILE);
 
                         System.out.println("Cache file size:  "+ file.length());
 
@@ -82,11 +84,13 @@ public class MediaUploader extends Fragment {
                         System.out.println(uri);
                         System.out.println(type);
                         if (type.equals("application/pdf")) {
-                            DocumentViewer.openPdf(getActivity(), binding.mediaUploadPreview, 0);
+                            RetrieveFileFromUrl.openPdf(getActivity(),
+                                    binding.mediaUploadPreview, MainActivity.MEDIA_UPLOAD_CACHE_FILE,0);
                             extension = ".pdf";
                             mediaType = "pdf";
                         } else if (type.startsWith("image")) {
-                            RetrieveFileFromUrl.openImage(getActivity(), binding.mediaUploadPreview, "temp2");
+                            RetrieveFileFromUrl.openImage(getActivity(), binding.mediaUploadPreview,
+                                    MainActivity.MEDIA_UPLOAD_CACHE_FILE);
                             if (type.equals("image/png")) {
                                 extension = ".png";
                                 mediaType = "png";
@@ -145,9 +149,11 @@ public class MediaUploader extends Fragment {
 
 
         }
+        Bundle args = getArguments();
 
-        mediaId = getArguments().getString("mediaId");
-        edit = !mediaId.equals("");
+        mediaId = args== null?"": args.getString("media_id");
+
+        edit = mediaId!= null && !mediaId.equals("");
         if (edit) {
             getMedia(mediaId);
             binding.mediaUploadButton.setText(R.string.media_edit_button_label);
@@ -314,7 +320,7 @@ public class MediaUploader extends Fragment {
 
                             Bundle bundle = new Bundle();
 
-                            bundle.putString("mediaId", mediaId);
+                            bundle.putString("media_id", mediaId);
                             NavHostFragment.findNavController(MediaUploader.this)
                                     .navigate(R.id.action_mediaUploader_to_documentViewer, bundle);
 
@@ -390,7 +396,8 @@ public class MediaUploader extends Fragment {
                 Map<String, DataPart> params = new HashMap<>();
                 // file name could found file base or direct access from real path
                 // for now just get bitmap data from ImageView
-                File fileCopy = new File(getActivity().getCacheDir(), "temp2");
+                File fileCopy = new File(getActivity().getCacheDir(),
+                        MainActivity.MEDIA_UPLOAD_CACHE_FILE);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try {

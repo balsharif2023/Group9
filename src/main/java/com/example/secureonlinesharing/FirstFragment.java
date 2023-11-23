@@ -27,6 +27,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +49,17 @@ public class FirstFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //((MainActivity) getActivity()).backButton.setVisibility(View.INVISIBLE);
+        String[] cache = {
+                MainActivity.MEDIA_VIEWER_CACHE_FILE,
+                MainActivity.HEADSHOT_CACHE_FILE,
+                MainActivity.MEDIA_UPLOAD_CACHE_FILE
+        };
+
+        for(String filename: cache)
+        {
+            File file = new File(getActivity().getCacheDir(),filename);
+            file.delete();
+        }
        ImageButton backButton = getActivity().findViewById(R.id.backButton);
         if (backButton!= null)
         {
@@ -168,7 +179,8 @@ public class FirstFragment extends Fragment {
                                         System.out.println(jwt);
 
                                     new Thread(new RetrieveFileFromUrl(FirstFragment.this,
-                                            response.getString("facial_profile_file"), "profile_pic")).start();
+                                            response.getString("facial_profile_file"),
+                                            MainActivity.HEADSHOT_CACHE_FILE)).start();
 
 
 

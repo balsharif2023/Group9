@@ -50,7 +50,7 @@ public class RegistrationPage extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Bundle args= getArguments();
-        editing =  args.containsKey("user_id");
+        editing =  args!= null && args.containsKey("user_id");
 
         if(editing)
         {

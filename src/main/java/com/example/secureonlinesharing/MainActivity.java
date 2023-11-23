@@ -41,6 +41,18 @@ public class MainActivity extends AppCompatActivity {
     // variable for shared preferences.
     public SharedPreferences sharedpreferences;
 
+
+    //cache filename
+
+    public static  final String HEADSHOT_CACHE_FILE = "profile_pic";
+
+    public static  final String MEDIA_UPLOAD_CACHE_FILE = "media_upload_temp";
+
+
+    public static  final String MEDIA_VIEWER_CACHE_FILE = "media_viewer_temp";
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,14 +80,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab)
-                        .setAction("Action", null).show();
-            }
-        });
         backButton = binding.backButton;
         userMenuButton =binding.userMenuButton;
 

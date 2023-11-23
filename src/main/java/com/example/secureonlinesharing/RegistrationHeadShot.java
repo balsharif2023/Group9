@@ -62,10 +62,6 @@ public class RegistrationHeadShot extends Fragment {
 
 
 
-    private String mediaId = "";
-    private int pdfPageNum;
-
-    private PdfRenderer renderer;
 
     private CameraHandler camera;
 
@@ -96,55 +92,7 @@ public class RegistrationHeadShot extends Fragment {
 
     }
 
-    public static Bitmap openImage(Activity activity, ImageView img) {
-        File imgFile = new File(activity.getCacheDir(), "temp");
 
-
-        // on below line we are checking if the image file exist or not.
-        if (imgFile.exists()) {
-            // on below line we are creating an image bitmap variable
-            // and adding a bitmap to it from image file.
-            Bitmap imgBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
-            // on below line we are setting bitmap to our image view.
-            img.setImageBitmap(imgBitmap);
-            return imgBitmap;
-        }
-        return null;
-    }
-
-    public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
-
-        // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
-
-        //   File fileCopy = copyToCache(activity,input);
-        File fileCopy = new File(activity.getCacheDir(), "temp");
-        // We get a page from the PDF doc by calling 'open'
-        ParcelFileDescriptor fileDescriptor =
-                ParcelFileDescriptor.open(fileCopy,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-
-        PdfRenderer renderer = new PdfRenderer(fileDescriptor);
-
-
-        PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
-        // Create a new bitmap and render the page contents into it
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        activity.getWindowManager()
-                .getDefaultDisplay()
-                .getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-        int pageWidth = mPdfPage.getWidth();
-        int pageHeight = mPdfPage.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight * width / pageWidth,
-                Bitmap.Config.ARGB_8888);
-        mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-        // Set the bitmap in the ImageView
-        img.setImageBitmap(bitmap);
-
-        return renderer;
-    }
 
 
 
@@ -166,7 +114,7 @@ public class RegistrationHeadShot extends Fragment {
             try {
                 Bitmap cropImage = getCropImage();
                 int quality = 100;
-                File file = new File(getActivity().getCacheDir(), "temp");
+                File file = new File(getActivity().getCacheDir(), MainActivity.HEADSHOT_CACHE_FILE);
                 FileOutputStream output = new FileOutputStream(file);
                 System.out.println("headshot: "+ cropImage.getWidth()+"x" + cropImage.getHeight());
                 cropImage.compress(Bitmap.CompressFormat.JPEG, quality, output);
@@ -217,7 +165,7 @@ public class RegistrationHeadShot extends Fragment {
 
 
         }
-        pdfPageNum = 0;
+
 
 
 
@@ -369,6 +317,8 @@ public class RegistrationHeadShot extends Fragment {
                 params.put("user_password",  args.getString("user_password"));
                 params.put("facial_image_format", "jpg");
 
+                System.out.println(params);
+
                 return params;
             }
 
@@ -377,26 +327,10 @@ public class RegistrationHeadShot extends Fragment {
                 Map<String, DataPart> params = new HashMap<>();
                 // file name could found file base or direct access from real path
                 // for now just get bitmap data from ImageView
-                File fileCopy = new File(getActivity().getCacheDir(), "temp");
+                File fileCopy = new File(getActivity().getCacheDir(),
+                        MainActivity.HEADSHOT_CACHE_FILE);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    Bitmap bitmap = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
-//
-//
-//                    try {
-//
-//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-//                        byte[] bytes = baos.toByteArray();
-//
-//                        File file = new File(getActivity().getCacheDir(), "profile_pic");
-//                        FileOutputStream output = new FileOutputStream(file);
-//
-//                        output.write(bytes, 0, bytes.length);
-//
-//                        output.close();
-//
-//                        baos.close();
 
 
                     byte[] bytes = new byte[0];

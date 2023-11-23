@@ -100,22 +100,13 @@ public class FaceAuth extends Fragment {
     private FaceAuthBinding binding;
 
 
-    private String mediaId = "";
-    private int pdfPageNum;
 
-    private PdfRenderer renderer;
+
 
     private CameraHandler camera;
 
-    private Bitmap headShot;
 
 
-    // creating a variable
-    // for PDF view.
-    // PDFView pdfView;
-
-    // url of our PDF file.
-    String pdfurl = "https://innshomebase.com/securefilesharing/develop/public/loremipsum.pdf";
 
     private int imgSize = 112;
 // Set this image size according to our choice of DNN Model (160 for FaceNet, 112 for MobileFaceNet)
@@ -235,74 +226,8 @@ public class FaceAuth extends Fragment {
 
     }
 
-    public static Bitmap openImage(Activity activity, ImageView img) {
-        File imgFile = new File(activity.getCacheDir(), "temp");
 
 
-        // on below line we are checking if the image file exist or not.
-        if (imgFile.exists()) {
-            // on below line we are creating an image bitmap variable
-            // and adding a bitmap to it from image file.
-            Bitmap imgBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
-            // on below line we are setting bitmap to our image view.
-            img.setImageBitmap(imgBitmap);
-            return imgBitmap;
-        }
-        return null;
-    }
-
-    public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
-
-        // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
-
-        //   File fileCopy = copyToCache(activity,input);
-        File fileCopy = new File(activity.getCacheDir(), "temp");
-        // We get a page from the PDF doc by calling 'open'
-        ParcelFileDescriptor fileDescriptor =
-                ParcelFileDescriptor.open(fileCopy,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-
-        PdfRenderer renderer = new PdfRenderer(fileDescriptor);
-
-
-        PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
-        // Create a new bitmap and render the page contents into it
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        activity.getWindowManager()
-                .getDefaultDisplay()
-                .getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-        int pageWidth = mPdfPage.getWidth();
-        int pageHeight = mPdfPage.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight * width / pageWidth,
-                Bitmap.Config.ARGB_8888);
-        mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-        // Set the bitmap in the ImageView
-        img.setImageBitmap(bitmap);
-
-        return renderer;
-    }
-
-    public static File copyToCache(Activity activity, InputStream input) throws IOException {
-
-
-//Get input stream object to read the pdf
-        File file = new File(activity.getCacheDir(), "temp");
-        FileOutputStream output = new FileOutputStream(file);
-        byte[] buffer = new byte[1024];
-        int size;
-        // Copy the entire contents of the file
-        while ((size = input.read(buffer)) != -1) {
-            output.write(buffer, 0, size);
-        }
-//Close the buffer
-        input.close();
-        output.close();
-        return file;
-
-    }
 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -316,10 +241,16 @@ public class FaceAuth extends Fragment {
             @Override
             public void onCapture() {
 
-                //  headShot = ((BitmapDrawable)binding.camera.captureView.getDrawable()).getBitmap();
 
+                if(getCropImage()!= null){
+                   if(faceMatch()) {
+                       NavHostFragment.findNavController(FaceAuth.this)
+                               .navigate(R.id.action_faceAuth_to_documentViewer,
+                                       getArguments());
+                   }
 
-                faceMatch();
+                }
+
             }
         };
 
@@ -334,8 +265,6 @@ public class FaceAuth extends Fragment {
         }
 
 
-        // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
-        //new RetrievePDFfromUrl(pdfurl).run();
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
         if (backButton != null) {
             backButton.setVisibility(View.VISIBLE);
@@ -357,7 +286,7 @@ public class FaceAuth extends Fragment {
 
 
         }
-        pdfPageNum = 0;
+
 
 
 //        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
@@ -380,7 +309,7 @@ public class FaceAuth extends Fragment {
     }
 
 
-    public void faceMatch() {
+    public boolean faceMatch() {
 
 
         int[] img = {
@@ -430,7 +359,7 @@ public class FaceAuth extends Fragment {
             Bitmap img1 = null;
             if(i<0)
             {
-                File imgFile = new File(getActivity().getCacheDir(), "profile_pic");
+                File imgFile = new File(getActivity().getCacheDir(), MainActivity.HEADSHOT_CACHE_FILE);
 
 
                 img1 = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -459,6 +388,7 @@ public class FaceAuth extends Fragment {
         } //*/
 
         System.out.println("best match is " +  ( bestIndex<0? "profile_pic":names[bestIndex])  + " with score " + bestScore);
+        return bestIndex<0;
 
     }
 

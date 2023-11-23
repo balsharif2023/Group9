@@ -3,6 +3,9 @@ package com.example.secureonlinesharing;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.pdf.PdfRenderer;
+import android.os.ParcelFileDescriptor;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -128,6 +131,39 @@ class RetrieveFileFromUrl implements Runnable{
 
 
 
+    public static PdfRenderer openPdf(Activity activity, ImageView img,String file_name,
+                                      int pdfPageNum) throws IOException {
+
+        // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
+
+        //   File fileCopy = copyToCache(activity,input);
+        File fileCopy = new File(activity.getCacheDir(), file_name);
+        // We get a page from the PDF doc by calling 'open'
+        ParcelFileDescriptor fileDescriptor =
+                ParcelFileDescriptor.open(fileCopy,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+
+        PdfRenderer renderer = new PdfRenderer(fileDescriptor);
+
+
+        PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
+        // Create a new bitmap and render the page contents into it
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        activity.getWindowManager()
+                .getDefaultDisplay()
+                .getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        int pageWidth = mPdfPage.getWidth();
+        int pageHeight = mPdfPage.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight * width / pageWidth,
+                Bitmap.Config.ARGB_8888);
+        mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        // Set the bitmap in the ImageView
+        img.setImageBitmap(bitmap);
+
+        return renderer;
+    }
 
 
 

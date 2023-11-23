@@ -76,21 +76,10 @@ public class DocumentViewer extends Fragment {
     private PdfRenderer renderer;
 
 
-    private Bitmap mSelectedImage;
-    private GraphicOverlay mGraphicOverlay;
-    // Max width (portrait mode)
-    private Integer mImageMaxWidth;
-    // Max height (portrait mode)
-    private Integer mImageMaxHeight;
 
 
 
-    // creating a variable
-    // for PDF view.
-   // PDFView pdfView;
 
-    // url of our PDF file.
-    String pdfurl = "https://innshomebase.com/securefilesharing/develop/public/loremipsum.pdf";
 
 
     @Override
@@ -111,38 +100,6 @@ public class DocumentViewer extends Fragment {
     }
 
 
-    public static PdfRenderer openPdf(Activity activity, ImageView img, int pdfPageNum) throws IOException {
-
-        // Copy sample.pdf from 'res/raw' folder into cache so PdfRenderer can handle it
-
-     //   File fileCopy = copyToCache(activity,input);
-        File fileCopy = new File(activity.getCacheDir(), "temp");
-        // We get a page from the PDF doc by calling 'open'
-        ParcelFileDescriptor fileDescriptor =
-                ParcelFileDescriptor.open(fileCopy,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-
-        PdfRenderer renderer = new PdfRenderer(fileDescriptor);
-
-
-        PdfRenderer.Page mPdfPage = renderer.openPage(pdfPageNum);
-        // Create a new bitmap and render the page contents into it
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-       activity.getWindowManager()
-               .getDefaultDisplay()
-               .getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-        int pageWidth = mPdfPage.getWidth();
-        int pageHeight= mPdfPage.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, pageHeight*width/pageWidth,
-                Bitmap.Config.ARGB_8888);
-        mPdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-        // Set the bitmap in the ImageView
-        img.setImageBitmap(bitmap);
-
-        return renderer;
-    }
 
 
 
@@ -152,9 +109,9 @@ public class DocumentViewer extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mGraphicOverlay = binding.graphicOverlay;
 
-        mediaId = getArguments().getString("mediaId");
+
+        mediaId = getArguments().getString("media_id");
 
         getMedia();
 
@@ -192,7 +149,7 @@ public class DocumentViewer extends Fragment {
 
                 Bundle bundle = new Bundle();
 
-                bundle.putString("mediaId",mediaId);
+                bundle.putString("media_id",mediaId);
                 NavHostFragment.findNavController(DocumentViewer.this)
                         .navigate(R.id.action_documentViewer_to_mediaUploader,bundle);
 
@@ -203,12 +160,6 @@ public class DocumentViewer extends Fragment {
 
 
 
-        binding.detectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                runFaceContourDetection();
-            }
-        });
 
 
         binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
@@ -219,7 +170,9 @@ public class DocumentViewer extends Fragment {
                 try {
                     if (renderer.getPageCount() - 1 > pdfPageNum) {
                         pdfPageNum++;
-                        renderer = openPdf(getActivity(),binding.mediaView, pdfPageNum);
+                        renderer = RetrieveFileFromUrl.openPdf(getActivity(),
+                                binding.mediaView,
+                                MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
                     }
                 }
                 catch (IOException e) {
@@ -237,7 +190,8 @@ public class DocumentViewer extends Fragment {
                 if(pdfPageNum >0)
                 {
                 pdfPageNum--;
-                    renderer = openPdf(getActivity(),binding.mediaView, pdfPageNum);
+                    renderer = RetrieveFileFromUrl.openPdf(getActivity(),binding.mediaView,
+                            MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
                 }
             }
                 catch (IOException e) {
@@ -306,7 +260,7 @@ public class DocumentViewer extends Fragment {
 
                         System.out.println(accessPath);
 
-                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, "temp"){
+                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, MainActivity.MEDIA_VIEWER_CACHE_FILE){
 
                             @Override
                             public void onRetrieve()
@@ -314,11 +268,12 @@ public class DocumentViewer extends Fragment {
                                 try {
                                     if (contentType.equals("application/pdf"))
                                     {
-                                        renderer = openPdf(getActivity(), binding.mediaView, 0);
+                                        renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
+                                                MainActivity.MEDIA_VIEWER_CACHE_FILE,0);
                                         binding.pdfControls.setVisibility(View.VISIBLE);
                                     }
                                     else if (contentType.startsWith("image")) {
-                                        mSelectedImage =  RetrieveFileFromUrl.openImage(getActivity(), binding.mediaView, "temp");
+                                        RetrieveFileFromUrl.openImage(getActivity(), binding.mediaView, MainActivity.MEDIA_VIEWER_CACHE_FILE);
                                         binding.pdfControls.setVisibility(View.GONE);
 
 
@@ -429,62 +384,11 @@ public class DocumentViewer extends Fragment {
     }
 
 
-    private void runFaceContourDetection() {
-        InputImage image = InputImage.fromBitmap(mSelectedImage, 0);
-        FaceDetectorOptions options =
-                new FaceDetectorOptions.Builder()
-                        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-                        .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
-                        .build();
-
-        binding.detectButton.setEnabled(false);
-        FaceDetector detector = FaceDetection.getClient(options);
-        detector.process(image)
-                .addOnSuccessListener(
-                        new OnSuccessListener<List<Face>>() {
-                            @Override
-                            public void onSuccess(List<Face> faces) {
-                                binding.detectButton.setEnabled(true);
-                                processFaceContourDetectionResult(faces);
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Task failed with an exception
-                                binding.detectButton.setEnabled(true);
-                                e.printStackTrace();
-                            }
-                        });
-
-    }
-
-    private void processFaceContourDetectionResult(List<Face> faces) {
-        // Task completed successfully
-        if (faces.size() == 0) {
-            showToast("No face found");
-            return;
-        }
-        else
-        {
-            showToast("face found");
-        }
-        mGraphicOverlay.clear();
-        for (int i = 0; i < faces.size(); ++i) {
-            Face face = faces.get(i);
-            FaceContourGraphic faceGraphic = new FaceContourGraphic(mGraphicOverlay);
-            mGraphicOverlay.add(faceGraphic);
-            faceGraphic.updateFace(face);
-        }
-    }
 
 
 
 
-    private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
+
 
 
 
