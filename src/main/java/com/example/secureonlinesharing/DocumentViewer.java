@@ -20,8 +20,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.graphics.pdf.PdfRenderer;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -49,6 +51,7 @@ import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,16 +73,10 @@ public class DocumentViewer extends Fragment {
 
     private DocumentViewerBinding binding;
 
-    private  String mediaId = "";
+    private String mediaId = "";
     private int pdfPageNum;
 
     private PdfRenderer renderer;
-
-
-
-
-
-
 
 
     @Override
@@ -87,24 +84,15 @@ public class DocumentViewer extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
 
-    )
-
-    {
+    ) {
 
         binding = DocumentViewerBinding.inflate(inflater, container, false);
         // create a new renderer
-     
+
 
         return binding.getRoot();
 
     }
-
-
-
-
-
-
-
 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -116,17 +104,15 @@ public class DocumentViewer extends Fragment {
         getMedia();
 
 
-       // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
+        // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
         //new RetrievePDFfromUrl(pdfurl).run();
         ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
+        if (backButton != null) {
             backButton.setVisibility(View.VISIBLE);
 
             backButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view)
-                {
+                public void onClick(View view) {
                     NavHostFragment.findNavController(DocumentViewer.this)
                             .navigate(R.id.action_documentViewer_to_SecondFragment);
                 }
@@ -136,12 +122,12 @@ public class DocumentViewer extends Fragment {
         }
 
         ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
+        if (userMenuButton != null) {
             userMenuButton.setVisibility(View.VISIBLE);
 
 
         }
-        pdfPageNum =0;
+        pdfPageNum = 0;
 
         binding.mediaEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,17 +135,13 @@ public class DocumentViewer extends Fragment {
 
                 Bundle bundle = new Bundle();
 
-                bundle.putString("media_id",mediaId);
+                bundle.putString("media_id", mediaId);
                 NavHostFragment.findNavController(DocumentViewer.this)
-                        .navigate(R.id.action_documentViewer_to_mediaUploader,bundle);
+                        .navigate(R.id.action_documentViewer_to_mediaUploader, bundle);
 
 
             }
         });
-
-
-
-
 
 
         binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
@@ -174,8 +156,7 @@ public class DocumentViewer extends Fragment {
                                 binding.mediaView,
                                 MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
@@ -187,14 +168,12 @@ public class DocumentViewer extends Fragment {
 
 
             try {
-                if(pdfPageNum >0)
-                {
-                pdfPageNum--;
-                    renderer = RetrieveFileFromUrl.openPdf(getActivity(),binding.mediaView,
+                if (pdfPageNum > 0) {
+                    pdfPageNum--;
+                    renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
                             MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
                 }
-            }
-                catch (IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
@@ -214,21 +193,21 @@ public class DocumentViewer extends Fragment {
 
     }
 
-    public void getMedia()  {
+    public void getMedia() {
 
-        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
-        String token = data.getString("jwt","");
+        String token = data.getString("jwt", "");
 
-        String userId = data.getString("id","");
+        String userId = data.getString("id", "");
 
-        JSONObject json ;
+        JSONObject json;
 
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
-        url += "?mediaId="+ mediaId;
+        url += "?mediaId=" + mediaId;
 
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -246,7 +225,7 @@ public class DocumentViewer extends Fragment {
                     // get the image url from the JSON object
                     String message;
                     try {
-                       // message = response.getString("token");
+                        // message = response.getString("token");
                         //System.out.println(message);
 
                         System.out.println(response.getString("mediaAccessPath"));
@@ -255,24 +234,21 @@ public class DocumentViewer extends Fragment {
 
                         String owner = response.getString("mediaOwnerId");
 
-                        System.out.println("owner: "+ owner + " user: "+ userId);
+                        System.out.println("owner: " + owner + " user: " + userId);
                         String accessPath = response.getString("mediaAccessPath");
 
                         System.out.println(accessPath);
 
-                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, MainActivity.MEDIA_VIEWER_CACHE_FILE){
+                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, MainActivity.MEDIA_VIEWER_CACHE_FILE) {
 
                             @Override
-                            public void onRetrieve()
-                            {
+                            public void onRetrieve() {
                                 try {
-                                    if (contentType.equals("application/pdf"))
-                                    {
+                                    if (contentType.equals("application/pdf")) {
                                         renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
-                                                MainActivity.MEDIA_VIEWER_CACHE_FILE,0);
+                                                MainActivity.MEDIA_VIEWER_CACHE_FILE, 0);
                                         binding.pdfControls.setVisibility(View.VISIBLE);
-                                    }
-                                    else if (contentType.startsWith("image")) {
+                                    } else if (contentType.startsWith("image")) {
                                         RetrieveFileFromUrl.openImage(getActivity(), binding.mediaView, MainActivity.MEDIA_VIEWER_CACHE_FILE);
                                         binding.pdfControls.setVisibility(View.GONE);
 
@@ -287,18 +263,17 @@ public class DocumentViewer extends Fragment {
 
                         }).start();
 
-                        if( owner.equals(userId))
-                        {
-                            String firstName = data.getString("firstName","");
-                            String lastName = data.getString("lastName","");
+                        if (owner.equals(userId)) {
+                            String firstName = data.getString("firstName", "");
+                            String lastName = data.getString("lastName", "");
 
-                            binding.mediaOwner.setText(firstName+ " "+ lastName);
+                            binding.mediaOwner.setText(firstName + " " + lastName);
 
-                        }
-                        else
+                        } else
                             binding.mediaOwner.setText("");
-
-
+                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"joeblow\"},{\"user_name\": \"joeblow\"},{\"user_name\": \"joeblow\"}]}";
+                        JSONObject authUser = new JSONObject(json1);
+                        showUserList(getActivity(),authUser,binding.authUsers);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -309,7 +284,7 @@ public class DocumentViewer extends Fragment {
                 (Response.ErrorListener) error -> {
                     // make a Toast telling the user
                     // that something went wrong
-                     //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
                     // log the error message in the error stream
                     //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
                     NetworkResponse networkResponse = error.networkResponse;
@@ -321,7 +296,7 @@ public class DocumentViewer extends Fragment {
                         } else if (error.getClass().equals(NoConnectionError.class)) {
                             errorMessage = "Failed to connect server";
                         }
-                        Toast toast = Toast.makeText(getContext(),errorMessage,Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
                         toast.show();
 
                     } else {
@@ -333,7 +308,7 @@ public class DocumentViewer extends Fragment {
 
 
                             Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(),message,Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
                             toast.show();
 
                             if (networkResponse.statusCode == 404) {
@@ -352,16 +327,15 @@ public class DocumentViewer extends Fragment {
                     Log.i("Error", errorMessage);
                     error.printStackTrace();
                 }
-        ){
+        ) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers =  super.getHeaders();
-                HashMap<String, String> headers2 =new HashMap<String,String>();
-                for(String s: headers.keySet())
-                {
-                    headers2.put(s,headers.get(s));
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
                 }
-                headers2.put("Authorization","Bearer " + token);
+                headers2.put("Authorization", "Bearer " + token);
                 return headers2;
             }
         };
@@ -376,7 +350,6 @@ public class DocumentViewer extends Fragment {
     // create an async task class for loading pdf file from URL.
 
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -384,12 +357,58 @@ public class DocumentViewer extends Fragment {
     }
 
 
+    public static void showUserList(Activity activity, JSONObject response,LinearLayout wrapper) {
+
+        String userList;
+        try {
+            userList = response.getString("ivanSendsBack");
+            System.out.println(userList);
+            JSONArray json = new JSONArray(userList);
+            View prev = null;
+
+           // binding.authUsers.removeAllViews();
+            for (int i = 0; i < json.length(); i++) {
+                JSONObject entry = json.getJSONObject(i);
+                View view = LayoutInflater.from(activity).inflate(R.layout.user_record, null);
+                ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_name"));
+
+                ((ImageButton) view.findViewById(R.id.authUserEditButton)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+
+                ((ImageButton) view.findViewById(R.id.authUserDeleteButton)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
 
 
 
 
+                    }
+                });
+
+                wrapper.addView(view);
+                if (prev != null) {
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    params.setMargins(0, 0, 0, 40);
+                    prev.setLayoutParams(params);
+                }
+
+                prev = view;
+            }
 
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 }

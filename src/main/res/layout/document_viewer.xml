@@ -160,11 +160,35 @@
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/detectButton"
+            <View
+                android:id="@+id/divider2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
+                android:layout_height="3dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/authUsersLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/auth_user_list_label"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/authUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"></LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

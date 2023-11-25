@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/userRecordTemplate"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/media_border"
+    android:orientation="horizontal"
+    android:visibility="visible">
+
+    <ImageView
+        android:id="@+id/userHeadshot"
+
+        android:layout_width="wrap_content"
+        android:layout_height="55dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/owl"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/media_inner_border"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:fontFamily="serif"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="TextView"
+            android:textSize="25sp" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/authUserEditButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_edit"
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/authUserDeleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_delete"
+        android:visibility="gone" />
+
+</LinearLayout>
