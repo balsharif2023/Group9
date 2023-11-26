@@ -29,6 +29,7 @@
 
                 <TextView
                     android:id="@+id/mediaTitleLabel"
+                    style="@style/formLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -52,6 +53,7 @@
 
                 <TextView
                     android:id="@+id/mediaDescriptionLabel"
+                    style="@style/formLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -96,17 +98,70 @@
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY" />
 
-                <Button
-                    android:id="@+id/mediaUploadButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@color/gold"
-                    android:paddingLeft="80dp"
-                    android:paddingRight="80dp"
-                    android:text="@string/media_edit_button_label" />
+
 
             </LinearLayout>
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="?android:attr/listDivider" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:id="@+id/floatingActionButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:clickable="true"
+                            android:src="@android:drawable/ic_input_add"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+
+                        <TextView
+                            android:id="@+id/authUsersLabel"
+                            style="@style/formLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/auth_user_list_label"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/authUsers"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"></LinearLayout>
+
+                </LinearLayout>
+
+
+            <Button
+                android:id="@+id/mediaUploadButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gold"
+                android:paddingLeft="80dp"
+                android:paddingRight="80dp"
+                android:text="@string/media_edit_button_label" />
+
+
 
         </LinearLayout>
 

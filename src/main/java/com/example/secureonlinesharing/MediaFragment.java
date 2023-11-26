@@ -3,34 +3,18 @@ package com.example.secureonlinesharing;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
-import android.graphics.pdf.PdfRenderer;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RawRes;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -41,85 +25,43 @@ import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.secureonlinesharing.databinding.DocumentViewerBinding;
-import com.example.secureonlinesharing.databinding.FragmentThirdBinding;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetection;
-import com.google.mlkit.vision.face.FaceDetector;
-import com.google.mlkit.vision.face.FaceDetectorOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
+public class MediaFragment extends Fragment {
 
-public class DocumentViewer extends Fragment {
 
-    private DocumentViewerBinding binding;
 
-    private String mediaId = "";
+    protected String mediaId = "";
     private int pdfPageNum;
 
+
+    protected boolean isViewer = false;
     private PdfRenderer renderer;
 
+    protected TextView mediaTitle, mediaDescription, mediaOwner;
 
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-
-    ) {
-
-        binding = DocumentViewerBinding.inflate(inflater, container, false);
-        // create a new renderer
+    protected LinearLayout authUsers;
 
 
-        return binding.getRoot();
-
-    }
 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Bundle args= getArguments();
 
-        mediaId = getArguments().getString("media_id");
-
-        getMedia();
-
-
-        // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
-        //new RetrievePDFfromUrl(pdfurl).run();
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
-
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(DocumentViewer.this)
-                            .navigate(R.id.action_documentViewer_to_SecondFragment);
-                }
-            });
+        mediaId = args == null?"": args.getString("media_id");
 
 
-        }
+
+
+
 
         ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
         if (userMenuButton != null) {
@@ -129,56 +71,11 @@ public class DocumentViewer extends Fragment {
         }
         pdfPageNum = 0;
 
-        binding.mediaEditButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Bundle bundle = new Bundle();
-
-                bundle.putString("media_id", mediaId);
-                NavHostFragment.findNavController(DocumentViewer.this)
-                        .navigate(R.id.action_documentViewer_to_mediaUploader, bundle);
 
 
-            }
-        });
 
 
-        binding.pdfForwardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-
-                try {
-                    if (renderer.getPageCount() - 1 > pdfPageNum) {
-                        pdfPageNum++;
-                        renderer = RetrieveFileFromUrl.openPdf(getActivity(),
-                                binding.mediaView,
-                                MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-
-            }
-        });
-
-        binding.pdfBackButton.setOnClickListener(view1 -> {
-
-
-            try {
-                if (pdfPageNum > 0) {
-                    pdfPageNum--;
-                    renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
-                            MainActivity.MEDIA_VIEWER_CACHE_FILE, pdfPageNum);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-
-        });
 
 
 //        final ZoomLinearLayout zoomLinearLayout = (ZoomLinearLayout) getActivity().findViewById(R.id.zoom_linear_layout);
@@ -229,8 +126,6 @@ public class DocumentViewer extends Fragment {
                         //System.out.println(message);
 
                         System.out.println(response.getString("mediaAccessPath"));
-                        binding.mediaTitle.setText(response.getString("mediaTitle"));
-                        binding.mediaDescription.setText(response.getString("mediaDescription"));
 
                         String owner = response.getString("mediaOwnerId");
 
@@ -239,41 +134,29 @@ public class DocumentViewer extends Fragment {
 
                         System.out.println(accessPath);
 
-                        new Thread(new RetrieveFileFromUrl(DocumentViewer.this, accessPath, MainActivity.MEDIA_VIEWER_CACHE_FILE) {
-
-                            @Override
-                            public void onRetrieve() {
-                                try {
-                                    if (contentType.equals("application/pdf")) {
-                                        renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
-                                                MainActivity.MEDIA_VIEWER_CACHE_FILE, 0);
-                                        binding.pdfControls.setVisibility(View.VISIBLE);
-                                    } else if (contentType.startsWith("image")) {
-                                        RetrieveFileFromUrl.openImage(getActivity(), binding.mediaView, MainActivity.MEDIA_VIEWER_CACHE_FILE);
-                                        binding.pdfControls.setVisibility(View.GONE);
+                        mediaTitle.setText(response.getString("mediaTitle"));
+                        mediaDescription.setText(response.getString("mediaDescription"));
 
 
-                                    }
 
 
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
+                        displayMedia(accessPath);
+
+
+                            if(mediaOwner!=null) {
+                                if (owner.equals(userId)) {
+                                    String firstName = data.getString("firstName", "");
+                                    String lastName = data.getString("lastName", "");
+
+                                    mediaOwner.setText(firstName + " " + lastName);
+
+                                } else
+                                    mediaOwner.setText("");
                             }
+                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"joeblow\", \"user_id\":\"1\"},{\"user_name\": \"joeblow\", \"user_id\":\"2\"},{\"user_name\": \"joeblow\", \"user_id\":\"3\"}]}";
 
-                        }).start();
-
-                        if (owner.equals(userId)) {
-                            String firstName = data.getString("firstName", "");
-                            String lastName = data.getString("lastName", "");
-
-                            binding.mediaOwner.setText(firstName + " " + lastName);
-
-                        } else
-                            binding.mediaOwner.setText("");
-                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"joeblow\"},{\"user_name\": \"joeblow\"},{\"user_name\": \"joeblow\"}]}";
                         JSONObject authUser = new JSONObject(json1);
-                        showUserList(getActivity(),authUser,binding.authUsers);
+                        showUserList(authUser,authUsers);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -353,11 +236,13 @@ public class DocumentViewer extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+
     }
 
 
-    public static void showUserList(Activity activity, JSONObject response,LinearLayout wrapper) {
+    public void displayMedia(String path){}
+
+    public void showUserList(JSONObject response,LinearLayout wrapper) {
 
         String userList;
         try {
@@ -369,26 +254,10 @@ public class DocumentViewer extends Fragment {
            // binding.authUsers.removeAllViews();
             for (int i = 0; i < json.length(); i++) {
                 JSONObject entry = json.getJSONObject(i);
-                View view = LayoutInflater.from(activity).inflate(R.layout.user_record, null);
+                View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
                 ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_name"));
 
-                ((ImageButton) view.findViewById(R.id.authUserEditButton)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-
-
-                ((ImageButton) view.findViewById(R.id.authUserDeleteButton)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-
-
-
-                    }
-                });
+              onDisplayUser(view, entry.getString("user_id"));
 
                 wrapper.addView(view);
                 if (prev != null) {
@@ -409,6 +278,8 @@ public class DocumentViewer extends Fragment {
         }
 
     }
+
+    public void  onDisplayUser(View view, String userId){}
 
 
 }

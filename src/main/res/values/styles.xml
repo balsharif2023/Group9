@@ -7,6 +7,26 @@
         <item name="android:layout_marginBottom">15dp</item>
     </style>
 
+
+
+    <style name="formLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">24sp</item>
+
+        <item name="android:layout_marginTop">2.5dp</item>
+        <item name="android:layout_marginBottom">15dp</item>
+
+        <item name= "android:fontFamily" >sans-serif</item>
+
+        <item name= "android:textStyle" >bold</item>
+
+
+    </style>
+
+
+
+
+
     <style name="profileDisplay" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">24sp</item>

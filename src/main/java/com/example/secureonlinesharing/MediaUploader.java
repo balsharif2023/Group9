@@ -48,12 +48,12 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MediaUploader extends Fragment {
+public class MediaUploader extends MediaFragment {
 
     private MediaUploaderBinding binding;
     private boolean edit = false;
 
-    private String mediaId = "";
+
 
     private String extension = "";
 
@@ -123,6 +123,15 @@ public class MediaUploader extends Fragment {
 
         binding = MediaUploaderBinding.inflate(inflater, container, false);
         getActivity().setTitle("Olympus");
+
+        mediaTitle = binding.mediaTitleInput;
+
+        mediaDescription = binding.mediaDescriptionInput;
+
+        mediaOwner = null;
+
+        authUsers = binding.authUsers;
+
         return binding.getRoot();
 
     }
@@ -143,19 +152,12 @@ public class MediaUploader extends Fragment {
             });
         }
 
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.VISIBLE);
 
 
-        }
-        Bundle args = getArguments();
-
-        mediaId = args== null?"": args.getString("media_id");
 
         edit = mediaId!= null && !mediaId.equals("");
         if (edit) {
-            getMedia(mediaId);
+            getMedia();
             binding.mediaUploadButton.setText(R.string.media_edit_button_label);
         } else {
             binding.mediaUploadButton.setText(R.string.media_upload_button_label);
@@ -183,112 +185,6 @@ public class MediaUploader extends Fragment {
         dropdown.setAdapter(adapter);
     }
 
-    public void getMedia(String mediaId) {
-        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-
-        String token = data.getString("jwt", "");
-
-
-        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
-        // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
-
-        url += "?mediaId=" + mediaId;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-
-                Request.Method.GET,
-
-                url,
-
-                null,
-
-
-                // lambda function for handling the case
-                // when the HTTP request succeeds
-                (Response.Listener<JSONObject>) response -> {
-                    // get the image url from the JSON object
-                    String message;
-                    try {
-                        // message = response.getString("token");
-                        //System.out.println(message);
-
-                        System.out.println(response.getString("mediaAccessPath"));
-                        binding.mediaTitleInput.setText(response.getString("mediaTitle"));
-                        binding.mediaDescriptionInput.setText(response.getString("mediaDescription"));
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                },
-
-                // lambda function for handling the case
-                // when the HTTP request fails
-                (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
-                    NetworkResponse networkResponse = error.networkResponse;
-                    //System.out.println("status code: "+ networkResponse.statusCode );
-                    String errorMessage = "Unknown error";
-                    if (networkResponse == null) {
-                        if (error.getClass().equals(TimeoutError.class)) {
-                            errorMessage = "Request timeout";
-                        } else if (error.getClass().equals(NoConnectionError.class)) {
-                            errorMessage = "Failed to connect server";
-                        }
-                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
-                        toast.show();
-
-                    } else {
-                        String result = new String(networkResponse.data);
-                        try {
-                            JSONObject response = new JSONObject(result);
-
-                            String message = response.getString("message");
-
-
-                            Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                            toast.show();
-
-                            if (networkResponse.statusCode == 404) {
-                                errorMessage = "Resource not found";
-                            } else if (networkResponse.statusCode == 401) {
-                                errorMessage = message + " Please login again";
-                            } else if (networkResponse.statusCode == 400) {
-                                errorMessage = message + " Check your inputs";
-                            } else if (networkResponse.statusCode == 500) {
-                                errorMessage = message + " Something is getting wrong";
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Log.i("Error", errorMessage);
-                    error.printStackTrace();
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = super.getHeaders();
-                HashMap<String, String> headers2 = new HashMap<String, String>();
-                for (String s : headers.keySet()) {
-                    headers2.put(s, headers.get(s));
-                }
-                headers2.put("Authorization", "Bearer " + token);
-                return headers2;
-            }
-        };
-        // add the json request object created above
-        // to the Volley request queue
-        volleyQueue.add(jsonObjectRequest);
-        //} // catch(JSONException e){} */
-
-
-    }
 
 
     public void saveMedia() {
@@ -322,7 +218,7 @@ public class MediaUploader extends Fragment {
 
                             bundle.putString("media_id", mediaId);
                             NavHostFragment.findNavController(MediaUploader.this)
-                                    .navigate(R.id.action_mediaUploader_to_documentViewer, bundle);
+                                    .navigate(R.id.action_mediaUploader_to_mediaViewer, bundle);
 
 
                             Log.i("Message", message);
@@ -431,10 +327,59 @@ public class MediaUploader extends Fragment {
     }
 
 
+
+    @Override
+    public void onDisplayUser(View view, String userId){
+
+        ImageButton editButton =  ((ImageButton) view.findViewById(R.id.authUserEditButton)),
+                deleteButton = ((ImageButton) view.findViewById(R.id.authUserDeleteButton));
+
+
+
+        editButton.setVisibility(View.VISIBLE);
+
+        deleteButton.setVisibility(View.VISIBLE);
+
+
+
+     editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+
+     deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+
+            }
+        });
+
+
+
+
+    }
+
+
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
+
+
+
+
+
+
+
+
 
 }

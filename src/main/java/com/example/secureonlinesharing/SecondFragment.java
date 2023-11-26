@@ -142,7 +142,7 @@ public class SecondFragment extends Fragment {
                                         throw new RuntimeException(e);
                                     }
                                   NavHostFragment.findNavController(SecondFragment.this)
-                                          .navigate(R.id.action_SecondFragment_to_documentViewer,bundle);
+                                          .navigate(R.id.action_SecondFragment_to_mediaViewer,bundle);
 
 //                                  NavHostFragment.findNavController(SecondFragment.this)
 //                                   .navigate(R.id.action_SecondFragment_to_faceAuth,bundle);

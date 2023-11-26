@@ -245,7 +245,7 @@ public class FaceAuth extends Fragment {
                 if(getCropImage()!= null){
                    if(faceMatch()) {
                        NavHostFragment.findNavController(FaceAuth.this)
-                               .navigate(R.id.action_faceAuth_to_documentViewer,
+                               .navigate(R.id.action_faceAuth_to_mediaViewer,
                                        getArguments());
                    }
 
