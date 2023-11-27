@@ -1,38 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MediaViewer">
+    android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".MediaViewer">
 
-        <!--  <com.example.secureonlinesharing.ZoomLinearLayout
-
-        android:id="@+id/zoom_linear_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"> -->
-
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/mediaEditButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="20dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:src="@android:drawable/ic_menu_edit"
-            android:visibility="visible"
-            app:backgroundTint="@color/design_default_color_secondary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,7 +36,7 @@
             <LinearLayout
                 android:id="@+id/pdfWrapper"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -193,5 +177,36 @@
         </LinearLayout>
 
 
+    </androidx.core.widget.NestedScrollView>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <!--  <com.example.secureonlinesharing.ZoomLinearLayout
+
+android:id="@+id/zoom_linear_layout"
+android:layout_width="match_parent"
+android:layout_height="match_parent"> -->
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/mediaEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:src="@android:drawable/ic_menu_edit"
+            android:visibility="visible"
+            app:backgroundTint="@color/design_default_color_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

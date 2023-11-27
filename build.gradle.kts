@@ -50,7 +50,8 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite:+")//2.4.0
     implementation ("org.tensorflow:tensorflow-lite-gpu:+")
 
-    implementation ("org.tensorflow:tensorflow-lite-support:+")//0.1.0
+    implementation ("org.tensorflow:tensorflow-lite-support:+")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")//0.1.0
 
 
 

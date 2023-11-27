@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AuthUserPermissions"> -->
+
+
+    <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/guideline2"
+        tools:layout_editor_absoluteX="16dp">
+
+        <TextView
+            android:id="@+id/loginErrorMessage"
+            style="@style/formValidation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_error_message"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/startDateLabel"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/auth_user_start_date"
+                android:textSize="25sp" />
+
+            <EditText
+                android:id="@+id/startDateInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:ems="10"
+                android:enabled="true"
+                android:focusable="false"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/startDateEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/user_name_empty_message"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/endDateLabel"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/auth_user_end_date"
+                android:textSize="25sp" />
+
+            <EditText
+                android:id="@+id/endDateInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="12"
+                android:enabled="true"
+                android:focusable="false"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/endDateEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/password_empty_message"
+                android:visibility="gone" />
+        </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/mapLabel"
+            style="@style/formLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_user_map_label"
+            android:textSize="25sp" />
+
+        <LinearLayout
+            android:id="@+id/mapContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/mapCoords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/auth_user_coords_label"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/gold"
+                android:paddingLeft="80dp"
+                android:paddingRight="80dp"
+                android:text="@string/auth_user_save_permissions" />
+
+        </LinearLayout>
+    </LinearLayout>
+

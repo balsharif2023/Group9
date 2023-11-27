@@ -84,6 +84,9 @@
         <action
             android:id="@+id/action_mediaUploader_to_mediaViewer"
             app:destination="@id/mediaViewer" />
+        <action
+            android:id="@+id/action_mediaUploader_to_authUserPermissions"
+            app:destination="@id/authUserPermissions" />
     </fragment>
     <fragment
         android:id="@+id/userProfilePage"
@@ -116,5 +119,14 @@
         <action
             android:id="@+id/action_registrationHeadShot_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/authUserPermissions"
+        android:name="com.example.secureonlinesharing.AuthUserPermissions"
+        android:label="auth_user_permissions"
+        tools:layout="@layout/auth_user_permissions" >
+        <action
+            android:id="@+id/action_authUserPermissions_to_mediaUploader"
+            app:destination="@id/mediaUploader" />
     </fragment>
 </navigation>

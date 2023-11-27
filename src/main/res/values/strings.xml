@@ -83,4 +83,9 @@
     <string name="head_shot_title">Headshot for Authentication</string>
     <string name="next_button_label">Next</string>
     <string name="auth_user_list_label">Authorized Users</string>
+    <string name="auth_user_save_permissions">Save Permissions</string>
+    <string name="auth_user_start_date">Start Date</string>
+    <string name="auth_user_end_date">End Date</string>
+    <string name="auth_user_map_label">Access Location</string>
+    <string name="auth_user_coords_label">Tap to Select Coordinates</string>
 </resources>
