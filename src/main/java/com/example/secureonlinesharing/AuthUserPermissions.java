@@ -71,6 +71,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 .beginTransaction()
                 .add(R.id.mapContainer, mapFragment)
                 .commit();
+        mapFragment.getMapAsync(this);
 
 
 
@@ -128,6 +129,17 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
         });
 
+        binding.saveButton.setOnClickListener (new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                    savePermissions();
+            }
+
+        });
+
+
+
 
     }
 
@@ -158,7 +170,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
                         // on below line we are setting date to our text view.
-                        dateInput.setText((monthOfYear+1) + "-" + dayOfMonth + "-" + year);
+                        dateInput.setText(year + "-" +(monthOfYear+1) + "-" + dayOfMonth);
 
 
 
@@ -175,6 +187,8 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
+
+        System.out.println("map ready");
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
@@ -189,25 +203,159 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
     }
 
 
-    public static class DatePickerFragment extends DialogFragment
-            implements DatePickerDialog.OnDateSetListener {
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current date as the default date in the picker.
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
 
-            // Create a new instance of DatePickerDialog and return it.
-            return new DatePickerDialog(requireContext(), this, year, month, day);
+    public void savePermissions() {
+
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt", "");
+
+        String userId = data.getString("id", "");
+
+        JSONObject json = new JSONObject();
+
+        Bundle args = getArguments();
+
+        try {
+            json.put("media_id",args.getString("media_id"));
+
+            json.put("user_id",args.getString("user_id"));
+
+            json.put("start_date",binding.startDateInput.getText());
+
+            json.put("end_date",binding.endDateInput.getText());
+
+            json.put("latitude",""+ accessCoords.latitude);
+            json.put("longitude",""+ accessCoords.longitude);
+
+
+
+
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            // Do something with the date the user picks.
-        }
+
+        System.out.println(json);
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/addUpdateAuthorizedUser.php";
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.POST,
+
+                url,
+
+                json,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+                    try {
+                         message = response.getString("message");
+                        System.out.println(message);
+
+                        boolean success = response.getBoolean("isSuccessful");
+                        if(success)
+                              MainActivity.showToast(AuthUserPermissions.this,
+                                "Permissions saved");
+                        else
+                            MainActivity.showToast(AuthUserPermissions.this,
+                                    "Permissions unsaved");
+
+
+
+
+
+
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    // make a Toast telling the user
+                    // that something went wrong
+                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    // log the error message in the error stream
+                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    NetworkResponse networkResponse = error.networkResponse;
+                    //System.out.println("status code: "+ networkResponse.statusCode );
+                    String errorMessage = "Unknown error";
+                    if (networkResponse == null) {
+                        if (error.getClass().equals(TimeoutError.class)) {
+                            errorMessage = "Request timeout";
+                        } else if (error.getClass().equals(NoConnectionError.class)) {
+                            errorMessage = "Failed to connect server";
+                        }
+                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
+                        toast.show();
+
+                    } else {
+                        String result = new String(networkResponse.data);
+                        try {
+                            JSONObject response = new JSONObject(result);
+
+                            String message = response.getString("message");
+
+
+                            Log.e("Error Message", message);
+                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                            toast.show();
+
+                            if (networkResponse.statusCode == 404) {
+                                errorMessage = "Resource not found";
+                            } else if (networkResponse.statusCode == 401) {
+                                errorMessage = message + " Please login again";
+                            } else if (networkResponse.statusCode == 400) {
+                                errorMessage = message + " Check your inputs";
+                            } else if (networkResponse.statusCode == 500) {
+                                errorMessage = message + " Something is getting wrong";
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Log.i("Error", errorMessage);
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
     }
+
+
+
+
 
 
 

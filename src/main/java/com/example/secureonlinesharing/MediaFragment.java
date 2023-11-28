@@ -153,7 +153,7 @@ public class MediaFragment extends Fragment {
                                 } else
                                     mediaOwner.setText("");
                             }
-                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"joeblow\", \"user_id\":\"1\"},{\"user_name\": \"joeblow\", \"user_id\":\"2\"},{\"user_name\": \"joeblow\", \"user_id\":\"3\"}]}";
+                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\"},{\"user_name\": \"joeblow\", \"user_id\":\"2\"},{\"user_name\": \"joeblow\", \"user_id\":\"3\"}]}";
 
                         JSONObject authUser = new JSONObject(json1);
                         showUserList(authUser,authUsers);

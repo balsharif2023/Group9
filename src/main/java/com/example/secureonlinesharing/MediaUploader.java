@@ -183,6 +183,17 @@ public class MediaUploader extends MediaFragment {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.access_rules, R.layout.dropdown_item);
         adapter.setDropDownViewResource(R.layout.dropdown_item);
         dropdown.setAdapter(adapter);
+
+        binding.addAuthUserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                NavHostFragment.findNavController(MediaUploader.this)
+                        .navigate(R.id.action_mediaUploader_to_SecondFragment);
+
+
+            }
+        });
     }
 
 
