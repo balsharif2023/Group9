@@ -135,6 +135,20 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.SecondFragment);
 
         }
+
+
+
+        else if (id==R.id.action_friends)
+
+        {
+
+            NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
+            navController.navigateUp();
+            navController.navigate(R.id.friendList);
+
+        }
+
+
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }

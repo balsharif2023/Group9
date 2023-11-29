@@ -88,4 +88,7 @@
     <string name="auth_user_end_date">End Date</string>
     <string name="auth_user_map_label">Access Location</string>
     <string name="auth_user_coords_label">Tap to Select Coordinates</string>
+    <string name="action_friends">Friends</string>
+    <string name="title_friends">Friends</string>
+    <string name="friend_request_done_button" >Done</string>
 </resources>

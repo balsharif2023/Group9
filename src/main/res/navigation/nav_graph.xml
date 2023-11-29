@@ -129,4 +129,25 @@
             android:id="@+id/action_authUserPermissions_to_mediaUploader"
             app:destination="@id/mediaUploader" />
     </fragment>
+    <fragment
+        android:id="@+id/friendList"
+        android:name="com.example.secureonlinesharing.FriendList"
+        android:label="friend_list"
+        tools:layout="@layout/friend_list" >
+        <action
+            android:id="@+id/action_friendList_to_SecondFragment"
+            app:destination="@id/SecondFragment" />
+        <action
+            android:id="@+id/action_friendList_to_friendRequest"
+            app:destination="@id/friendRequest" />
+    </fragment>
+    <fragment
+        android:id="@+id/friendRequest"
+        android:name="com.example.secureonlinesharing.FriendRequest"
+        android:label="friend_request"
+        tools:layout="@layout/friend_request" >
+        <action
+            android:id="@+id/action_friendRequest_to_friendList"
+            app:destination="@id/friendList" />
+    </fragment>
 </navigation>
