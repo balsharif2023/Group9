@@ -188,8 +188,13 @@ public class MediaUploader extends MediaFragment {
             @Override
             public void onClick(View v) {
 
+                Bundle bundle = new Bundle();
+
+                bundle.putString("action","authorize");
+                bundle.putString("media_id", mediaId);
+
                 NavHostFragment.findNavController(MediaUploader.this)
-                        .navigate(R.id.action_mediaUploader_to_SecondFragment);
+                        .navigate(R.id.action_mediaUploader_to_authUserSearch, bundle);
 
 
             }

@@ -7,11 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -19,10 +22,13 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.secureonlinesharing.databinding.AuthUserSearchBinding;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthUserSearch extends Fragment {
 
@@ -75,13 +81,22 @@ public class AuthUserSearch extends Fragment {
         }
 
 
-        binding.searchField.setOnSearchClickListener(new View.OnClickListener() {
+        binding.searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
               search();
             }
 
+        });
+
+        binding.modifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.modifyButton.setVisibility(View.GONE);
+
+                binding.searchWrapper.setVisibility(View.VISIBLE);
+            }
         });
     }
 
@@ -97,12 +112,192 @@ public class AuthUserSearch extends Fragment {
     public void  search(){
 
 
-        String searchString = (String) binding.searchField.getQuery();
+
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt","");
+
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("user_first_name", binding.firstNameInput.getText().toString());
+            json.put("user_last_name", binding.lastNameInput.getText().toString());
+
+            json.put("user_username", binding.userNameInput.getText().toString());
+            json.put("user_email", binding.emailInput.getText().toString());
+
+
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
-        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/userLogin.php";
-        url+= "?ivanSendsBack="+ searchString;
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/searchUsers.php";
+
+
+
+
+
+
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                // we are using GET HTTP request method
+                Request.Method.POST,
+                // url we want to send the HTTP request to
+                url,
+                // this parameter is used to send a JSON object to the
+                // server, since this is not required in our case,
+                // we are keeping it `null`
+                //  new JSONObject("{userId:1}"),
+                json,
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+
+                    System.out.println(response);
+                    String message;
+
+
+                    // message = response.getString("message");
+
+                    binding.searchWrapper.setVisibility(View.GONE);
+                    binding.modifyButton.setVisibility(View.VISIBLE);
+
+                    binding.userRecordWrapper.removeAllViews();
+                    Bundle args = getArguments();
+
+                    String action = args.getString("action");
+
+                    String mediaId = args.getString("media_id");
+
+
+
+
+
+                    String userList;
+                    try {
+                        userList = response.getString("searchResults");
+                        System.out.println(userList);
+                        JSONArray users = new JSONArray(userList);
+                        View prev = null;
+
+                        // binding.authUsers.removeAllViews();
+                        for (int i = 0; i < users.length(); i++) {
+                            JSONObject entry = users.getJSONObject(i);
+
+                            String userName = entry.getString("user_username");
+
+                            String userId= entry.getString("user_id");
+
+                            View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
+                            ((TextView) view.findViewById(R.id.userName)).setText(userName);
+
+                            view.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    if(action.equals("friend"))
+                                    {
+                                        sendFriendRequest(userName);
+                                    } else if (action.equals("authorize")) {
+
+
+
+                                        Bundle bundle = new Bundle();
+
+                                        bundle.putString("media_id",mediaId);
+
+                                        bundle.putString("user_id",userId);
+
+
+
+
+                                        NavHostFragment.findNavController(AuthUserSearch.this)
+                                                .navigate(R.id.action_authUserSearch_to_authUserPermissions,bundle);
+
+
+                                    }
+                                }
+                            });
+
+                            binding.userRecordWrapper.addView(view);
+                            if (prev != null) {
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                );
+                                params.setMargins(0, 0, 0, 40);
+                                prev.setLayoutParams(params);
+                            }
+
+                            prev = view;
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    // make a Toast telling the user
+                    // that something went wrong
+                    //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
+                    // log the error message in the error stream
+                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                }
+        )
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+
+
+
+
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
+
+
+    }
+
+
+
+
+    public void  sendFriendRequest(String userName){
+
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt","");
+
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/sendFriendRequest.php";
+        url+= "?requestedFriendUserName="+ userName;
 
 
 
@@ -128,63 +323,30 @@ public class AuthUserSearch extends Fragment {
                     String message;
 
 
-                    // message = response.getString("message");
 
 
-
-                    // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
-
-                    SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = data.edit();
 
                     // below two lines will put values for
                     // email and password in shared preferences.
+
+                    System.out.println(response);
+
                     try {
+                        MainActivity.showToast(AuthUserSearch.this,response.getString("reason"));
 
-                        System.out.println(response);
 
-                        editor.putString("id", response.getString("user_id"));
-
-                        editor.putString("userName", response.getString("user_username"));
-
-                        editor.putString("firstName", response.getString("user_first_name"));
-
-                        editor.putString("lastName", response.getString("user_last_name"));
+                        boolean success = response.getBoolean("wasSuccessful");
+                        if(success){
 
 
 
-                        String token = response.getString("token");
-                        editor.putString("token",token );
-
-                        JSONObject json = null;
-
-                        json = new JSONObject(token);
-                        String jwt = json.getString("jwt");
-                        editor.putString("jwt",jwt );
-
-                        System.out.println(jwt);
-
-                        new Thread(new RetrieveFileFromUrl(AuthUserSearch.this,
-                                response.getString("facial_profile_file"),
-                                MainActivity.HEADSHOT_CACHE_FILE)).start();
-
-
+                        }
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
 
 
-
-
-
-                    // to save our data with key and value.
-                    editor.apply();
-                    NavHostFragment.findNavController(AuthUserSearch.this)
-                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
-                    // load the image into the ImageView using Glide.
-                    //binding.textviewFirst.setText(message);
 
                 },
 
@@ -197,7 +359,18 @@ public class AuthUserSearch extends Fragment {
                     // log the error message in the error stream
                     //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
                 }
-        );
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
         // add the json request object created above
         // to the Volley request queue
         volleyQueue.add(jsonObjectRequest);
@@ -207,5 +380,7 @@ public class AuthUserSearch extends Fragment {
 
 
     }
+
+
 
 }

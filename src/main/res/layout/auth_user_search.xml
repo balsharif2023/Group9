@@ -9,17 +9,120 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".AuthUserSearch">
-    >
 
-    <SearchView
-        android:id="@+id/searchField"
+    <LinearLayout
+        android:id="@+id/searchWrapper"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:searchIcon="@android:drawable/ic_search_category_default" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView5"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="First Name" />
+
+            <EditText
+                android:id="@+id/firstNameInput"
+                style="@style/formInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView4"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Last Name" />
+
+            <EditText
+                android:id="@+id/lastNameInput"
+                style="@style/formInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView3"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User Name" />
+
+            <EditText
+                android:id="@+id/userNameInput"
+                style="@style/formInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView2"
+                style="@style/formLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="E-mail" />
+
+            <EditText
+                android:id="@+id/emailInput"
+                style="@style/formInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/search_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Search" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/modifyButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Modify Search"
+        android:visibility="gone" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:fillViewport="true">
 
         <LinearLayout
