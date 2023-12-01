@@ -8,6 +8,8 @@ import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.fragment.app.Fragment;
 
@@ -130,7 +132,20 @@ class RetrieveFileFromUrl implements Runnable{
     }
 
 
+    public static void openVideo(Activity activity, VideoView videoView,String fileName) {
 
+        File videoFile = new File(activity.getCacheDir(), fileName);
+        videoView.setZOrderOnTop(true);
+        videoView.setVisibility(View.VISIBLE);
+        videoView.setVideoPath(videoFile.getAbsolutePath());
+
+        MediaController mediaController = new MediaController(activity);
+        mediaController.setAnchorView(videoView);
+        mediaController.setMediaPlayer(videoView);
+        videoView.setMediaController(mediaController);
+        //videoView.setVideoPath("android.resource://" + getActivity().getPackageName() + "/" + R.raw.video_clip); //set the path of the video that we need to use in our VideoView
+        videoView.start();  //start() method of the VideoView class will start the video to play
+    }
     public static PdfRenderer openPdf(Activity activity, ImageView img,String file_name,
                                       int pdfPageNum) throws IOException {
 

@@ -125,7 +125,7 @@ public class MediaFragment extends Fragment {
                         // message = response.getString("token");
                         //System.out.println(message);
 
-                        System.out.println(response.getString("mediaAccessPath"));
+                        System.out.println(response);
 
                         String owner = response.getString("mediaOwnerId");
 
@@ -140,7 +140,7 @@ public class MediaFragment extends Fragment {
 
 
 
-                        displayMedia(accessPath);
+
 
 
                             if(mediaOwner!=null) {
@@ -157,6 +157,8 @@ public class MediaFragment extends Fragment {
 
                         JSONObject authUser = new JSONObject(json1);
                         showUserList(authUser,authUsers);
+
+                        displayMedia(accessPath);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

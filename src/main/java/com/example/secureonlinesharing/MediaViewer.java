@@ -185,6 +185,12 @@ public class MediaViewer extends MediaFragment {
             @Override
             public void onRetrieve() {
                 try {
+                    boolean isVideo = contentType.startsWith("video");
+
+
+                    binding.mediaLoading.setVisibility(View.GONE);
+
+
                     if (contentType.equals("application/pdf")) {
                         renderer = RetrieveFileFromUrl.openPdf(getActivity(), binding.mediaView,
                                 MainActivity.MEDIA_VIEWER_CACHE_FILE, 0);
@@ -195,6 +201,20 @@ public class MediaViewer extends MediaFragment {
 
 
                     }
+                    else if (isVideo) {
+                        RetrieveFileFromUrl.openVideo(getActivity(), binding.videoView, MainActivity.MEDIA_VIEWER_CACHE_FILE);
+                        binding.pdfControls.setVisibility(View.GONE);
+
+
+
+
+
+
+                    }
+
+                    binding.pdfWrapper.setVisibility(isVideo?View.GONE: View.VISIBLE);
+                    binding.videoWrapper.setVisibility(isVideo?View.VISIBLE: View.GONE);
+
 
 
                 } catch (IOException e) {

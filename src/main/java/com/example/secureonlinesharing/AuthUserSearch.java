@@ -338,6 +338,9 @@ public class AuthUserSearch extends Fragment {
                         boolean success = response.getBoolean("wasSuccessful");
                         if(success){
 
+                            NavHostFragment.findNavController(AuthUserSearch.this)
+                                    .navigate(R.id.action_authUserSearch_to_friendList);
+
 
 
                         }

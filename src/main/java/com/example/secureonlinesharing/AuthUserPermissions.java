@@ -264,9 +264,21 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                         System.out.println(message);
 
                         boolean success = response.getBoolean("isSuccessful");
-                        if(success)
-                              MainActivity.showToast(AuthUserPermissions.this,
-                                "Permissions saved");
+                        if(success){
+
+
+                            MainActivity.showToast(AuthUserPermissions.this,
+                                    "Permissions saved");
+
+                            Bundle bundle = new Bundle();
+                            bundle.putString("media_id",args.getString("media_id") );
+
+                            NavHostFragment.findNavController(AuthUserPermissions.this)
+                                    .navigate(R.id.action_authUserPermissions_to_mediaUploader, bundle);
+
+
+                        }
+
                         else
                             MainActivity.showToast(AuthUserPermissions.this,
                                     "Permissions unsaved");

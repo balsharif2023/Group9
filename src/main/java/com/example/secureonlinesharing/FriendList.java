@@ -84,9 +84,11 @@ public class FriendList extends Fragment {
         binding.addFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putString("action", "friend");
 
                 NavHostFragment.findNavController(FriendList.this)
-                        .navigate(R.id.action_friendList_to_friendRequest);
+                        .navigate(R.id.action_friendList_to_authUserSearch, bundle);
 
             }
         });
@@ -142,8 +144,13 @@ public class FriendList extends Fragment {
 
                           if(status.equals("requested"))
                           {
-                              toMePrev = addToList(binding.friendRequestToMe,view,toMePrev);
-
+                              String role = entry.getString("sender_or_reciever");
+                              if(role.contains("receiver")) {
+                                  byMePrev = addToList(binding.friendRequestByMe, view, byMePrev);
+                              }
+                              else{
+                                  toMePrev = addToList(binding.friendRequestToMe, view, toMePrev);
+                              }
                           } else if (status.equals("friends")) {
 
                               currentPrev = addToList(binding.friendListCurrent,view,currentPrev);
@@ -155,27 +162,31 @@ public class FriendList extends Fragment {
 
                         }
 
-                        if (toMePrev==null)
+                        if (toMePrev!=null)
                         {
-                            binding.friendRequestToMeLabel.setVisibility(View.GONE);
-                            binding.friendRequestToMe.setVisibility(View.GONE);
+                            binding.friendRequestToMeLabel.setVisibility(View.VISIBLE);
+                            binding.friendRequestToMe.setVisibility(View.VISIBLE);
 
-                            binding.dividerToMe.setVisibility(View.GONE);
+                            if(currentPrev!= null || byMePrev!= null)
+
+                                binding.dividerToMe.setVisibility(View.VISIBLE);
 
                         }
-                        if(currentPrev==null){
+                        if(currentPrev!=null){
 
-                            binding.friendListCurrentLabel.setVisibility(View.GONE);
-                            binding.friendListCurrent.setVisibility(View.GONE);
+                            binding.friendListCurrentLabel.setVisibility(View.VISIBLE);
+                            binding.friendListCurrent.setVisibility(View.VISIBLE);
 
-                            binding.dividerCurrent.setVisibility(View.GONE);
+                            if(byMePrev!= null)
+
+                                 binding.dividerCurrent.setVisibility(View.VISIBLE);
 
                         }
 
-                        if(byMePrev==null)
+                        if(byMePrev!=null)
                         {
-                            binding.friendRequestByMe.setVisibility(View.GONE);
-                            binding.friendRequestByMeLabel.setVisibility(View.GONE);
+                            binding.friendRequestByMe.setVisibility(View.VISIBLE);
+                            binding.friendRequestByMeLabel.setVisibility(View.VISIBLE);
 
                         }
 

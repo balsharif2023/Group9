@@ -42,13 +42,15 @@
                 style="@style/formLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Requests" />
+                android:text="New Requests"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/friendRequestToMe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
             </LinearLayout>
 
@@ -56,20 +58,23 @@
                 android:id="@+id/dividerToMe"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
+                android:background="?android:attr/listDivider"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/friendListCurrentLabel"
                 style="@style/formLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Current Friends" />
+                android:text="Current Friends"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/friendListCurrent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
             </LinearLayout>
 
@@ -77,20 +82,23 @@
                 android:id="@+id/dividerCurrent"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
+                android:background="?android:attr/listDivider"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/friendRequestByMeLabel"
                 style="@style/formLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Requests by Me" />
+                android:text="Requests by Me"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/friendRequestByMe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"></LinearLayout>
+                android:orientation="vertical"
+                android:visibility="gone"></LinearLayout>
 
         </LinearLayout>
 

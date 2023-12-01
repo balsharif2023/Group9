@@ -57,7 +57,7 @@ public class MediaUploader extends MediaFragment {
 
     private String extension = "";
 
-    private  String mediaType="";
+    private  String mediaType="", mimeType ="";
 
     // GetContent creates an ActivityResultLauncher<String> to let you pass
 // in the mime type you want to let the user select
@@ -80,30 +80,38 @@ public class MediaUploader extends MediaFragment {
                         System.out.println("Cache file size:  "+ file.length());
 
                         ContentResolver cR = getContext().getContentResolver();
-                        String type = cR.getType(uri);
+                         mimeType = cR.getType(uri);
                         System.out.println(uri);
-                        System.out.println(type);
-                        if (type.equals("application/pdf")) {
+                        System.out.println(mimeType);
+                        if (mimeType.equals("application/pdf")) {
                             RetrieveFileFromUrl.openPdf(getActivity(),
                                     binding.mediaUploadPreview, MainActivity.MEDIA_UPLOAD_CACHE_FILE,0);
                             extension = ".pdf";
                             mediaType = "pdf";
-                        } else if (type.startsWith("image")) {
+                        } else if (mimeType.startsWith("image")) {
                             RetrieveFileFromUrl.openImage(getActivity(), binding.mediaUploadPreview,
                                     MainActivity.MEDIA_UPLOAD_CACHE_FILE);
-                            if (type.equals("image/png")) {
+                            if (mimeType.equals("image/png")) {
                                 extension = ".png";
                                 mediaType = "png";
                             }
-                            else if (type.equals("image/jpeg")) {
+                            else if (mimeType.equals("image/jpeg")) {
                                 extension = ".jpeg";
                                 mediaType = "jpg";
 
                             }
 
-                        } else if (type.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+                        } else if (mimeType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
                             extension = ".docx";
                             mediaType = "docx";
+                        }
+                        else if (mimeType.startsWith("video"))
+                        {
+                            if (mimeType.equals("video/mp4")) {
+                                extension = ".mp4";
+                                mediaType = "mpeg";
+                            }
+
                         }
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
@@ -317,8 +325,7 @@ public class MediaUploader extends MediaFragment {
                                 new DataPart("file",
                                         //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
                                         Files.readAllBytes(fileCopy.toPath()),
-
-                                        "image/jpeg"));
+                                        mimeType));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

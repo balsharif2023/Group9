@@ -143,6 +143,9 @@
         <action
             android:id="@+id/action_friendList_to_friendRequest"
             app:destination="@id/friendRequest" />
+        <action
+            android:id="@+id/action_friendList_to_authUserSearch"
+            app:destination="@id/authUserSearch" />
     </fragment>
     <fragment
         android:id="@+id/friendRequest"
@@ -164,5 +167,8 @@
         <action
             android:id="@+id/action_authUserSearch_to_authUserPermissions"
             app:destination="@id/authUserPermissions" />
+        <action
+            android:id="@+id/action_authUserSearch_to_friendList"
+            app:destination="@id/friendList" />
     </fragment>
 </navigation>

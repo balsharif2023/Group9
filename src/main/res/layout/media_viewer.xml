@@ -33,11 +33,38 @@
                 android:text="File Not Loaded"
                 android:textSize="45sp" />
 
+            <pl.droidsonroids.gif.GifImageView
+                android:id="@+id/mediaLoading"
+                android:layout_width="match_parent"
+
+                android:layout_height="150dp"
+                android:background="@drawable/spining" />
+
+            <LinearLayout
+                android:id="@+id/videoWrapper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <VideoView
+                    android:id="@+id/videoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/media_border"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/pdfWrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
