@@ -41,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,6 +64,14 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        Bundle args = getArguments();
+
+        binding.startDateInput.setText(args.getString("start_date"));
+
+        binding.endDateInput.setText(args.getString("end_date"));
+
 
 
 
@@ -89,7 +98,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 public void onClick(View view)
                 {
                     Bundle bundle = new Bundle();
-                    bundle.putString("media_id",getArguments().getString("media_id"));
+                    bundle.putString("media_id",args.getString("media_id"));
                     NavHostFragment.findNavController(AuthUserPermissions.this)
                             .navigate(R.id.action_authUserPermissions_to_mediaUploader,bundle);
                 }
@@ -132,8 +141,12 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
         binding.saveButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                    if(validateForm())
+                    {
+                        savePermissions();
 
-                    savePermissions();
+                    }
+
             }
 
         });
@@ -189,6 +202,26 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
     public void onMapReady(@NonNull GoogleMap googleMap) {
 
         System.out.println("map ready");
+
+        String latStr = getArguments().getString("lat");
+
+        String lonStr = getArguments().getString("long");
+
+        if(!latStr.equals(""))
+        {
+            double lat= Double.parseDouble(latStr);
+
+            double lon= Double.parseDouble(lonStr);
+
+            googleMap.addMarker(new MarkerOptions().position(
+                    new LatLng(lat,lon)));
+            binding.mapCoords.setText("Lat "+
+                    new DecimalFormat("#.###").format(lat)
+                    +"\u00B0, Long "+
+                    new DecimalFormat("#.###").format(lon)+"\u00B0");
+
+        }
+
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
@@ -197,10 +230,41 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 googleMap.clear();
                 googleMap.addMarker(new MarkerOptions().position(latLng));
                 accessCoords= latLng;
+                binding.mapCoords.setText("Lat "+
+                      new DecimalFormat("#.###").format(latLng.latitude)
+                        +"\u00B0, Long "+
+                                new DecimalFormat("#.###").format(latLng.longitude)+"\u00B0");
+
             }
         });
 
     }
+
+
+
+    public boolean validateForm() {
+        // extract the entered data from the EditText
+
+        String startDateToText = binding.startDateInput.getText().toString();
+        String endDateToText = binding.endDateInput.getText().toString();
+
+        // Android offers the inbuilt patterns which the entered
+        // data from the EditText field needs to be compared with
+        // In this case the entered data needs to compared with
+        // the EMAIL_ADDRESS, which is implemented same below
+        boolean startDateValid = !startDateToText.isEmpty();
+        binding.startDateEmptyMessage.setVisibility(startDateValid? View.GONE : View.VISIBLE);
+
+        boolean endDateValid = !endDateToText.isEmpty();
+        binding.endDateEmptyMessage.setVisibility(endDateValid? View.GONE : View.VISIBLE);
+
+        return startDateValid && endDateValid;
+
+    }
+
+
+
+
 
 
 
@@ -225,10 +289,12 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
             json.put("start_date",binding.startDateInput.getText());
 
             json.put("end_date",binding.endDateInput.getText());
+            if(accessCoords!= null) {
 
-            json.put("latitude",""+ accessCoords.latitude);
-            json.put("longitude",""+ accessCoords.longitude);
 
+                json.put("latitude", "" + accessCoords.latitude);
+                json.put("longitude", "" + accessCoords.longitude);
+            }
 
 
 

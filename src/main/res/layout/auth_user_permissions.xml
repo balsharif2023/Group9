@@ -54,7 +54,7 @@
                 style="@style/formValidation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/user_name_empty_message"
+                android:text="@string/start_date_empty_message"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -86,7 +86,7 @@
                 style="@style/formValidation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/password_empty_message"
+                android:text="@string/end_date_empty_message"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -124,6 +124,7 @@
             android:gravity="center"
             android:text="@string/auth_user_coords_label"
             android:textSize="24sp" />
+
     </LinearLayout>
 
     <LinearLayout

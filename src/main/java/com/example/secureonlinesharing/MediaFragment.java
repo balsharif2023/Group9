@@ -153,7 +153,10 @@ public class MediaFragment extends Fragment {
                                 } else
                                     mediaOwner.setText("");
                             }
-                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\"},{\"user_name\": \"joeblow\", \"user_id\":\"2\"},{\"user_name\": \"joeblow\", \"user_id\":\"3\"}]}";
+                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}," +
+                                "{\"user_name\": \"joeblow\", \"user_id\":\"2\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}" +
+                                ",{\"user_name\": \"joeblow\", \"user_id\":\"3\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}]}";
+                        //String json1 = response.getString("with be the one that has array after the : probably called authorizedUsers has to match the key verbatim");
 
                         JSONObject authUser = new JSONObject(json1);
                         showUserList(authUser,authUsers);
@@ -259,7 +262,23 @@ public class MediaFragment extends Fragment {
                 View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
                 ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_name"));
 
-              onDisplayUser(view, entry.getString("user_id"));
+                Bundle info = new Bundle();
+
+                info.putString("user_id", entry.getString("user_id"));
+
+                info.putString("start_date", entry.getString("start_date"));
+
+                info.putString("end_date", entry.getString("end_date"));
+
+                info.putString("lat", entry.getString("lat"));
+
+                info.putString("long", entry.getString("long"));
+
+
+
+
+
+                onDisplayUser(view, info);
 
                 wrapper.addView(view);
                 if (prev != null) {
@@ -281,7 +300,7 @@ public class MediaFragment extends Fragment {
 
     }
 
-    public void  onDisplayUser(View view, String userId){}
+    public void  onDisplayUser(View view,Bundle info){}
 
 
 }

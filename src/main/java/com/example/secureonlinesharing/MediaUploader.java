@@ -352,7 +352,7 @@ public class MediaUploader extends MediaFragment {
 
 
     @Override
-    public void onDisplayUser(View view, String userId){
+    public void onDisplayUser(View view,Bundle info){
 
         ImageButton editButton =  ((ImageButton) view.findViewById(R.id.authUserEditButton)),
                 deleteButton = ((ImageButton) view.findViewById(R.id.authUserDeleteButton));
@@ -370,10 +370,12 @@ public class MediaUploader extends MediaFragment {
             public void onClick(View view) {
 
                 Bundle bundle = new Bundle();
+                bundle.putAll(info);
+
+
 
                 bundle.putString("media_id",mediaId);
 
-                bundle.putString("user_id",userId);
 
 
 

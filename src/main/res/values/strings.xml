@@ -91,4 +91,6 @@
     <string name="action_friends">Friends</string>
     <string name="title_friends">Friends</string>
     <string name="friend_request_done_button" >Done</string>
+    <string name="start_date_empty_message">Please specify a start date</string>
+    <string name="end_date_empty_message">Please specify an end date</string>
 </resources>
