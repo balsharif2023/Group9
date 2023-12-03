@@ -85,7 +85,10 @@ public class AuthUserSearch extends Fragment {
             @Override
             public void onClick(View view)
             {
-              search();
+
+                if(validateForm()){
+                    search();
+                }
             }
 
         });
@@ -250,11 +253,8 @@ public class AuthUserSearch extends Fragment {
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    MainActivity.showVolleyError(AuthUserSearch.this.getContext(),error);
+
                 }
         )
         {
@@ -283,6 +283,29 @@ public class AuthUserSearch extends Fragment {
 
     }
 
+    public boolean validateForm() {
+        // extract the entered data from the EditText
+
+        String firstName = binding.firstNameInput.getText().toString();
+        String lastName = binding.lastNameInput.getText().toString();
+
+        String userName = binding.userNameInput.getText().toString();
+        String email = binding.emailInput.getText().toString();
+
+
+        // Android offers the inbuilt patterns which the entered
+        // data from the EditText field needs to be compared with
+        // In this case the entered data needs to compared with
+        // the EMAIL_ADDRESS, which is implemented same below
+        boolean valid = !firstName.isEmpty()||!lastName.isEmpty()||!userName.isEmpty()||
+                !email.isEmpty();
+        binding.userSearchEmptyMessage.setVisibility(valid? View.GONE : View.VISIBLE);
+
+
+
+        return valid;
+
+    }
 
 
 
@@ -356,11 +379,7 @@ public class AuthUserSearch extends Fragment {
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    MainActivity.showVolleyError(AuthUserSearch.this.getContext(),error);
                 }
         ){
             @Override

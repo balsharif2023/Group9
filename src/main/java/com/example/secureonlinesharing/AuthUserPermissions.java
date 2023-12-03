@@ -366,50 +366,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //  Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
-                    NetworkResponse networkResponse = error.networkResponse;
-                    //System.out.println("status code: "+ networkResponse.statusCode );
-                    String errorMessage = "Unknown error";
-                    if (networkResponse == null) {
-                        if (error.getClass().equals(TimeoutError.class)) {
-                            errorMessage = "Request timeout";
-                        } else if (error.getClass().equals(NoConnectionError.class)) {
-                            errorMessage = "Failed to connect server";
-                        }
-                        Toast toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT);
-                        toast.show();
-
-                    } else {
-                        String result = new String(networkResponse.data);
-                        try {
-                            JSONObject response = new JSONObject(result);
-
-                            String message = response.getString("message");
-
-
-                            Log.e("Error Message", message);
-                            Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                            toast.show();
-
-                            if (networkResponse.statusCode == 404) {
-                                errorMessage = "Resource not found";
-                            } else if (networkResponse.statusCode == 401) {
-                                errorMessage = message + " Please login again";
-                            } else if (networkResponse.statusCode == 400) {
-                                errorMessage = message + " Check your inputs";
-                            } else if (networkResponse.statusCode == 500) {
-                                errorMessage = message + " Something is getting wrong";
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Log.i("Error", errorMessage);
-                    error.printStackTrace();
+                  MainActivity.showVolleyError(AuthUserPermissions.this.getContext(),error);
                 }
         ) {
             @Override

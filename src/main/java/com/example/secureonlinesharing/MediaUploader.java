@@ -182,7 +182,11 @@ public class MediaUploader extends MediaFragment {
         binding.mediaUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveMedia();
+
+                if(validateForm()) {
+
+                    saveMedia();
+                }
             }
 
 
@@ -208,6 +212,39 @@ public class MediaUploader extends MediaFragment {
             }
         });
     }
+
+
+
+
+
+    public boolean validateForm() {
+        // extract the entered data from the EditText
+
+        String mediaTitle = binding.mediaTitleInput.getText().toString();
+        String mediaDescription = binding.mediaDescriptionInput.getText().toString();
+
+        // Android offers the inbuilt patterns which the entered
+        // data from the EditText field needs to be compared with
+        // In this case the entered data needs to compared with
+        // the EMAIL_ADDRESS, which is implemented same below
+        boolean titleValid = !mediaTitle.isEmpty();
+        binding.mediaTitleEmptyMessage.setVisibility(titleValid? View.GONE : View.VISIBLE);
+
+        boolean descriptionValid = !mediaDescription.isEmpty();
+        binding.mediaDescriptionEmptyMessage.setVisibility(descriptionValid? View.GONE : View.VISIBLE);
+
+        return titleValid && descriptionValid;
+
+    }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -255,42 +292,8 @@ public class MediaUploader extends MediaFragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 binding.loadingWrapper.setVisibility(View.INVISIBLE);
+                MainActivity.showVolleyError(MediaUploader.this.getContext(),error);
 
-                NetworkResponse networkResponse = error.networkResponse;
-                String errorMessage = "Unknown error";
-                if (networkResponse == null) {
-                    if (error.getClass().equals(TimeoutError.class)) {
-                        errorMessage = "Request timeout";
-                    } else if (error.getClass().equals(NoConnectionError.class)) {
-                        errorMessage = "Failed to connect server";
-                    }
-                } else {
-                    String result = new String(networkResponse.data);
-                    try {
-                        JSONObject response = new JSONObject(result);
-
-                        String message = response.getString("message");
-
-
-                        Log.e("Error Message", message);
-                        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                        toast.show();
-
-                        if (networkResponse.statusCode == 404) {
-                            errorMessage = "Resource not found";
-                        } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message + " Please login again";
-                        } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message + " Check your inputs";
-                        } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message + " Something is getting wrong";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.i("Error", errorMessage);
-                error.printStackTrace();
             }
         }) {
             @Override
@@ -300,10 +303,14 @@ public class MediaUploader extends MediaFragment {
                     params.put("mediaId", mediaId);
                 }
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                String accessRule= binding.mediaAccessRuleDropdown.getSelectedItem().toString();
+
+                accessRule= accessRule.toLowerCase().replaceAll(" ","_");
+
                 params.put("ownerId", id);
                 params.put("fileTitle", binding.mediaTitleInput.getText().toString());
                 params.put("fileName", "file_" + timestamp.getTime() + extension);
-                params.put("accessRules", binding.mediaAccessRuleDropdown.getSelectedItem().toString());
+                params.put("accessRules",accessRule);
                 params.put("concurrentAccess", "1");
                 params.put("mediaDescription", binding.mediaDescriptionInput.getText().toString());
                 params.put("mediaType", mediaType);

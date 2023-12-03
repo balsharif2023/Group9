@@ -24,6 +24,7 @@
 
     <style name="formValidation" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@android:color/holo_red_dark</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:layout_marginTop">2.5dp</item>
         <item name="android:layout_marginBottom">15dp</item>
     </style>
@@ -36,6 +37,21 @@
 
         <item name="android:layout_marginTop">2.5dp</item>
         <item name="android:layout_marginBottom">15dp</item>
+
+        <item name= "android:fontFamily" >sans-serif</item>
+
+        <item name= "android:textStyle" >bold</item>
+
+
+    </style>
+
+
+    <style name="regFormLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">24sp</item>
+
+        <item name="android:layout_marginTop">2.5dp</item>
+        <item name="android:layout_marginBottom">2.5dp</item>
 
         <item name= "android:fontFamily" >sans-serif</item>
 
@@ -67,13 +83,41 @@
     </style>
 
     <style name="formInput" parent="TextAppearance.AppCompat">
-        <item name="android:visibility">gone</item>
+       <!-- <item name="android:visibility">gone</item>-->
 
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">24sp</item>
 
         <item name="android:layout_marginTop">2.5dp</item>
         <item name="android:layout_marginBottom">15dp</item>
+    </style>
+
+
+
+
+    <style name="regFormInput" parent="TextAppearance.AppCompat">
+        <!-- <item name="android:visibility">gone</item>-->
+
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">20sp</item>
+
+        <item name="android:layout_marginTop">2.5dp</item>
+        <item name="android:layout_marginBottom">2.5dp</item>
+    </style>
+
+
+
+    <style name="formButton" parent="TextAppearance.AppCompat">
+        <!-- <item name="android:visibility">gone</item>-->
+
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">24sp</item>
+
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+
+        <item name="android:background">@drawable/rounded_button</item>
+
     </style>
 
 </resources>

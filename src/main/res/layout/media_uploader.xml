@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    tools:context=".MediaUploader">
+    android:orientation="vertical"
+    tools:context=".SecondFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        tools:context=".MediaUploader">
 
 
         <LinearLayout
@@ -38,12 +44,20 @@
 
                 <EditText
                     android:id="@+id/mediaTitleInput"
+                    style="@style/formInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:ems="10"
                     android:inputType="text" />
+
+                <TextView
+                    android:id="@+id/mediaTitleEmptyMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/media_title_empty_message"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
@@ -62,12 +76,20 @@
 
                 <EditText
                     android:id="@+id/mediaDescriptionInput"
+                    style="@style/formInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:ems="10"
                     android:inputType="text" />
+
+                <TextView
+                    android:id="@+id/mediaDescriptionEmptyMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/media_description_empty_message"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -75,97 +97,98 @@
             <Spinner
                 android:id="@+id/mediaAccessRuleDropdown"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
+                <Button
                     android:id="@+id/filePicker"
+                    style="@style/formButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_marginBottom="25dp"
                     android:text="@string/media_picker_label"
-                    android:textSize="48sp" />
+                    android:textSize="24sp" />
 
                 <ImageView
                     android:id="@+id/mediaUploadPreview"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY" />
 
 
-
             </LinearLayout>
-                <View
-                    android:id="@+id/divider2"
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="?android:attr/listDivider" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="3dp"
-                    android:background="?android:attr/listDivider" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="18dp">
+
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/addAuthUserButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:clickable="true"
+                        android:src="@android:drawable/ic_input_add"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                    <TextView
+                        android:id="@+id/authUsersLabel"
+                        style="@style/formLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/auth_user_list_label"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
 
                 <LinearLayout
+                    android:id="@+id/authUsers"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical"></LinearLayout>
 
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="18dp">
-
-                        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                            android:id="@+id/addAuthUserButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:clickable="true"
-                            android:src="@android:drawable/ic_input_add"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-
-                        <TextView
-                            android:id="@+id/authUsersLabel"
-                            style="@style/formLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/auth_user_list_label"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-                    <LinearLayout
-                        android:id="@+id/authUsers"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"></LinearLayout>
-
-                </LinearLayout>
+            </LinearLayout>
 
 
             <Button
                 android:id="@+id/mediaUploadButton"
+                style="@style/formButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/gold"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
                 android:text="@string/media_edit_button_label" />
 
 
-
         </LinearLayout>
-
+    </androidx.core.widget.NestedScrollView>
         <!--  <ImageView
             android:id="@+id/loadingIcon"
             android:layout_width="match_parent"
@@ -177,6 +200,9 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" /> -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
         <LinearLayout
@@ -201,4 +227,6 @@
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+

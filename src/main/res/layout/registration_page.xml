@@ -22,6 +22,7 @@
 
             <TextView
                 android:id="@+id/firstNameLabel"
+                style="@style/regFormLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -30,6 +31,7 @@
 
             <EditText
                 android:id="@+id/firstNameInput"
+                style="@style/regFormInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -53,6 +55,7 @@
 
             <TextView
                 android:id="@+id/lastNameLabel"
+                style="@style/regFormLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -61,6 +64,9 @@
 
             <EditText
                 android:id="@+id/lastNameInput"
+                style="@style/regFormInput"
+
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -84,6 +90,8 @@
 
             <TextView
                 android:id="@+id/userNameLabel"
+                style="@style/regFormLabel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -92,6 +100,8 @@
 
             <EditText
                 android:id="@+id/userNameInput"
+                style="@style/regFormInput"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -115,6 +125,8 @@
 
             <TextView
                 android:id="@+id/passwordLabel"
+                style="@style/regFormLabel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -123,6 +135,8 @@
 
             <EditText
                 android:id="@+id/passwordInput"
+                style="@style/regFormInput"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -146,6 +160,8 @@
 
             <TextView
                 android:id="@+id/passwordConfirmLabel"
+                style="@style/regFormLabel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -154,6 +170,8 @@
 
             <EditText
                 android:id="@+id/passwordConfirmInput"
+                style="@style/regFormInput"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -176,6 +194,8 @@
 
             <TextView
                 android:id="@+id/emailLabel"
+                style="@style/regFormLabel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -184,6 +204,8 @@
 
             <EditText
                 android:id="@+id/emailInput"
+                style="@style/regFormInput"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -207,6 +229,8 @@
 
             <TextView
                 android:id="@+id/phoneNumberLabel"
+                style="@style/regFormLabel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -215,6 +239,8 @@
 
             <EditText
                 android:id="@+id/phoneNumberInput"
+                style="@style/regFormInput"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -270,10 +296,10 @@
 
             <Button
                 android:id="@+id/nextButton"
+                style="@style/formButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/gold"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
                 android:text="@string/next_button_label" />

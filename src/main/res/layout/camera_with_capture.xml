@@ -54,6 +54,7 @@
 
     <Button
         android:id="@+id/detectButton"
+        style="@style/formButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/camera_capture_button_label" />

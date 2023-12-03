@@ -184,14 +184,8 @@ public class UserProfilePage extends Fragment {
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                    System.out.println(error.getMessage());
-                    error.printStackTrace();
-                    //binding.loginErrorMessage.setVisibility(View.VISIBLE);
-                    // make a Toast telling the user
-                    // that something went wrong
-                    //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                    // log the error message in the error stream
-                    //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
+                    MainActivity.showVolleyError(UserProfilePage.this.getContext(),error);
+
                 }
         );
         // add the json request object created above

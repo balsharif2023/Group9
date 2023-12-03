@@ -1,14 +1,26 @@
 package com.example.secureonlinesharing;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.core.view.WindowCompat;
@@ -26,6 +38,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -149,6 +167,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        else if (id==R.id.action_logout)
+
+        {
+            logout();
+
+        }
+
+
+
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -162,6 +189,161 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+
+
+
+    public void logout(){
+
+
+
+        SharedPreferences data = getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt", "");
+
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(this);
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/userLogout.php";
+
+
+
+
+        // since the response we get from the api is in JSON, we
+        // need to use `JsonObjectRequest` for parsing the
+        // request response
+        //  try {
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                // we are using GET HTTP request method
+                Request.Method.GET,
+                // url we want to send the HTTP request to
+                url,
+                // this parameter is used to send a JSON object to the
+                // server, since this is not required in our case,
+                // we are keeping it `null`
+                //  new JSONObject("{userId:1}"),
+                null,
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+
+
+                    // message = response.getString("message");
+
+
+
+                    // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
+
+
+
+                    // below two lines will put values for
+                    // email and password in shared preferences.
+
+                        System.out.println(response);
+
+                    NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
+                    navController.navigateUp();
+                    navController.navigate(R.id.FirstFragment);
+
+                    try {
+                        Toast.makeText(MainActivity.this, response.getString("reason"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                    // load the image into the ImageView using Glide.
+                    //binding.textviewFirst.setText(message);
+
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(MainActivity.this,error);
+
+                }
+        )
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+
+
+
+    }
+
+    public static void showVolleyError(Context context, VolleyError error){
+
+        NetworkResponse networkResponse = error.networkResponse;
+        String errorMessage = "Unknown error";
+        if (networkResponse == null) {
+            if (error.getClass().equals(TimeoutError.class)) {
+                errorMessage = "Request timeout";
+            } else if (error.getClass().equals(NoConnectionError.class)) {
+                errorMessage = "Failed to connect server";
+            }
+        } else {
+            String result = new String(networkResponse.data);
+            try {
+                JSONObject response = new JSONObject(result);
+
+                String message = null;
+                if(response.has("message"))
+
+                     message = response.getString("message");
+
+                else if (response.has("reason"))
+                {
+                    message = response.getString("reason");
+
+                }
+
+                if(message!=null) {
+
+                    Log.e("Error Message", message);
+                    Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                if (networkResponse.statusCode == 404) {
+                    errorMessage = "Resource not found";
+                } else if (networkResponse.statusCode == 401) {
+                    errorMessage = message + " Please login again";
+                } else if (networkResponse.statusCode == 400) {
+                    errorMessage = message + " Check your inputs";
+                } else if (networkResponse.statusCode == 500) {
+                    errorMessage = message + " Something is getting wrong";
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.i("Error", errorMessage);
+        error.printStackTrace();
+
+
+
+    }
+
+
+
+
 
     public static void showToast(Fragment fragment, String message) {
         Toast.makeText(fragment.getContext(), message, Toast.LENGTH_SHORT).show();

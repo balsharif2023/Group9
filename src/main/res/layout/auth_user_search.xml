@@ -107,9 +107,18 @@
 
         <Button
             android:id="@+id/search_button"
+            style="@style/formButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Search" />
+
+        <TextView
+            android:id="@+id/userSearchEmptyMessage"
+            style="@style/formValidation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/user_search_empty_message"
+            android:visibility="gone" />
 
     </LinearLayout>
 

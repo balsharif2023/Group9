@@ -96,130 +96,145 @@ public class FirstFragment extends Fragment {
             {
                 System.out.println("Login button clicked!");
                 binding.loginErrorMessage.setVisibility(View.GONE);
+                //TODO remember to uncomment the code below
 //                if(!validateForm())
 //                    return;
 
-
-                // getting a new volley request queue for making new requests
-                String userNameToText = binding.userNameInput.getText().toString();
-                String passwordToText = binding.passwordInput.getText().toString();
-                if(userNameToText.equals(""))userNameToText="batman123";
-
-                if(passwordToText.equals(""))passwordToText="batman123";
-
-
-
-                RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
-                // url of the api through which we get random dog images
-                String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/userLogin.php";
-                url+= "?username="+ userNameToText;
-
-                url+= "&password="+ passwordToText;
-
-
-
-                // since the response we get from the api is in JSON, we
-                // need to use `JsonObjectRequest` for parsing the
-                // request response
-              //  try {
-
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                            // we are using GET HTTP request method
-                            Request.Method.GET,
-                            // url we want to send the HTTP request to
-                            url,
-                            // this parameter is used to send a JSON object to the
-                            // server, since this is not required in our case,
-                            // we are keeping it `null`
-                          //  new JSONObject("{userId:1}"),
-                            null,
-
-                            // lambda function for handling the case
-                            // when the HTTP request succeeds
-                            (Response.Listener<JSONObject>) response -> {
-                                // get the image url from the JSON object
-                                String message;
-
-
-                                   // message = response.getString("message");
-
-
-
-                               // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
-
-                                SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
-
-                                SharedPreferences.Editor editor = data.edit();
-
-                                // below two lines will put values for
-                                // email and password in shared preferences.
-                                try {
-
-                                    System.out.println(response);
-
-                                    editor.putString("id", response.getString("user_id"));
-
-                                    editor.putString("userName", response.getString("user_username"));
-
-                                    editor.putString("firstName", response.getString("user_first_name"));
-
-                                    editor.putString("lastName", response.getString("user_last_name"));
-
-
-
-                                    String token = response.getString("token");
-                                    editor.putString("token",token );
-
-                                    JSONObject json = null;
-
-                                        json = new JSONObject(token);
-                                        String jwt = json.getString("jwt");
-                                        editor.putString("jwt",jwt );
-
-                                        System.out.println(jwt);
-
-                                    new Thread(new RetrieveFileFromUrl(FirstFragment.this,
-                                            response.getString("facial_profile_file"),
-                                            MainActivity.HEADSHOT_CACHE_FILE)).start();
-
-
-
-                                } catch (JSONException e) {
-                                    throw new RuntimeException(e);
-                                }
+                    login();
 
 
 
 
 
-                                // to save our data with key and value.
-                                editor.apply();
-                                    NavHostFragment.findNavController(FirstFragment.this)
-                                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
-                                    // load the image into the ImageView using Glide.
-                                     //binding.textviewFirst.setText(message);
-
-                            },
-
-                            // lambda function for handling the case
-                            // when the HTTP request fails
-                            (Response.ErrorListener) error -> {
-                                binding.loginErrorMessage.setVisibility(View.VISIBLE);
-                                // make a Toast telling the user
-                                // that something went wrong
-                                //     Toast.makeText(getActivity(), "Some error occurred! Cannot fetch dog image", Toast.LENGTH_LONG).show();
-                                // log the error message in the error stream
-                                //    Log.e("MainActivity", "loadDogImage error: ${error.localizedMessage}");
-                            }
-                    );
-                    // add the json request object created above
-                    // to the Volley request queue
-                    volleyQueue.add(jsonObjectRequest);
                 //} // catch(JSONException e){} */
 
             }
 
         });
+    }
+
+
+
+    public void login(){
+
+
+
+        // getting a new volley request queue for making new requests
+        String userNameToText = binding.userNameInput.getText().toString();
+        String passwordToText = binding.passwordInput.getText().toString();
+        if(userNameToText.equals(""))userNameToText="batman123";
+
+        if(passwordToText.equals(""))passwordToText="batman123";
+
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/userLogin.php";
+        url+= "?username="+ userNameToText;
+
+        url+= "&password="+ passwordToText;
+
+
+
+        // since the response we get from the api is in JSON, we
+        // need to use `JsonObjectRequest` for parsing the
+        // request response
+        //  try {
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                // we are using GET HTTP request method
+                Request.Method.GET,
+                // url we want to send the HTTP request to
+                url,
+                // this parameter is used to send a JSON object to the
+                // server, since this is not required in our case,
+                // we are keeping it `null`
+                //  new JSONObject("{userId:1}"),
+                null,
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+
+                    System.out.println(response);
+
+
+                    // message = response.getString("message");
+
+
+
+                    // SharedPreferences data = ((MainActivity)getActivity()).sharedpreferences;
+
+                    SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+                    SharedPreferences.Editor editor = data.edit();
+
+                    // below two lines will put values for
+                    // email and password in shared preferences.
+                    try {
+
+                        System.out.println(response);
+
+                        editor.putString("id", response.getString("user_id"));
+
+                        editor.putString("userName", response.getString("user_username"));
+
+                        editor.putString("firstName", response.getString("user_first_name"));
+
+                        editor.putString("lastName", response.getString("user_last_name"));
+
+
+
+                        String token = response.getString("token");
+                        editor.putString("token",token );
+
+                        JSONObject json = null;
+
+                        json = new JSONObject(token);
+                        String jwt = json.getString("jwt");
+                        editor.putString("jwt",jwt );
+
+                        System.out.println(jwt);
+
+                        new Thread(new RetrieveFileFromUrl(FirstFragment.this,
+                                response.getString("facial_profile_file"),
+                                MainActivity.HEADSHOT_CACHE_FILE)).start();
+
+
+
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+
+
+
+                    // to save our data with key and value.
+                    editor.apply();
+                    NavHostFragment.findNavController(FirstFragment.this)
+                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
+                    // load the image into the ImageView using Glide.
+                    //binding.textviewFirst.setText(message);
+
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(FirstFragment.this.getContext(),error);
+
+                }
+        );
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+
+
+
     }
 
     public boolean validateForm() {

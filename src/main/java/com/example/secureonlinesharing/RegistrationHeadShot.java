@@ -264,42 +264,10 @@ public class RegistrationHeadShot extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 binding.loadingWrapper.setVisibility(View.INVISIBLE);
-
-                NetworkResponse networkResponse = error.networkResponse;
-                String errorMessage = "Unknown error";
-                if (networkResponse == null) {
-                    if (error.getClass().equals(TimeoutError.class)) {
-                        errorMessage = "Request timeout";
-                    } else if (error.getClass().equals(NoConnectionError.class)) {
-                        errorMessage = "Failed to connect server";
-                    }
-                } else {
-                    String result = new String(networkResponse.data);
-                    try {
-                        JSONObject response = new JSONObject(result);
-
-                        String message = response.getString("reason");
+                MainActivity.showVolleyError(RegistrationHeadShot.this.getContext(),error);
 
 
-                        Log.e("Error Message", message);
-                        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                        toast.show();
 
-                        if (networkResponse.statusCode == 404) {
-                            errorMessage = "Resource not found";
-                        } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message + " Please login again";
-                        } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message + " Check your inputs";
-                        } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message + " Something is getting wrong";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.i("Error", errorMessage);
-                error.printStackTrace();
             }
         }) {
             @Override

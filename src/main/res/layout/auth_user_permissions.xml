@@ -133,15 +133,16 @@
             android:orientation="vertical">
 
 
-            <Button
-                android:id="@+id/saveButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/gold"
-                android:paddingLeft="80dp"
-                android:paddingRight="80dp"
-                android:text="@string/auth_user_save_permissions" />
+        <Button
+            android:id="@+id/saveButton"
+            style="@style/formButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/gold"
+            android:paddingLeft="80dp"
+            android:paddingRight="80dp"
+            android:text="@string/auth_user_save_permissions" />
 
         </LinearLayout>
     </LinearLayout>
