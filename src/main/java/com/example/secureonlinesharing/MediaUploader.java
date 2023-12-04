@@ -146,19 +146,7 @@ public class MediaUploader extends MediaFragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //((MainActivity) getActivity()).backButton.setVisibility(View.INVISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(MediaUploader.this)
-                            .navigate(R.id.action_mediaUploader_to_SecondFragment);
 
-                }
-            });
-        }
 
 
 
@@ -205,8 +193,11 @@ public class MediaUploader extends MediaFragment {
                 bundle.putString("action","authorize");
                 bundle.putString("media_id", mediaId);
 
-                NavHostFragment.findNavController(MediaUploader.this)
-                        .navigate(R.id.action_mediaUploader_to_authUserSearch, bundle);
+//                NavHostFragment.findNavController(MediaUploader.this)
+//                        .navigate(R.id.action_mediaUploader_to_authUserSearch, bundle);
+
+                ((MainActivity)getActivity()).navigate(R.id.authUserSearch,bundle);
+
 
 
             }
@@ -278,8 +269,9 @@ public class MediaUploader extends MediaFragment {
                             Bundle bundle = new Bundle();
 
                             bundle.putString("media_id", mediaId);
-                            NavHostFragment.findNavController(MediaUploader.this)
-                                    .navigate(R.id.action_mediaUploader_to_mediaViewer, bundle);
+        //                            NavHostFragment.findNavController(MediaUploader.this)
+        //                                    .navigate(R.id.action_mediaUploader_to_mediaViewer, bundle);
+                            ((MainActivity)getActivity()).navigate(R.id.mediaViewer,bundle);
 
 
                             Log.i("Message", message);
@@ -386,9 +378,11 @@ public class MediaUploader extends MediaFragment {
 
 
 
+//
+//                NavHostFragment.findNavController(MediaUploader.this)
+//                        .navigate(R.id.action_mediaUploader_to_authUserPermissions,bundle);
+                ((MainActivity)getActivity()).navigate(R.id.authUserPermissions,bundle);
 
-                NavHostFragment.findNavController(MediaUploader.this)
-                        .navigate(R.id.action_mediaUploader_to_authUserPermissions,bundle);
 
 
 

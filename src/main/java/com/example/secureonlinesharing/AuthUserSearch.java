@@ -48,37 +48,6 @@ public class AuthUserSearch extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String[] cache = {
-                MainActivity.MEDIA_VIEWER_CACHE_FILE,
-                MainActivity.HEADSHOT_CACHE_FILE,
-                MainActivity.MEDIA_UPLOAD_CACHE_FILE
-        };
-
-        for(String filename: cache)
-        {
-            File file = new File(getActivity().getCacheDir(),filename);
-            file.delete();
-        }
-       ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
-            backButton.setVisibility(View.INVISIBLE);
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
-
-
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
-            userMenuButton.setVisibility(View.GONE);
-
-
-        }
 
 
         binding.searchButton.setOnClickListener(new View.OnClickListener() {
@@ -220,9 +189,9 @@ public class AuthUserSearch extends Fragment {
 
 
 
-                                        NavHostFragment.findNavController(AuthUserSearch.this)
-                                                .navigate(R.id.action_authUserSearch_to_authUserPermissions,bundle);
-
+//                                        NavHostFragment.findNavController(AuthUserSearch.this)
+//                                                .navigate(R.id.action_authUserSearch_to_authUserPermissions,bundle);
+                                        ((MainActivity)getActivity()).navigate(R.id.authUserPermissions,bundle);
 
                                     }
                                 }
@@ -360,9 +329,12 @@ public class AuthUserSearch extends Fragment {
 
                         boolean success = response.getBoolean("wasSuccessful");
                         if(success){
+//
+//                            NavHostFragment.findNavController(AuthUserSearch.this)
+//                                    .navigate(R.id.action_authUserSearch_to_friendList);
 
-                            NavHostFragment.findNavController(AuthUserSearch.this)
-                                    .navigate(R.id.action_authUserSearch_to_friendList);
+                            ((MainActivity)getActivity()).navigate(R.id.friendList,null);
+
 
 
 

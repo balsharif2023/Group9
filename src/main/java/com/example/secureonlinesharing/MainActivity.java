@@ -26,6 +26,7 @@ import android.view.View;
 import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -42,8 +43,10 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     // variable for shared preferences.
     public SharedPreferences sharedpreferences;
 
+    private Stack<Integer> navHistory;
+
+    private  Stack<Bundle> argHistory;
+
 
     //cache filename
 
@@ -68,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static  final String MEDIA_VIEWER_CACHE_FILE = "media_viewer_temp";
+
+    private NavController navController;
 
 
 
@@ -80,8 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.toolbar);
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+        System.out.println(navController.getCurrentDestination().getDisplayName());
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         // drawer layout instance to toggle the menu icon to open
@@ -112,6 +122,65 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        binding.backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                int last = navHistory.pop();
+//                Bundle lastArgs= argHistory.pop();
+
+
+                navController.popBackStack();
+               // MainActivity.this.navigate(last,lastArgs);
+                setBackButtonDisplay();
+
+
+            }
+        });
+
+        navHistory =new Stack<Integer>();
+
+        argHistory = new Stack<Bundle>();
+
+
+    }
+
+    public void  navigate(int dest,Bundle args){
+      //  NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
+        System.out.println(navController.getCurrentDestination().getDisplayName());
+     //   navController.navigateUp();
+        System.out.println(navController.getCurrentDestination().getDisplayName());
+
+        String srcName = navController.getCurrentDestination().getDisplayName();
+
+        navController.navigate(dest,args);
+
+
+
+        setBackButtonDisplay();
+       // binding.backButton.setVisibility(navHistory.isEmpty()?View.GONE:View.VISIBLE);
+
+    }
+    public void navigateFrom(Fragment src, int dest,Bundle args){
+//        navHistory.push(src.getId());
+//        argHistory.push(src.getArguments());
+
+        navigate(dest, args);
+
+
+
+
+    }
+
+    public void setBackButtonDisplay()
+    {
+        NavBackStackEntry entry = navController.getCurrentBackStackEntry();
+        System.out.println("backStack entry "+entry.getDestination().getDisplayName());
+        binding.backButton.setVisibility(
+               entry==null
+                       //||entry.getDestination().getDisplayName().contains("FirstFragment")
+                      ||entry.getDestination().getId()==R.id.FirstFragment
+                       ||entry.getDestination().getId()==R.id.SecondFragment
+                        ?View.GONE:View.VISIBLE);
     }
 
 
@@ -133,14 +202,10 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.close();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        else if (id==R.id.action_profile)
+        if (id==R.id.action_profile)
         {
-            NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
-            navController.navigateUp();
-            navController.navigate(R.id.userProfilePage);
+
+            navigate(R.id.userProfilePage,null);
 
 
         }
@@ -148,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
 
         {
 
-            NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
-            navController.navigateUp();
-            navController.navigate(R.id.SecondFragment);
+
+            navigate(R.id.SecondFragment,null);
+
 
         }
 
@@ -160,9 +225,9 @@ public class MainActivity extends AppCompatActivity {
 
         {
 
-            NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
-            navController.navigateUp();
-            navController.navigate(R.id.friendList);
+
+            navigate(R.id.friendList,null);
+
 
         }
 
@@ -246,9 +311,11 @@ public class MainActivity extends AppCompatActivity {
 
                         System.out.println(response);
 
-                    NavController navController = Navigation.findNavController(MainActivity.this,R.id.nav_host_fragment_content_main);
-                    navController.navigateUp();
-                    navController.navigate(R.id.FirstFragment);
+
+                    navigate(R.id.FirstFragment,null);
+
+
+                    binding.userMenuButton.setVisibility(View.GONE);
 
                     try {
                         Toast.makeText(MainActivity.this, response.getString("reason"), Toast.LENGTH_SHORT).show();

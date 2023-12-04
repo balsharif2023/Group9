@@ -69,6 +69,7 @@
                 android:background="@null"
                 android:scaleType="fitXY"
                 android:src="@android:drawable/ic_menu_sort_by_size"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

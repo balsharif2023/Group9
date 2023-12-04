@@ -244,9 +244,12 @@ public class FaceAuth extends Fragment {
 
                 if(getCropImage()!= null){
                    if(faceMatch()) {
-                       NavHostFragment.findNavController(FaceAuth.this)
-                               .navigate(R.id.action_faceAuth_to_mediaViewer,
-                                       getArguments());
+//                       NavHostFragment.findNavController(FaceAuth.this)
+//                               .navigate(R.id.action_faceAuth_to_mediaViewer,
+//                                       getArguments());
+
+                       ((MainActivity)getActivity()).navigate(R.id.mediaViewer,getArguments());
+
                    }
 
                 }
@@ -265,27 +268,6 @@ public class FaceAuth extends Fragment {
         }
 
 
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
-
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(FaceAuth.this)
-                            .navigate(R.id.action_faceAuth_to_SecondFragment);
-                }
-            });
-
-
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.VISIBLE);
-
-
-        }
 
 
 

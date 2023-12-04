@@ -54,28 +54,7 @@ public class SecondFragment extends Fragment {
 
         getMedia();
 
-       // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
-            backButton.setVisibility(View.VISIBLE);
-
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view)
-                {
-                    NavHostFragment.findNavController(SecondFragment.this)
-                            .navigate(R.id.action_SecondFragment_to_FirstFragment);
-                }
-            });
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
-            userMenuButton.setVisibility(View.VISIBLE);
-
-
-        }
+      //  ((ImageButton)getActivity().findViewById(R.id.backButton)).setVisibility(View.GONE);
 
 
 
@@ -86,8 +65,7 @@ public class SecondFragment extends Fragment {
             public void onClick(View view) {
                 Bundle bundle = new Bundle();
                 bundle.putString("mediaId","");
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_mediaUploader,bundle);
+                ((MainActivity)getActivity()).navigateFrom(SecondFragment.this,R.id.mediaUploader,bundle);
 
             }
         });
@@ -97,6 +75,8 @@ public class SecondFragment extends Fragment {
         SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
         String token = data.getString("jwt","");
+
+        String userId = data.getString("id","");
 
 
 
@@ -121,9 +101,12 @@ public class SecondFragment extends Fragment {
                     String mediaList;
                     try {
                          mediaList = response.getString("mediaList");
-                        System.out.println(mediaList);
+
                         JSONArray json = new JSONArray(mediaList);
-                        View prev= null;
+                        View myPrev = null, sharedPrev = null;
+                        System.out.println(""+json.length()+" media retrieved");
+                        System.out.println(mediaList);
+
                         for (int i =0; i< json.length();i++)
                         {
                             JSONObject entry =json.getJSONObject(i);
@@ -141,31 +124,44 @@ public class SecondFragment extends Fragment {
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
-                                  NavHostFragment.findNavController(SecondFragment.this)
-                                          .navigate(R.id.action_SecondFragment_to_mediaViewer,bundle);
+                                    ((MainActivity)getActivity()).navigateFrom(SecondFragment.this,R.id.mediaViewer,bundle);
 
-//                                  NavHostFragment.findNavController(SecondFragment.this)
-//                                   .navigate(R.id.action_SecondFragment_to_faceAuth,bundle);
+//                                    ((MainActivity)getActivity()).navigateFrom(SecondFragment.this,R.id.faceAuth,bundle);
                                 }
                             });
 
-                            binding.mediaRecordWrapper.addView(view);
-                            if (prev!= null)
+
+                            boolean isOwner = entry.getBoolean("is_media_owner");
+
+                            if (isOwner)
                             {
-                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.MATCH_PARENT,
-                                        LinearLayout.LayoutParams.WRAP_CONTENT
-                                );
-                                params.setMargins(0, 0, 0, 40);
-                                prev.setLayoutParams(params);
+                                myPrev = addToList(binding.myMedia, view,myPrev);
+                            }
+                            else
+                                sharedPrev =addToList(binding.sharedMedia,view,sharedPrev);
+
+
+                        }
+
+                        if(myPrev!= null)
+                        {
+                            binding.myMediaLabel.setVisibility(View.VISIBLE);
+
+                            binding.myMedia.setVisibility(View.VISIBLE);
+                            if(sharedPrev!= null)
+                            {
+                                binding.mediaDivider.setVisibility(View.VISIBLE);
                             }
 
-                            prev =view;
-                        }
-//                        System.out.println(response.getString("mediaAccessPath"));
-//                        binding.mediaTitleInput.setText(response.getString("mediaTitle"));
-//                        binding.mediaDescriptionInput.setText(response.getString("mediaDescription"));
 
+                        }
+                        if (sharedPrev != null
+                        ) {
+                            binding.sharedMediaLabel.setVisibility(View.VISIBLE);
+
+                            binding.sharedMedia.setVisibility(View.VISIBLE);
+
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -198,6 +194,32 @@ public class SecondFragment extends Fragment {
 
 
     }
+
+
+
+
+    public View addToList(ViewGroup list, View item, View prev) {
+
+        list.addView(item);
+        if (prev != null) {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 0, 0, 40);
+            prev.setLayoutParams(params);
+        }
+
+        return item;
+
+
+    }
+
+
+
+
+
+
 
     @Override
     public void onDestroyView() {

@@ -54,26 +54,7 @@ public class UserProfilePage extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
 
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(UserProfilePage.this)
-                            .navigate(R.id.action_userProfilePage_to_SecondFragment);
-                }
-            });
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
-            userMenuButton.setVisibility(View.GONE);
-
-
-        }
 
         binding.editProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,8 +70,11 @@ public class UserProfilePage extends Fragment {
                 bundle.putString("user_phone", phone);
                 bundle.putString("user_email", email);
 
-                NavHostFragment.findNavController(UserProfilePage.this)
-                        .navigate(R.id.action_userProfilePage_to_registrationPage,bundle);
+//                NavHostFragment.findNavController(UserProfilePage.this)
+//                        .navigate(R.id.action_userProfilePage_to_registrationPage,bundle);
+
+                ((MainActivity)getActivity()).navigate(R.id.registrationPage,bundle);
+
 
             }
 

@@ -87,30 +87,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
 
 
-        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
-            backButton.setVisibility(View.VISIBLE);
 
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view)
-                {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("media_id",args.getString("media_id"));
-                    NavHostFragment.findNavController(AuthUserPermissions.this)
-                            .navigate(R.id.action_authUserPermissions_to_mediaUploader,bundle);
-                }
-            });
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
-            userMenuButton.setVisibility(View.VISIBLE);
-
-
-        }
 
 
        binding.startDateInput.setOnClickListener (new View.OnClickListener() {
@@ -207,7 +184,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
         String lonStr = getArguments().getString("long");
 
-        if(!latStr.equals(""))
+        if(latStr!= null&&!latStr.equals(""))
         {
             double lat= Double.parseDouble(latStr);
 
@@ -339,8 +316,9 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                             Bundle bundle = new Bundle();
                             bundle.putString("media_id",args.getString("media_id") );
 
-                            NavHostFragment.findNavController(AuthUserPermissions.this)
-                                    .navigate(R.id.action_authUserPermissions_to_mediaUploader, bundle);
+//                            NavHostFragment.findNavController(AuthUserPermissions.this)
+//                                    .navigate(R.id.action_authUserPermissions_to_mediaUploader, bundle);
+                            ((MainActivity)getActivity()).navigate(R.id.mediaUploader,bundle);
 
 
                         }

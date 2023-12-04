@@ -142,29 +142,6 @@ public class RegistrationHeadShot extends Fragment {
 
 
 
-        // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
-        //new RetrievePDFfromUrl(pdfurl).run();
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
-
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(RegistrationHeadShot.this)
-                            .navigate(R.id.action_faceAuth_to_SecondFragment);
-                }
-            });
-
-
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.VISIBLE);
-
-
-        }
 
 
 
@@ -248,10 +225,12 @@ public class RegistrationHeadShot extends Fragment {
 
                                 String message = result.getString("token");
                                 System.out.println(message);
+//
+//                                NavHostFragment.findNavController(RegistrationHeadShot.this)
+//                                        .navigate(R.id.action_registrationHeadShot_to_FirstFragment);
+                            ((MainActivity)getActivity()).navigate(R.id.FirstFragment,null);
 
-                                NavHostFragment.findNavController(RegistrationHeadShot.this)
-                                        .navigate(R.id.action_registrationHeadShot_to_FirstFragment);
-                                // load the image into the ImageView using Glide.
+                            // load the image into the ImageView using Glide.
                                 //binding.textviewFirst.setText(message);
 
                             Log.i("Message", message);

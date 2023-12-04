@@ -60,32 +60,14 @@ public class FirstFragment extends Fragment {
             File file = new File(getActivity().getCacheDir(),filename);
             file.delete();
         }
-       ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton!= null)
-        {
-            backButton.setVisibility(View.INVISIBLE);
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
-
-
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton!= null) {
-            userMenuButton.setVisibility(View.GONE);
-
-
-        }
 
         binding.createAccountLink.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
-                 NavHostFragment.findNavController(FirstFragment.this)
-                         .navigate(R.id.action_FirstFragment_to_registrationPage);
+//                 NavHostFragment.findNavController(FirstFragment.this)
+//                         .navigate(R.id.action_FirstFragment_to_registrationPage);
+                 ((MainActivity)getActivity()).navigate(R.id.registrationPage,null);
+
 
              }
 
@@ -198,12 +180,19 @@ public class FirstFragment extends Fragment {
                         editor.putString("jwt",jwt );
 
                         System.out.println(jwt);
+                        ImageButton menuButton = getActivity().findViewById(R.id.userMenuButton);
+                        menuButton.setVisibility(View.VISIBLE);
 
-                        new Thread(new RetrieveFileFromUrl(FirstFragment.this,
-                                response.getString("facial_profile_file"),
-                                MainActivity.HEADSHOT_CACHE_FILE)).start();
+                        if(response.has("facial_profile_file")
+                                && response.getString("facial_profile_file")!= null
+                        &&!response.getString("facial_profile_file").equals("null")) {
+                            System.out.println(response.getString("facial_profile_file"));
 
+                            new Thread(new RetrieveFileFromUrl(FirstFragment.this,
+                                    response.getString("facial_profile_file"),
+                                    MainActivity.HEADSHOT_CACHE_FILE)).start();
 
+                        }
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -215,11 +204,9 @@ public class FirstFragment extends Fragment {
 
                     // to save our data with key and value.
                     editor.apply();
-                    NavHostFragment.findNavController(FirstFragment.this)
-                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
-                    // load the image into the ImageView using Glide.
-                    //binding.textviewFirst.setText(message);
-
+//                    NavHostFragment.findNavController(FirstFragment.this)
+//                            .navigate(R.id.action_FirstFragment_to_SecondFragment);
+                    ((MainActivity)getActivity()).navigate(R.id.SecondFragment,null);
                 },
 
                 // lambda function for handling the case

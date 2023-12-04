@@ -59,26 +59,7 @@ public class FriendList extends Fragment {
 
         getFriends();
 
-        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
 
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(FriendList.this)
-                            .navigate(R.id.action_friendList_to_SecondFragment);
-                }
-            });
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.VISIBLE);
-
-
-        }
 
 
         binding.addFriendButton.setOnClickListener(new View.OnClickListener() {
@@ -87,8 +68,10 @@ public class FriendList extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("action", "friend");
 
-                NavHostFragment.findNavController(FriendList.this)
-                        .navigate(R.id.action_friendList_to_authUserSearch, bundle);
+//                NavHostFragment.findNavController(FriendList.this)
+//                        .navigate(R.id.action_friendList_to_authUserSearch, bundle);
+                ((MainActivity)getActivity()).navigate(R.id.authUserSearch,bundle);
+
 
             }
         });

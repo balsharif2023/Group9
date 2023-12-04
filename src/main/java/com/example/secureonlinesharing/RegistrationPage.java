@@ -61,26 +61,7 @@ public class RegistrationPage extends Fragment {
             binding.emailInput.setText(args.getString("user_email"));
         }
 
-        // ((MainActivity) getActivity()).backButton.setVisibility(View.VISIBLE);
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
 
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(RegistrationPage.this)
-                            .navigate(R.id.action_registrationPage_to_FirstFragment);
-                }
-            });
-        }
-
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.GONE);
-
-
-        }
 
         binding.nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,8 +128,10 @@ public class RegistrationPage extends Fragment {
         data.putString("user_username", binding.userNameInput.getText().toString());
         data.putString("user_password", binding.passwordInput.getText().toString());
 
-        NavHostFragment.findNavController(RegistrationPage.this)
-                .navigate(R.id.action_registrationPage_to_registrationHeadShot, data);
+//        NavHostFragment.findNavController(RegistrationPage.this)
+//                .navigate(R.id.action_registrationPage_to_registrationHeadShot, data);
+        ((MainActivity)getActivity()).navigate(R.id.registrationHeadShot,null);
+
 
 
     }

@@ -63,12 +63,7 @@ public class MediaFragment extends Fragment {
 
 
 
-        ImageButton userMenuButton = getActivity().findViewById(R.id.userMenuButton);
-        if (userMenuButton != null) {
-            userMenuButton.setVisibility(View.VISIBLE);
 
-
-        }
         pdfPageNum = 0;
 
 
@@ -153,15 +148,11 @@ public class MediaFragment extends Fragment {
                                 } else
                                     mediaOwner.setText("");
                             }
-                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}," +
-                                "{\"user_name\": \"joeblow\", \"user_id\":\"2\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}" +
-                                ",{\"user_name\": \"joeblow\", \"user_id\":\"3\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}]}";
-                        //String json1 = response.getString("with be the one that has array after the : probably called authorizedUsers has to match the key verbatim");
 
-                        JSONObject authUser = new JSONObject(json1);
-                        showUserList(authUser,authUsers);
 
                         displayMedia(accessPath);
+                            getAuthUsers();
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -194,7 +185,95 @@ public class MediaFragment extends Fragment {
 
     }
 
-    // create an async task class for loading pdf file from URL.
+
+
+    public void getAuthUsers() {
+
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt", "");
+
+        String userId = data.getString("id", "");
+
+        JSONObject json;
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/getAuthorizedUserList.php";
+        url += "?mediaId=" + mediaId;
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.GET,
+
+                url,
+
+                null,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+                    try {
+                        // message = response.getString("token");
+                        //System.out.println(message);
+
+                        System.out.println(response);
+
+
+                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}," +
+                                "{\"user_name\": \"joeblow\", \"user_id\":\"2\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}" +
+                                ",{\"user_name\": \"joeblow\", \"user_id\":\"3\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}]}";
+                        //String json1 = response.getString("with be the one that has array after the : probably called authorizedUsers has to match the key verbatim");
+
+                        JSONArray authUser = new JSONArray(response.getString("authorizedUserList"));
+                        showUserList(authUser,authUsers);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(MediaFragment.this.getContext(),error);
+
+
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     @Override
@@ -206,32 +285,32 @@ public class MediaFragment extends Fragment {
 
     public void displayMedia(String path){}
 
-    public void showUserList(JSONObject response,LinearLayout wrapper) {
+    public void showUserList(JSONArray json,LinearLayout wrapper) {
 
         String userList;
         try {
-            userList = response.getString("ivanSendsBack");
-            System.out.println(userList);
-            JSONArray json = new JSONArray(userList);
+//            userList = response.getString("ivanSendsBack");
+//            System.out.println(userList);
+            //JSONArray json = new JSONArray(response.toString());
             View prev = null;
 
            // binding.authUsers.removeAllViews();
             for (int i = 0; i < json.length(); i++) {
                 JSONObject entry = json.getJSONObject(i);
                 View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
-                ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_name"));
+                ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_username"));
 
                 Bundle info = new Bundle();
 
                 info.putString("user_id", entry.getString("user_id"));
 
-                info.putString("start_date", entry.getString("start_date"));
+//                info.putString("start_date", entry.getString("user_start_date"));
+//
+//                info.putString("end_date", entry.getString("user_end_date"));
 
-                info.putString("end_date", entry.getString("end_date"));
+                info.putString("lat", entry.getString("latitude"));
 
-                info.putString("lat", entry.getString("lat"));
-
-                info.putString("long", entry.getString("long"));
+                info.putString("long", entry.getString("longitude"));
 
 
 

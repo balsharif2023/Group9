@@ -77,25 +77,10 @@ public class MediaViewer extends MediaFragment {
 
 
 
-        getMedia();
+       getMedia();
 
 
-        // new Thread(new RetrievePDFfromUrl(pdfurl)).start();
-        //new RetrievePDFfromUrl(pdfurl).run();
-        ImageButton backButton = getActivity().findViewById(R.id.backButton);
-        if (backButton != null) {
-            backButton.setVisibility(View.VISIBLE);
 
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    NavHostFragment.findNavController(MediaViewer.this)
-                            .navigate(R.id.action_mediaViewer_to_SecondFragment);
-                }
-            });
-
-
-        }
 
 
         pdfPageNum = 0;
@@ -107,8 +92,11 @@ public class MediaViewer extends MediaFragment {
                 Bundle bundle = new Bundle();
 
                 bundle.putString("media_id", mediaId);
-                NavHostFragment.findNavController(MediaViewer.this)
-                        .navigate(R.id.action_mediaViewer_to_mediaUploader, bundle);
+//                NavHostFragment.findNavController(MediaViewer.this)
+//                        .navigate(R.id.action_mediaViewer_to_mediaUploader, bundle);
+
+                ((MainActivity)getActivity()).navigate(R.id.mediaUploader,bundle);
+
 
 
             }
