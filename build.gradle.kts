@@ -53,7 +53,7 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite-support:+")
     implementation("com.google.android.gms:play-services-maps:18.2.0")//0.1.0
 
-
+    implementation ("com.google.android.gms:play-services-location:17.0.0")
 
     val camerax_version = "1.3.0"
     implementation ("androidx.camera:camera-core:${camerax_version}")
