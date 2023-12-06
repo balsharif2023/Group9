@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,7 +60,7 @@ public class SecondFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        getMedia();
+        getMediaList();
 
         //  ((ImageButton)getActivity().findViewById(R.id.backButton)).setVisibility(View.GONE);
 
@@ -74,7 +76,7 @@ public class SecondFragment extends Fragment {
         });
     }
 
-    public void getMedia() {
+    public void getMediaList() {
         SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
 
         String token = data.getString("jwt", "");
@@ -85,6 +87,7 @@ public class SecondFragment extends Fragment {
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/mediaList.php";
+
 
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -113,10 +116,12 @@ public class SecondFragment extends Fragment {
 
                         for (int i = 0; i < json.length(); i++) {
                             JSONObject entry = json.getJSONObject(i);
+                             String mediaId= entry.getString("media_Id");
+
                             View view = LayoutInflater.from(getContext()).inflate(R.layout.media_record, null);
                             ((TextView) view.findViewById(R.id.mediaRecordTitle)).setText(entry.getString("media_title"));
                             ((TextView) view.findViewById(R.id.mediaRecordDescription)).setText(entry.getString("media_description"));
-                            view.setTag(R.id.media_record_id, entry.getString("media_Id"));
+                            view.setTag(R.id.media_record_id,mediaId );
 
                             boolean isOwner = entry.getBoolean("is_media_owner");
 
@@ -125,6 +130,9 @@ public class SecondFragment extends Fragment {
                             view.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+
+
+
                                     Bundle bundle = new Bundle();
 
                                     String mediaId= null;
@@ -140,61 +148,26 @@ public class SecondFragment extends Fragment {
                                         if (currentSharedCount == 1)
                                             ((MainActivity) getActivity()).navigate(R.id.faceAuth, bundle);
                                         else {
-                                            double lat = currentSharedCount == 2 ? 26 : 48;
-                                            double lon = currentSharedCount == 2 ? -80 : 48;
 
-
-                                            Location location = ((MainActivity) getActivity()).getCurrentLocation();
-
-                                            double curLat = location.getLatitude();
-                                            double curLong = location.getLongitude();
-
-                                            if (Math.hypot(curLat - lat, curLong - lon) < 1) {
-//                                                new DialogFragment() {
-//                                                    @Override
-//                                                    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//                                                        // Use the Builder class for convenient dialog construction.
-//                                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                                                        builder.setMessage("Location verified, you may proceed: Lat " +
-//                                                                        new DecimalFormat("#.###").format(curLat)
-//                                                                        + "\u00B0, Long " +
-//                                                                        new DecimalFormat("#.###").format(curLong) + "\u00B0")
-//                                                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                                                                    public void onClick(DialogInterface dialog, int id) {
-//                                                                        ((MainActivity) getActivity()).navigate(R.id.mediaViewer, bundle);
-//                                                                    }
-//                                                                });
+                                            getMedia(mediaId);
+//                                            double lat = currentSharedCount == 2 ? 26 : 48;
+//                                            double lon = currentSharedCount == 2 ? -80 : 48;
 //
-//                                                        // Create the AlertDialog object and return it.
-//                                                        return builder.create();
-//                                                    }
-                                                new PermissionDialogFragment(SecondFragment.this,mediaId,true,curLat,curLong
-                                                ,lat,lon).show(getParentFragmentManager(), "GPS Success!");
-                                            } else {
-//                                                new DialogFragment() {
-//                                                    @Override
-//                                                    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//                                                        // Use the Builder class for convenient dialog construction.
-//                                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                                                        builder.setMessage("Location incorrect: You are at (" +
-//                                                                        new DecimalFormat("#.###").format(curLat)
-//                                                                        + "\u00B0, " +
-//                                                                        new DecimalFormat("#.###").format(curLong) + "\u00B0)"
-//                                                                +" But required location is ("+
-//                                                                        new DecimalFormat("#.###").format(lat)
-//                                                                        + "\u00B0, " +
-//                                                                        new DecimalFormat("#.###").format(lon) + "\u00B0)" )
-//                                                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                                                                    public void onClick(DialogInterface dialog, int id) {
-//                                                                    }
-//                                                                });
 //
-//                                                        // Create the AlertDialog object and return it.
-//                                                        return builder.create();
-//                                                    }
-                                                new PermissionDialogFragment(SecondFragment.this,mediaId,false,curLat,curLong
-                                                        ,lat,lon).show(getParentFragmentManager(), "GPS Failure!");
-                                            }
+//                                            Location location = ((MainActivity) getActivity()).getCurrentLocation();
+//
+//                                            double curLat = location.getLatitude();
+//                                            double curLong = location.getLongitude();
+//
+//                                            if (Math.hypot(curLat - lat, curLong - lon) < 1) {
+////
+//                                                new PermissionDialogFragment(SecondFragment.this,mediaId,true,curLat,curLong
+//                                                ,lat,lon).show(getParentFragmentManager(), "GPS Success!");
+//                                            } else {
+////
+//                                                new PermissionDialogFragment(SecondFragment.this,mediaId,false,curLat,curLong
+//                                                        ,lat,lon).show(getParentFragmentManager(), "GPS Failure!");
+//                                            }
                                         }
                                     }
 
@@ -278,6 +251,112 @@ public class SecondFragment extends Fragment {
     }
 
 
+
+
+    public void getMedia(String mediaId) {
+
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt", "");
+
+        String userId = data.getString("id", "");
+
+      Location location = ((MainActivity)getActivity()).getCurrentLocation();
+
+      double lat = location.getLatitude(), lon= location.getLongitude();
+
+
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/accessMedia.php";
+        url += "?mediaId=" + mediaId;
+
+        url += "&latitude=" + lat;
+
+        url += "&longitude=" + lon;
+
+        System.out.println(url);
+
+
+
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.GET,
+
+                url,
+
+                null,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+                    String message;
+                    try {
+                        // message = response.getString("token");
+                        //System.out.println(message);
+
+                        System.out.println(response);
+
+                        System.out.println(response.getString("message"));
+
+                        boolean success = response.getBoolean("isSuccessful");
+
+                        new PermissionDialogFragment(SecondFragment.this,mediaId,success,
+                                lat,lon,
+                                Double.parseDouble(response.getString("latitude")),
+                                Double.parseDouble(response.getString("longitude")))
+                                .show(getParentFragmentManager(),"GPS response");
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(SecondFragment.this.getContext(),error);
+
+                    System.out.println(error);
+                    System.out.println(new String(error.networkResponse.data));
+
+
+
+
+
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
+    }
+
+
+
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -314,16 +393,23 @@ public class SecondFragment extends Fragment {
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the Builder class for convenient dialog construction.
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage( success?"Location verified":"Location incorrect" +
-        ": You are at (" +
-                            new DecimalFormat("#.###").format(curLat)
-                            + "\u00B0, " +
-                            new DecimalFormat("#.###").format(curLong) + "\u00B0)"
-                            +", required location is ("+
-                            new DecimalFormat("#.###").format(lat)
-                            + "\u00B0, " +
-                            new DecimalFormat("#.###").format(lon) + "\u00B0)" )
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            String s1 = "<b>" +(success?"Location verified":"Location incorrect")+ "</b>";
+
+            String s2 =  "You are at (" +
+                    new DecimalFormat("#.###").format(curLat)
+                    + "\u00B0, " +
+                    new DecimalFormat("#.###").format(curLong) + "\u00B0)";
+
+            String s3 =  "Required Location is  (" +
+                    new DecimalFormat("#.###").format(lat)
+                    + "\u00B0, " +
+                    new DecimalFormat("#.###").format(lon) + "\u00B0)";
+
+
+            Spanned strMessage = Html.fromHtml(s1+  "<br>" + s2 + "<br>"+s3 ,Html.FROM_HTML_MODE_COMPACT);
+            builder.setMessage(strMessage)
+
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
 
                             if(success)

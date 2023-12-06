@@ -49,7 +49,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
     private AuthUserPermissionsBinding binding;
 
-    private LatLng accessCoords= null;
+    private LatLng accessCoords = null;
 
     @Override
     public View onCreateView(
@@ -73,8 +73,6 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
         binding.endDateInput.setText(args.getString("end_date"));
 
 
-
-
         SupportMapFragment mapFragment = SupportMapFragment.newInstance();
         getParentFragmentManager()
                 .beginTransaction()
@@ -83,27 +81,20 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
         mapFragment.getMapAsync(this);
 
 
-
-
-
-
-
-
-
-       binding.startDateInput.setOnClickListener (new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
+        binding.startDateInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 //               DatePickerFragment newFragment = new DatePickerFragment();
 //               newFragment.show(getParentFragmentManager(), "datePicker");
 
                 showDatePicker(binding.startDateInput);
 
-           }
+            }
 
-       });
+        });
 
 
-        binding.endDateInput.setOnClickListener (new View.OnClickListener() {
+        binding.endDateInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //               DatePickerFragment newFragment = new DatePickerFragment();
@@ -115,20 +106,17 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
         });
 
-        binding.saveButton.setOnClickListener (new View.OnClickListener() {
+        binding.saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    if(validateForm())
-                    {
-                        savePermissions();
+                if (validateForm()) {
+                    savePermissions();
 
-                    }
+                }
 
             }
 
         });
-
-
 
 
     }
@@ -141,8 +129,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
     }
 
 
-    public void showDatePicker(TextView dateInput)
-    {
+    public void showDatePicker(TextView dateInput) {
         final Calendar c = Calendar.getInstance();
 
         // on below line we are getting
@@ -160,8 +147,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
                         // on below line we are setting date to our text view.
-                        dateInput.setText(year + "-" +(monthOfYear+1) + "-" + dayOfMonth);
-
+                        dateInput.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
 
 
                     }
@@ -184,19 +170,23 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
         String lonStr = getArguments().getString("long");
 
-        if(latStr!= null&&!latStr.equals(""))
-        {
-            double lat= Double.parseDouble(latStr);
+        if (latStr != null && !latStr.equals("")) {
+            try {
 
-            double lon= Double.parseDouble(lonStr);
 
-            googleMap.addMarker(new MarkerOptions().position(
-                    new LatLng(lat,lon)));
-            binding.mapCoords.setText("Lat "+
-                    new DecimalFormat("#.###").format(lat)
-                    +"\u00B0, Long "+
-                    new DecimalFormat("#.###").format(lon)+"\u00B0");
+                double lat = Double.parseDouble(latStr);
 
+                double lon = Double.parseDouble(lonStr);
+
+                googleMap.addMarker(new MarkerOptions().position(
+                        new LatLng(lat, lon)));
+                binding.mapCoords.setText("Lat " +
+                        new DecimalFormat("#.###").format(lat)
+                        + "\u00B0, Long " +
+                        new DecimalFormat("#.###").format(lon) + "\u00B0");
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -206,17 +196,16 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 System.out.println(latLng);
                 googleMap.clear();
                 googleMap.addMarker(new MarkerOptions().position(latLng));
-                accessCoords= latLng;
-                binding.mapCoords.setText("Lat "+
-                      new DecimalFormat("#.###").format(latLng.latitude)
-                        +"\u00B0, Long "+
-                                new DecimalFormat("#.###").format(latLng.longitude)+"\u00B0");
+                accessCoords = latLng;
+                binding.mapCoords.setText("Lat " +
+                        new DecimalFormat("#.###").format(latLng.latitude)
+                        + "\u00B0, Long " +
+                        new DecimalFormat("#.###").format(latLng.longitude) + "\u00B0");
 
             }
         });
 
     }
-
 
 
     public boolean validateForm() {
@@ -230,20 +219,14 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
         // In this case the entered data needs to compared with
         // the EMAIL_ADDRESS, which is implemented same below
         boolean startDateValid = !startDateToText.isEmpty();
-        binding.startDateEmptyMessage.setVisibility(startDateValid? View.GONE : View.VISIBLE);
+        binding.startDateEmptyMessage.setVisibility(startDateValid ? View.GONE : View.VISIBLE);
 
         boolean endDateValid = !endDateToText.isEmpty();
-        binding.endDateEmptyMessage.setVisibility(endDateValid? View.GONE : View.VISIBLE);
+        binding.endDateEmptyMessage.setVisibility(endDateValid ? View.GONE : View.VISIBLE);
 
         return startDateValid && endDateValid;
 
     }
-
-
-
-
-
-
 
 
     public void savePermissions() {
@@ -259,21 +242,19 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
         Bundle args = getArguments();
 
         try {
-            json.put("media_id",args.getString("media_id"));
+            json.put("media_id", args.getString("media_id"));
 
-            json.put("user_id",args.getString("user_id"));
+            json.put("user_id", args.getString("user_id"));
 
-            json.put("start_date",binding.startDateInput.getText());
+            json.put("start_date", binding.startDateInput.getText());
 
-            json.put("end_date",binding.endDateInput.getText());
-            if(accessCoords!= null) {
+            json.put("end_date", binding.endDateInput.getText());
+            if (accessCoords != null) {
 
 
                 json.put("latitude", "" + accessCoords.latitude);
                 json.put("longitude", "" + accessCoords.longitude);
             }
-
-
 
 
         } catch (JSONException e) {
@@ -303,37 +284,27 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                     // get the image url from the JSON object
                     String message;
                     try {
-                         message = response.getString("message");
+                        message = response.getString("message");
                         System.out.println(message);
 
                         boolean success = response.getBoolean("isSuccessful");
-                        if(success){
+                        if (success) {
 
 
                             MainActivity.showToast(AuthUserPermissions.this,
                                     "Permissions saved");
 
                             Bundle bundle = new Bundle();
-                            bundle.putString("media_id",args.getString("media_id") );
+                            bundle.putString("media_id", args.getString("media_id"));
 
 //                            NavHostFragment.findNavController(AuthUserPermissions.this)
 //                                    .navigate(R.id.action_authUserPermissions_to_mediaUploader, bundle);
-                            ((MainActivity)getActivity()).navigate(R.id.mediaUploader,bundle);
+                            ((MainActivity) getActivity()).navigate(R.id.mediaUploader, bundle);
 
 
-                        }
-
-                        else
+                        } else
                             MainActivity.showToast(AuthUserPermissions.this,
                                     "Permissions unsaved");
-
-
-
-
-
-
-
-
 
 
                     } catch (JSONException e) {
@@ -344,7 +315,7 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                  MainActivity.showVolleyError(AuthUserPermissions.this.getContext(),error);
+                    MainActivity.showVolleyError(AuthUserPermissions.this.getContext(), error);
                 }
         ) {
             @Override
@@ -365,12 +336,6 @@ public class AuthUserPermissions extends Fragment implements OnMapReadyCallback 
 
 
     }
-
-
-
-
-
-
 
 
 }

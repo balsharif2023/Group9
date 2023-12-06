@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -36,6 +37,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.secureonlinesharing.databinding.MediaUploaderBinding;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -356,7 +358,7 @@ public class MediaUploader extends MediaFragment {
         ImageButton editButton =  ((ImageButton) view.findViewById(R.id.authUserEditButton)),
                 deleteButton = ((ImageButton) view.findViewById(R.id.authUserDeleteButton));
 
-
+            String userId= info.getString("user_id");
 
         editButton.setVisibility(View.VISIBLE);
 
@@ -392,7 +394,9 @@ public class MediaUploader extends MediaFragment {
 
      deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view1) {
+
+                removeAccess(userId,view);
 
 
 
@@ -405,6 +409,77 @@ public class MediaUploader extends MediaFragment {
 
     }
 
+    public void removeAccess(String userId,View userView) {
+        SharedPreferences data = getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+
+        String token = data.getString("jwt", "");
+
+
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/removeAuthorizedAccess.php";
+
+        url+="?mediaId="+mediaId;
+        url+="&userId="+userId;
+
+
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                Request.Method.GET,
+
+                url,
+
+                null,
+
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+
+                    try {
+                        System.out.println(response);
+                        System.out.println(response.getString("message"));
+
+                        userView.setVisibility(View.GONE);
+
+                        MainActivity.showToast(MediaUploader.this,response.getString("message"));
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(MediaUploader.this.getContext(), error);
+
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+        //} // catch(JSONException e){} */
+
+
+    }
 
 
 

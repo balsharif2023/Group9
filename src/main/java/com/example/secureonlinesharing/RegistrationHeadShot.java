@@ -1,6 +1,8 @@
 package com.example.secureonlinesharing;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -182,26 +184,31 @@ public class RegistrationHeadShot extends Fragment {
 
 
     public void submitForm()  {
-        boolean editing= getArguments().containsKey("user_id");
 
-        JSONObject data ;
-        try {
+        Bundle args = getArguments();
+        boolean editing= args!=null&&args.containsKey("user_id");
 
-            Bundle args = getArguments();
-            data= new JSONObject();
-            if(editing) data.put("user_id", args.getString("user_id"));
-            data.put("user_email", args.getString("user_email"));
-            data.put("user_phone",  args.getString("user_phone"));
-            data.put("user_first_name",  args.getString("user_first_name"));
-            data.put("user_last_name",  args.getString("user_last_name"));
-            data.put("user_username",  args.getString("user_username"));
-            data.put("user_password",  args.getString("user_password"));
+        SharedPreferences sharedData = null;
 
-        } catch (JSONException e) {
 
-            e.printStackTrace();
-            return;
+
+        String token = "";
+
+
+
+        String userId = "";
+
+
+        if(editing)
+        {
+          sharedData =   getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+          token = sharedData.getString("jwt", "");
+
+         // userId=  sharedData.getString("id", "");
         }
+
+
+
 
         RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
         // url of the api through which we get random dog images
@@ -213,8 +220,9 @@ public class RegistrationHeadShot extends Fragment {
             url+= "addUser.php" ;
         }
 
+        String finalToken = token;
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url,
-                null,
+                finalToken,
                 new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
@@ -256,6 +264,12 @@ public class RegistrationHeadShot extends Fragment {
 
 
                 Bundle args = getArguments();
+
+                if(editing){
+                    params.put("user_id", args.getString("user_id"));
+                    params.put("token", finalToken);
+                }
+
                 params.put("user_email", args.getString("user_email"));
                 params.put("user_phone",  args.getString("user_phone"));
                 params.put("user_first_name",  args.getString("user_first_name"));

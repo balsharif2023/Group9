@@ -130,7 +130,7 @@ public class RegistrationPage extends Fragment {
 
 //        NavHostFragment.findNavController(RegistrationPage.this)
 //                .navigate(R.id.action_registrationPage_to_registrationHeadShot, data);
-        ((MainActivity)getActivity()).navigate(R.id.registrationHeadShot,null);
+        ((MainActivity)getActivity()).navigate(R.id.registrationHeadShot,data);
 
 
 

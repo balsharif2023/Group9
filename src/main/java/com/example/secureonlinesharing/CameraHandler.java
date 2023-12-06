@@ -262,8 +262,8 @@ public class CameraHandler {
         System.out.println(box.toShortString());
         System.out.println(mSelectedImage.getWidth()+ " x " + mSelectedImage.getHeight());
 
-
-        cropImage = Bitmap.createBitmap(mSelectedImage,box.left,box.top,box.width(),box.height());
+        int height = Math.min(box.height(), mSelectedImage.getHeight()- box.top);
+        cropImage = Bitmap.createBitmap(mSelectedImage,box.left,box.top,box.width(),height);
         System.out.println(cropImage.getByteCount());
         captureView.setImageBitmap(cropImage);
     }
