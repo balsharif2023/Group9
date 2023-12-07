@@ -38,6 +38,8 @@ public class MediaFragment extends Fragment {
 
 
     protected String mediaId = "";
+
+    protected String userId ="";
     private int pdfPageNum;
 
 
@@ -57,6 +59,11 @@ public class MediaFragment extends Fragment {
         Bundle args= getArguments();
 
         mediaId = args == null?"": args.getString("media_id");
+
+        SharedPreferences sharedData =   getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        userId= sharedData.getString("id","");
+
+        System.out.println("viewind media "+ mediaId+" as " +userId);
 
 
 
@@ -203,6 +210,8 @@ public class MediaFragment extends Fragment {
         String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/getAuthorizedUserList.php";
         url += "?mediaId=" + mediaId;
 
+        System.out.println(url);
+
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
 
@@ -225,10 +234,6 @@ public class MediaFragment extends Fragment {
                         System.out.println(response);
 
 
-                        String json1 = "{\"ivanSendsBack\":[{\"user_name\": \"johndoe\", \"user_id\":\"28\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}," +
-                                "{\"user_name\": \"joeblow\", \"user_id\":\"2\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}" +
-                                ",{\"user_name\": \"joeblow\", \"user_id\":\"3\",\"start_date\": \"2023-12-2\",\"end_date\":\"2023-12-09\",\"lat\":\"5.2614\",\"long\":\"3.2164\"}]}";
-                        //String json1 = response.getString("with be the one that has array after the : probably called authorizedUsers has to match the key verbatim");
 
                         JSONArray authUser = new JSONArray(response.getString("authorizedUserList"));
                         showUserList(authUser,authUsers);
@@ -241,7 +246,9 @@ public class MediaFragment extends Fragment {
                 // lambda function for handling the case
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
-                    MainActivity.showVolleyError(MediaFragment.this.getContext(),error);
+                    MainActivity.showVolleyError(getContext(),error);
+
+                    error.printStackTrace();
 
 
                 }
@@ -297,16 +304,19 @@ public class MediaFragment extends Fragment {
            // binding.authUsers.removeAllViews();
             for (int i = 0; i < json.length(); i++) {
                 JSONObject entry = json.getJSONObject(i);
-                View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
+
+                if(entry.getString("user_id").equals(userId))continue;
+
+                    View view = LayoutInflater.from(getContext()).inflate(R.layout.user_record, null);
                 ((TextView) view.findViewById(R.id.userName)).setText(entry.getString("user_username"));
 
                 Bundle info = new Bundle();
 
                 info.putString("user_id", entry.getString("user_id"));
 
-//                info.putString("start_date", entry.getString("user_start_date"));
+//               info.putString("start_date", entry.getString("user_start_date"));
 //
-//                info.putString("end_date", entry.getString("user_end_date"));
+//               info.putString("end_date", entry.getString("user_end_date"));
 
                 info.putString("lat", entry.getString("latitude"));
 

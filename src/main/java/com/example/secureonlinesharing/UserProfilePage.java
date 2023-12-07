@@ -54,7 +54,7 @@ public class UserProfilePage extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-
+        getUserInfo();
 
         binding.editProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +79,15 @@ public class UserProfilePage extends Fragment {
             }
 
         });
-        getUserInfo();
+
+        binding.deleteAccountButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteUserInfo();
+
+            }
+        });
+
     }
 
 
@@ -177,5 +185,98 @@ public class UserProfilePage extends Fragment {
         volleyQueue.add(jsonObjectRequest);
 
     }
+
+    public void deleteUserInfo()
+    {
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        userId = data.getString("id","");
+
+        String token = data.getString("jwt","");
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/admetus/v1/controller/removeUser.php";
+
+
+
+        JSONObject json ;
+        try {
+
+
+            json= new JSONObject();
+            json.put("user_id",userId);
+
+            json.put("token",token);
+
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+            return;
+        }
+
+
+
+
+
+
+        System.out.println(url);
+
+        System.out.println(json);
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                // we are using GET HTTP request method
+                Request.Method.POST,
+                // url we want to send the HTTP request to
+                url,
+
+
+                json,
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+
+
+
+
+                    try {
+
+                        System.out.println(response);
+
+                        MainActivity.showToast(UserProfilePage.this,response.getString("reason"));
+
+
+
+                        ((MainActivity)getActivity()).navigate(R.id.FirstFragment,
+                                null);
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+
+
+
+
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(UserProfilePage.this.getContext(),error);
+
+                }
+        );
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+
+    }
+
 
 }

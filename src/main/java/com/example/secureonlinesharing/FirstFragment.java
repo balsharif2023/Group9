@@ -106,7 +106,7 @@ public class FirstFragment extends Fragment {
         String passwordToText = binding.passwordInput.getText().toString();
         if(userNameToText.equals(""))userNameToText="batman123";
 
-        if(passwordToText.equals(""))passwordToText="batman123";
+        if(passwordToText.equals(""))passwordToText="abc123";
 
 
 

@@ -46,6 +46,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/name_invalid"
                 android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/firstNameEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter a First Name"
+                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
@@ -80,6 +88,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/name_invalid"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/lastNameEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter a Last  Name"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -116,6 +132,15 @@
                 android:layout_height="wrap_content"
                 android:text="@string/email_invalid_message"
                 android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/userNameEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter a UserName"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -124,68 +149,103 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/passwordLabel"
-                style="@style/regFormLabel"
-
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/password_label"
-                android:textSize="25sp" />
-
-            <EditText
-                android:id="@+id/passwordInput"
-                style="@style/regFormInput"
-
+                android:id="@+id/passwordExpand"
+                style="@style/formLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="12"
-                android:inputType="textPassword" />
-
-            <TextView
-                android:id="@+id/passwordInvalidMessage"
-                style="@style/formValidation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/email_invalid_message"
+                android:text="Change Password"
+                android:textColor="#009688"
                 android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/passwordWrapper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/passwordLabel"
+                    style="@style/regFormLabel"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/password_label"
+                    android:textSize="25sp" />
+
+                <EditText
+                    android:id="@+id/passwordInput"
+                    style="@style/regFormInput"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="12"
+                    android:inputType="textPassword" />
+
+                <TextView
+                    android:id="@+id/passwordInvalidMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email_invalid_message"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/passwordEmptyMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Please enter a Password"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/confirmPasswordWrapper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/passwordConfirmLabel"
+                    style="@style/regFormLabel"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/password_confirm_label"
+                    android:textSize="25sp" />
+
+                <EditText
+                    android:id="@+id/passwordConfirmInput"
+                    style="@style/regFormInput"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="12"
+                    android:inputType="textPassword" />
+
+                <TextView
+                    android:id="@+id/passwordConfirmInvalidMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pass_confirm_invalid"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/passwordConfirmEmptyMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Please enter a Password"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/passwordConfirmLabel"
-                style="@style/regFormLabel"
-
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/password_confirm_label"
-                android:textSize="25sp" />
-
-            <EditText
-                android:id="@+id/passwordConfirmInput"
-                style="@style/regFormInput"
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="12"
-                android:inputType="textPassword" />
-
-            <TextView
-                android:id="@+id/passwordConfirmInvalidMessage"
-                style="@style/formValidation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/pass_confirm_invalid"
-                android:visibility="gone" />
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -217,6 +277,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/email_invalid_message"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/emailEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter an E-mail"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -252,6 +320,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/phone_num_invalid"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/phoneNumEmptyMessage"
+                style="@style/formValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter a Phone Number"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -302,7 +378,19 @@
                 android:layout_weight="1"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
-                android:text="@string/next_button_label" />
+                android:text="@string/next_button_label"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/saveButton"
+                style="@style/formButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="80dp"
+                android:paddingRight="80dp"
+                android:text="Save Changes"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

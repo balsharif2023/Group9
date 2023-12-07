@@ -119,8 +119,7 @@
                 android:id="@+id/firstNameDisplay"
                 style="@style/profileDisplay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/firstNameInput"
@@ -158,8 +157,7 @@
                 android:id="@+id/lastNameDisplay"
                 style="@style/profileDisplay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/lastNameInput"
@@ -197,8 +195,7 @@
                 android:id="@+id/userNameDisplay"
                 style="@style/profileDisplay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/userNameInput"
@@ -237,8 +234,7 @@
                 android:id="@+id/emailDisplay"
                 style="@style/profileDisplay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/emailInput"
@@ -276,8 +272,7 @@
                 android:id="@+id/phoneNumberDisplay"
                 style="@style/profileDisplay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/phoneNumberInput"
@@ -297,30 +292,50 @@
 
         </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/passWordLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Password"
+                    android:textSize="25sp" />
+
+                <TextView
+                    android:id="@+id/passwordDisplay"
+                    style="@style/profileDisplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tap edit button to change" />
+
+
+
+
+            </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <Button
-                android:id="@+id/saveButton"
+                android:id="@+id/deleteAccountButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/gold"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
-                android:text="Save" />
+                android:text="DELETE MY ACCOUNT" />
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
     </LinearLayout>
 
 

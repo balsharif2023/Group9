@@ -180,6 +180,12 @@ public class MainActivity extends AppCompatActivity {
 
         String srcName = navController.getCurrentDestination().getDisplayName();
 
+        if(dest==R.id.FirstFragment)
+        {
+            binding.userMenuButton.setVisibility(View.GONE);
+        }
+
+
         navController.navigate(dest,args);
 
 
