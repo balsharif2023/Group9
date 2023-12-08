@@ -314,9 +314,9 @@ public class MediaFragment extends Fragment {
 
                 info.putString("user_id", entry.getString("user_id"));
 
-//               info.putString("start_date", entry.getString("user_start_date"));
-//
-//               info.putString("end_date", entry.getString("user_end_date"));
+               info.putString("start_date", entry.getString("authorization_start_date"));
+
+                info.putString("end_date", entry.getString("authorization_end_date"));
 
                 info.putString("lat", entry.getString("latitude"));
 

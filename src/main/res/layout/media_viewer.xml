@@ -43,7 +43,7 @@
             <LinearLayout
                 android:id="@+id/videoWrapper"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -117,7 +117,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:orientation="vertical">
 
@@ -148,7 +148,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
@@ -219,19 +219,35 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"> -->
 
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/mediaEditButton"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:src="@android:drawable/ic_menu_edit"
-            android:visibility="visible"
-            app:backgroundTint="@color/design_default_color_secondary"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/mediaEditButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:src="@android:drawable/ic_menu_edit"
+                android:visibility="visible"
+                app:backgroundTint="@color/design_default_color_secondary" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/mediaDeleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:src="@android:drawable/ic_menu_delete"
+                app:backgroundTint="#B80404" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

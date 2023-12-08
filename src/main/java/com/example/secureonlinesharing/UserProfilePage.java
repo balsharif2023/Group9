@@ -1,6 +1,8 @@
 package com.example.secureonlinesharing;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -83,7 +87,8 @@ public class UserProfilePage extends Fragment {
         binding.deleteAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteUserInfo();
+                new DeleteUserDialogFragment(UserProfilePage.this)
+                        .show(getParentFragmentManager(),"Delete Account");
 
             }
         });
@@ -277,6 +282,47 @@ public class UserProfilePage extends Fragment {
         volleyQueue.add(jsonObjectRequest);
 
     }
+
+
+
+
+    public static class DeleteUserDialogFragment extends DialogFragment {
+
+        UserProfilePage fragment;
+
+        public DeleteUserDialogFragment(UserProfilePage fragment) {
+            this.fragment = fragment;
+
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction.
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Are you sure you want to delete your account ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            fragment.deleteUserInfo();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+
+
+
+                        }
+                    });
+            // Create the AlertDialog object and return it.
+            return builder.create();
+        }
+    }
+
+
+
+
+
+
 
 
 }

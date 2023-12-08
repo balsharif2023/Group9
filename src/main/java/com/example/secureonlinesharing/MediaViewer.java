@@ -1,7 +1,9 @@
 package com.example.secureonlinesharing;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +18,8 @@ import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -98,6 +102,16 @@ public class MediaViewer extends MediaFragment {
                 ((MainActivity)getActivity()).navigate(R.id.mediaUploader,bundle);
 
 
+
+            }
+        });
+
+        binding.mediaDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                new DeleteMediaDialogFragment(MediaViewer.this)
+                        .show(getParentFragmentManager(),"Delete Media");
 
             }
         });
@@ -217,6 +231,131 @@ public class MediaViewer extends MediaFragment {
 
 
     }
+
+
+
+    public void deleteMediaInfo()
+    {
+        SharedPreferences data =getActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        userId = data.getString("id","");
+
+        String token = data.getString("jwt","");
+
+        RequestQueue volleyQueue = Volley.newRequestQueue(getActivity());
+        // url of the api through which we get random dog images
+        String url = "https://innshomebase.com/securefilesharing/develop/aristotle/v1/controller/deleteMedia.php";
+
+
+        url+= "?mediaId="+mediaId;
+
+
+
+
+        System.out.println(url);
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                // we are using GET HTTP request method
+                Request.Method.GET,
+                // url we want to send the HTTP request to
+                url,
+
+
+                null,
+
+                // lambda function for handling the case
+                // when the HTTP request succeeds
+                (Response.Listener<JSONObject>) response -> {
+                    // get the image url from the JSON object
+
+
+
+
+                    try {
+
+                        System.out.println(response);
+
+                        MainActivity.showToast(MediaViewer.this,response.getString("message"));
+
+
+
+                        ((MainActivity)getActivity()).navigate(R.id.SecondFragment,
+                                null);
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+
+
+
+
+                },
+
+                // lambda function for handling the case
+                // when the HTTP request fails
+                (Response.ErrorListener) error -> {
+                    MainActivity.showVolleyError(getContext(),error);
+
+                }
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = super.getHeaders();
+                HashMap<String, String> headers2 = new HashMap<String, String>();
+                for (String s : headers.keySet()) {
+                    headers2.put(s, headers.get(s));
+                }
+                headers2.put("Authorization", "Bearer " + token);
+                return headers2;
+            }
+        };
+        // add the json request object created above
+        // to the Volley request queue
+        volleyQueue.add(jsonObjectRequest);
+
+    }
+
+
+
+
+
+    public static class DeleteMediaDialogFragment extends DialogFragment {
+
+        MediaViewer viewer;
+
+        public DeleteMediaDialogFragment(MediaViewer viewer) {
+            this.viewer = viewer;
+
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction.
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Are you sure you want to delete this media?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            viewer.deleteMediaInfo();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+
+
+
+                        }
+                    });
+            // Create the AlertDialog object and return it.
+            return builder.create();
+        }
+    }
+
+
+
 
 
 
