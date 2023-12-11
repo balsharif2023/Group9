@@ -164,7 +164,9 @@ public class FriendList extends Fragment {
                                 deleteButton.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        FriendList.this.respondToFriendRequest(userName,false);
+                                      //  FriendList.this.respondToFriendRequest(userName,false);
+                                        new DeleteFriendDialogFragment(FriendList.this,
+                                                userName).show(getParentFragmentManager(),"delete friend");
                                     }
                                 });
 
@@ -376,6 +378,43 @@ public class FriendList extends Fragment {
 
 
     }
+
+
+    public static class DeleteFriendDialogFragment extends DialogFragment {
+
+        FriendList viewer;
+
+        String userName;
+
+        public DeleteFriendDialogFragment(FriendList viewer, String userName) {
+            this.viewer = viewer;
+            this.userName =userName;
+
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction.
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Are you sure you want to delete this friend?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            viewer.respondToFriendRequest(userName,false);
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+
+
+
+                        }
+                    });
+            // Create the AlertDialog object and return it.
+            return builder.create();
+        }
+    }
+
 
 
 }

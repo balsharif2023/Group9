@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,12 +55,13 @@ public class MediaUploader extends MediaFragment {
 
     private MediaUploaderBinding binding;
     private boolean edit = false;
+    private File attachment = null;
 
 
 
     private String extension = "";
 
-    private  String mediaType="", mimeType ="";
+    private  String  mimeType ="";
 
     // GetContent creates an ActivityResultLauncher<String> to let you pass
 // in the mime type you want to let the user select
@@ -142,12 +144,17 @@ public class MediaUploader extends MediaFragment {
 
         authUsers = binding.authUsers;
 
+        authUserNone = binding.authUserNone;
+
         return binding.getRoot();
 
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        File file = new File(getActivity().getCacheDir(),MainActivity.MEDIA_UPLOAD_CACHE_FILE);
+        file.delete();
 
 
 
@@ -208,6 +215,23 @@ public class MediaUploader extends MediaFragment {
 
 
 
+    public  void onGetMedia(JSONObject response){
+
+        String[]values = {"concurrent_only",
+        "concurrent_with_video",
+        "face_authentication"};
+
+        String value = null;
+        try {
+            value = response.getString("accessRules");
+
+            binding.mediaAccessRuleDropdown.setSelection(Arrays.asList(values).indexOf(value));
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 
     public boolean validateForm() {
@@ -226,7 +250,13 @@ public class MediaUploader extends MediaFragment {
         boolean descriptionValid = !mediaDescription.isEmpty();
         binding.mediaDescriptionEmptyMessage.setVisibility(descriptionValid? View.GONE : View.VISIBLE);
 
-        return titleValid && descriptionValid;
+        attachment = new File(getActivity().getCacheDir(),MainActivity.MEDIA_UPLOAD_CACHE_FILE);
+
+        boolean fileValid = edit || attachment.exists();
+
+        binding.fileEmptyMessage.setVisibility(fileValid?View.GONE:View.VISIBLE);
+
+        return titleValid && descriptionValid&& fileValid;
 
     }
 
@@ -303,11 +333,18 @@ public class MediaUploader extends MediaFragment {
 
                 params.put("ownerId", id);
                 params.put("fileTitle", binding.mediaTitleInput.getText().toString());
-                params.put("fileName", "file_" + timestamp.getTime() + extension);
+                if(attachment.exists())
+                    params.put("fileName", "file_" + timestamp.getTime() + extension);
+
+
                 params.put("accessRules",accessRule);
                 params.put("concurrentAccess", "1");
                 params.put("mediaDescription", binding.mediaDescriptionInput.getText().toString());
                 params.put("mediaType", mediaType);
+
+                System.out.println(accessRule);
+
+                System.out.println(params);
 
                 return params;
             }
@@ -317,15 +354,17 @@ public class MediaUploader extends MediaFragment {
                 Map<String, DataPart> params = new HashMap<>();
                 // file name could found file base or direct access from real path
                 // for now just get bitmap data from ImageView
-                File fileCopy = new File(getActivity().getCacheDir(),
-                        MainActivity.MEDIA_UPLOAD_CACHE_FILE);
+//                File fileCopy = new File(getActivity().getCacheDir(),
+//                        MainActivity.MEDIA_UPLOAD_CACHE_FILE);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+
+                if (attachment.exists()&& Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try {
                         params.put("file",
                                 new DataPart("file",
                                         //  AppHelper.getFileDataFromDrawable(getContext(),binding.mediaUploadPreview.getDrawable())
-                                        Files.readAllBytes(fileCopy.toPath()),
+                                        Files.readAllBytes(attachment.toPath()),
                                         mimeType));
                     } catch (IOException e) {
                         throw new RuntimeException(e);

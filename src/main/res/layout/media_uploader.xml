@@ -121,13 +121,32 @@
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY" />
 
+                <TextView
+                    android:id="@+id/fileEmptyMessage"
+                    style="@style/formValidation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Please attach a file"
+                    android:visibility="gone" />
+
 
             </LinearLayout>
 
+            <Button
+                android:id="@+id/mediaUploadButton"
+                style="@style/formButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="80dp"
+                android:paddingRight="80dp"
+                android:text="@string/media_edit_button_label" />
+
             <View
-                android:id="@+id/divider2"
+                android:id="@+id/authUserDivider"
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:background="?android:attr/listDivider" />
 
 
@@ -164,6 +183,14 @@
                         android:text="@string/auth_user_list_label"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <TextView
+                        android:id="@+id/authUserNone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="None. Tap + to Add"
+                        android:textSize="24sp"
+                        android:visibility="gone" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -175,16 +202,6 @@
                     android:orientation="vertical"></LinearLayout>
 
             </LinearLayout>
-
-
-            <Button
-                android:id="@+id/mediaUploadButton"
-                style="@style/formButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="80dp"
-                android:paddingRight="80dp"
-                android:text="@string/media_edit_button_label" />
 
 
         </LinearLayout>

@@ -37,7 +37,7 @@ public class MediaFragment extends Fragment {
 
 
 
-    protected String mediaId = "";
+    protected String mediaId = "", mediaType= "";
 
     protected String userId ="";
     private int pdfPageNum;
@@ -49,6 +49,8 @@ public class MediaFragment extends Fragment {
     protected TextView mediaTitle, mediaDescription, mediaOwner;
 
     protected LinearLayout authUsers;
+
+    protected TextView authUserNone;
 
 
 
@@ -98,7 +100,7 @@ public class MediaFragment extends Fragment {
 
         String token = data.getString("jwt", "");
 
-        String userId = data.getString("id", "");
+         userId = data.getString("id", "");
 
         JSONObject json;
 
@@ -136,6 +138,8 @@ public class MediaFragment extends Fragment {
 
                         System.out.println(accessPath);
 
+                        mediaType = response.getString("mediaMimeType");
+
                         mediaTitle.setText(response.getString("mediaTitle"));
                         mediaDescription.setText(response.getString("mediaDescription"));
 
@@ -155,6 +159,9 @@ public class MediaFragment extends Fragment {
                                 } else
                                     mediaOwner.setText("");
                             }
+
+
+                            onGetMedia(response);
 
 
                         displayMedia(accessPath);
@@ -296,8 +303,10 @@ public class MediaFragment extends Fragment {
 
         String userList;
         try {
-//            userList = response.getString("ivanSendsBack");
-//            System.out.println(userList);
+
+                authUserNone.setVisibility(json.length()==1?View.VISIBLE:View.GONE);
+
+
             //JSONArray json = new JSONArray(response.toString());
             View prev = null;
 
@@ -349,6 +358,8 @@ public class MediaFragment extends Fragment {
     }
 
     public void  onDisplayUser(View view,Bundle info){}
+
+    public  void onGetMedia(JSONObject response){}
 
 
 }

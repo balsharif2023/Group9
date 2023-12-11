@@ -135,17 +135,18 @@ public class SecondFragment extends Fragment {
 
                                     Bundle bundle = new Bundle();
 
-                                    String mediaId= null;
+                                    String mediaId= null, accessRule= null;
                                     try {
                                         mediaId = entry.getString("media_Id");
                                         bundle.putString("media_id",mediaId );
+                                        accessRule= entry.getString("access_rules");
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
                                     if (isOwner) {
                                         ((MainActivity) getActivity()).navigate(R.id.mediaViewer, bundle);
                                     } else {
-                                        if (currentSharedCount == 1)
+                                        if (accessRule.equals("face_authentication"))
                                             ((MainActivity) getActivity()).navigate(R.id.faceAuth, bundle);
                                         else {
 
@@ -210,6 +211,10 @@ public class SecondFragment extends Fragment {
                 // when the HTTP request fails
                 (Response.ErrorListener) error -> {
                     MainActivity.showVolleyError(SecondFragment.this.getContext(), error);
+
+                    binding.myMediaLabel.setVisibility(View.VISIBLE);
+                    binding.mediaListNone.setVisibility(View.VISIBLE);
+
 
                 }
         ) {
@@ -327,6 +332,7 @@ public class SecondFragment extends Fragment {
 
                     System.out.println(error);
                     System.out.println(new String(error.networkResponse.data));
+
 
 
 

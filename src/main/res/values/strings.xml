@@ -17,6 +17,9 @@
         <item>Concurrent Only</item>
         <item>Concurrent with Video</item>
 
+        <item>Face Authentication</item>
+
+
     </string-array>
 
     <string name="previous">Previous</string>

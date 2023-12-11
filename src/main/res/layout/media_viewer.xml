@@ -172,12 +172,13 @@
             </LinearLayout>
 
             <View
-                android:id="@+id/divider2"
+                android:id="@+id/authUserDivider"
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
                 android:background="?android:attr/listDivider" />
 
             <LinearLayout
+                android:id="@+id/authUserWrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -192,6 +193,14 @@
                     android:text="@string/auth_user_list_label"
                     android:textSize="24sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/authUserNone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="None"
+                    android:textSize="24sp"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/authUsers"
@@ -220,6 +229,7 @@ android:layout_height="match_parent"> -->
 
 
         <LinearLayout
+            android:id="@+id/mediaActions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"

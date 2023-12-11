@@ -11,7 +11,6 @@
     tools:context=".SecondFragment">
 
 
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -20,11 +19,13 @@
 
 
         <LinearLayout
-            android:id="@+id/friendListWrapper"
+            android:id="@+id/mediaListWrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
+
+
 
 
             <TextView
@@ -34,6 +35,15 @@
                 android:layout_height="wrap_content"
                 android:text="My Media"
                 android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/mediaListNone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="None. Tap + to Add"
+                android:textSize="24sp"
+                android:visibility="gone" />
+
 
             <LinearLayout
                 android:id="@+id/myMedia"

@@ -70,6 +70,8 @@ public class MediaViewer extends MediaFragment {
 
         mediaOwner = binding.mediaOwner;
 
+        authUserNone =binding.authUserNone;
+
 
         return binding.getRoot();
 
@@ -355,10 +357,24 @@ public class MediaViewer extends MediaFragment {
     }
 
 
+    @Override
+    public void onGetMedia(JSONObject response) {
+        try {
+            String ownerId = response.getString("mediaOwnerId");
+            if(!ownerId.equals(userId))
+            {
+                binding.authUserDivider.setVisibility(View.GONE);
+                binding.authUserWrapper.setVisibility(View.GONE);
+                binding.mediaActions.setVisibility(View.GONE);
 
 
+            }
 
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
+    }
 }
 
 
